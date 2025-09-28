@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createServerSupabaseClient } from "@/lib/supabase/server"
+import { createClient } from "@/lib/supabase/server"
 import { createBookingSchema } from "@/lib/validations/booking"
 import { z } from "zod"
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createServerSupabaseClient()
+    const supabase = await createClient()
 
     const {
       data: { user },
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
           quantity,
           unit_price,
           special_instructions,
-          service:services(name, category)
+          service:services(name, type)
         )
       `)
       .eq("user_id", user.id)
@@ -49,15 +49,13 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = createBookingSchema.parse(body)
 
-    const supabase = await createServerSupabaseClient()
+    const supabase = await createClient()
 
     const {
       data: { user },
     } = await supabase.auth.getUser()
 
-    if (!user) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
-    }
+    const isGuestBooking = !user
 
     // Calculate total amount
     let totalAmount = 0
@@ -81,19 +79,67 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    let pickupAddressId = validatedData.pickupAddressId
+    let deliveryAddressId = validatedData.deliveryAddressId
+
+    if (isGuestBooking) {
+      // For guest bookings, we need to handle addresses differently
+      // If addresses are provided as objects instead of IDs, create them temporarily
+      if (validatedData.guestPickupAddress) {
+        const { data: pickupAddress, error: pickupError } = await supabase
+          .from("user_addresses")
+          .insert({
+            ...validatedData.guestPickupAddress,
+            user_id: null, // Guest address
+          })
+          .select()
+          .single()
+
+        if (pickupError) {
+          console.error("[v0] Guest pickup address creation error:", pickupError)
+          return NextResponse.json({ error: "Erreur lors de la création de l'adresse de collecte" }, { status: 500 })
+        }
+        pickupAddressId = pickupAddress.id
+      }
+
+      if (validatedData.guestDeliveryAddress) {
+        const { data: deliveryAddress, error: deliveryError } = await supabase
+          .from("user_addresses")
+          .insert({
+            ...validatedData.guestDeliveryAddress,
+            user_id: null, // Guest address
+          })
+          .select()
+          .single()
+
+        if (deliveryError) {
+          console.error("[v0] Guest delivery address creation error:", deliveryError)
+          return NextResponse.json({ error: "Erreur lors de la création de l'adresse de livraison" }, { status: 500 })
+        }
+        deliveryAddressId = deliveryAddress.id
+      }
+    }
+
     // Create booking
     const { data: booking, error: bookingError } = await supabase
       .from("bookings")
       .insert({
-        user_id: user.id,
-        pickup_address_id: validatedData.pickupAddressId,
-        delivery_address_id: validatedData.deliveryAddressId,
+        user_id: user?.id || null, // Allow null for guest bookings
+        pickup_address_id: pickupAddressId,
+        delivery_address_id: deliveryAddressId,
         pickup_date: validatedData.pickupDate,
         pickup_time_slot: validatedData.pickupTimeSlot,
         special_instructions: validatedData.specialInstructions,
         subscription_id: validatedData.subscriptionId,
         total_amount: totalAmount,
         status: "pending",
+        ...(isGuestBooking &&
+          validatedData.guestContact && {
+            metadata: {
+              guest_contact: validatedData.guestContact,
+              is_guest_booking: true,
+            },
+          }),
       })
       .select()
       .single()
