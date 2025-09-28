@@ -32,11 +32,12 @@ export function DateTimeStep({ pickupDate, pickupTimeSlot, onUpdate }: DateTimeS
     onUpdate({ pickupTimeSlot: timeSlot })
   }
 
-  // Disable past dates and Sundays
   const isDateDisabled = (date: Date) => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    return date < today || date.getDay() === 0 // Sunday = 0
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    tomorrow.setHours(0, 0, 0, 0)
+    date.setHours(0, 0, 0, 0)
+    return date < tomorrow || date.getDay() === 0 // Sunday = 0
   }
 
   const formatSelectedDate = (date: Date) => {
@@ -71,7 +72,7 @@ export function DateTimeStep({ pickupDate, pickupTimeSlot, onUpdate }: DateTimeS
             />
             <div className="mt-4 text-sm text-muted-foreground">
               <p>• Service disponible du lundi au samedi</p>
-              <p>• Collecte minimum 24h à l'avance</p>
+              <p>• Réservation minimum pour le lendemain</p>
             </div>
           </CardContent>
         </Card>
