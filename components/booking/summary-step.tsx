@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { MapPin, Clock, Package, Euro, Loader2, CheckCircle } from "lucide-react"
+import { MapPin, Clock, Package, Euro, Loader2, CheckCircle, Info } from "lucide-react"
 
 interface BookingData {
   pickupAddressId: string
@@ -22,9 +22,10 @@ interface BookingData {
 
 interface SummaryStepProps {
   bookingData: BookingData
+  serviceType?: string // Added service type prop
 }
 
-export function SummaryStep({ bookingData }: SummaryStepProps) {
+export function SummaryStep({ bookingData, serviceType = "classic" }: SummaryStepProps) {
   const [addresses, setAddresses] = useState<any[]>([])
   const [services, setServices] = useState<any[]>([])
   const [specialInstructions, setSpecialInstructions] = useState(bookingData.specialInstructions || "")
@@ -65,14 +66,16 @@ export function SummaryStep({ bookingData }: SummaryStepProps) {
   }
 
   const getTotalPrice = () => {
-    let total = 0
-    bookingData.items.forEach((item) => {
-      const service = getServiceDetails(item.serviceId)
-      if (service) {
-        total += service.base_price * item.quantity
-      }
-    })
-    return total
+    if (serviceType === "classic") {
+      // Classic service: 24.99€ for 8kg, +1€ per additional kg
+      const totalKg = getTotalItems() // Assuming 1 item = 1kg for simplicity
+      const basePrice = 24.99
+      const additionalKg = Math.max(0, totalKg - 8)
+      return basePrice + additionalKg * 1
+    } else {
+      // For subscriptions, show 0 as it's included
+      return 0
+    }
   }
 
   const getTotalItems = () => {
@@ -98,6 +101,19 @@ export function SummaryStep({ bookingData }: SummaryStepProps) {
     return slots[timeSlot as keyof typeof slots] || timeSlot
   }
 
+  const getServiceTypeInfo = () => {
+    switch (serviceType) {
+      case "monthly":
+        return { name: "Abonnement Mensuel", price: "99,99€/mois", included: true }
+      case "quarterly":
+        return { name: "Abonnement Trimestriel", price: "249,99€/trimestre", included: true }
+      default:
+        return { name: "Service Classique", price: "24,99€ pour 8kg", included: false }
+    }
+  }
+
+  const serviceInfo = getServiceTypeInfo()
+
   const handleSubmit = async () => {
     setIsSubmitting(true)
     setError(null)
@@ -109,6 +125,7 @@ export function SummaryStep({ bookingData }: SummaryStepProps) {
         body: JSON.stringify({
           ...bookingData,
           specialInstructions,
+          serviceType, // Include service type in booking
         }),
       })
 
@@ -134,6 +151,14 @@ export function SummaryStep({ bookingData }: SummaryStepProps) {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
+
+      <Alert>
+        <Info className="h-4 w-4" />
+        <AlertDescription>
+          <strong>{serviceInfo.name}</strong> - {serviceInfo.price}
+          {serviceInfo.included && " (Services inclus dans l'abonnement)"}
+        </AlertDescription>
+      </Alert>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Addresses */}
@@ -237,8 +262,12 @@ export function SummaryStep({ bookingData }: SummaryStepProps) {
                     <p className="text-sm text-muted-foreground">{service.description}</p>
                   </div>
                   <div className="text-right">
-                    <div className="font-semibold">{(service.base_price * item.quantity).toFixed(2)}€</div>
-                    <div className="text-xs text-muted-foreground">{service.base_price}€ / pièce</div>
+                    <div className="font-semibold">
+                      {serviceType === "classic" ? `${(service.base_price * item.quantity).toFixed(2)}€` : "Inclus"}
+                    </div>
+                    {serviceType === "classic" && (
+                      <div className="text-xs text-muted-foreground">{service.base_price}€ / pièce</div>
+                    )}
                   </div>
                 </div>
               )
@@ -250,10 +279,22 @@ export function SummaryStep({ bookingData }: SummaryStepProps) {
           <div className="flex items-center justify-between text-lg font-semibold">
             <span>Total</span>
             <div className="flex items-center">
-              <Euro className="h-5 w-5 mr-1" />
-              {getTotalPrice().toFixed(2)}
+              {serviceType === "classic" ? (
+                <>
+                  <Euro className="h-5 w-5 mr-1" />
+                  {getTotalPrice().toFixed(2)}
+                </>
+              ) : (
+                <span className="text-green-600">Inclus dans l'abonnement</span>
+              )}
             </div>
           </div>
+
+          {serviceType === "classic" && (
+            <p className="text-xs text-muted-foreground mt-2">
+              Prix final calculé selon le poids réel (24,99€ pour 8kg, +1€/kg supplémentaire)
+            </p>
+          )}
         </CardContent>
       </Card>
 

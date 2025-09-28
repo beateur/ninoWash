@@ -5,7 +5,8 @@ import { ServiceCard } from "@/components/ui/service-card"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { Search, Package } from "lucide-react"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Search, Package, Info } from "lucide-react"
 
 interface Service {
   id: string
@@ -26,9 +27,10 @@ interface BookingItem {
 interface ServicesStepProps {
   items: BookingItem[]
   onUpdate: (data: { items: BookingItem[] }) => void
+  serviceType?: string // Added service type prop
 }
 
-export function ServicesStep({ items, onUpdate }: ServicesStepProps) {
+export function ServicesStep({ items, onUpdate, serviceType = "classic" }: ServicesStepProps) {
   const [services, setServices] = useState<Record<string, Service[]>>({})
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
@@ -83,16 +85,16 @@ export function ServicesStep({ items, onUpdate }: ServicesStepProps) {
   }
 
   const getTotalPrice = () => {
-    let total = 0
-    items.forEach((item) => {
-      const service = Object.values(services)
-        .flat()
-        .find((s) => s.id === item.serviceId)
-      if (service) {
-        total += service.base_price * item.quantity
-      }
-    })
-    return total
+    if (serviceType === "classic") {
+      // Classic service: 24.99€ for 8kg, +1€ per additional kg
+      const totalKg = getTotalItems() // Assuming 1 item = 1kg for simplicity
+      const basePrice = 24.99
+      const additionalKg = Math.max(0, totalKg - 8)
+      return basePrice + additionalKg * 1
+    } else {
+      // For subscriptions, show included in plan
+      return 0
+    }
   }
 
   const filteredServices = Object.entries(services).reduce(
@@ -123,6 +125,17 @@ export function ServicesStep({ items, onUpdate }: ServicesStepProps) {
 
   return (
     <div className="space-y-6">
+      {serviceType !== "classic" && (
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            {serviceType === "monthly"
+              ? "Avec votre abonnement mensuel, vous bénéficiez de 2 collectes par semaine incluses."
+              : "Avec votre abonnement trimestriel, vous bénéficiez de 3 collectes par semaine incluses."}
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Search and Summary */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div className="relative flex-1 max-w-sm">
@@ -141,7 +154,10 @@ export function ServicesStep({ items, onUpdate }: ServicesStepProps) {
               <Package className="h-3 w-3" />
               <span>{getTotalItems()} articles</span>
             </Badge>
-            <div className="text-lg font-semibold text-primary">{getTotalPrice().toFixed(2)}€</div>
+            {serviceType === "classic" && (
+              <div className="text-lg font-semibold text-primary">{getTotalPrice().toFixed(2)}€</div>
+            )}
+            {serviceType !== "classic" && <div className="text-sm text-muted-foreground">Inclus dans l'abonnement</div>}
           </div>
         )}
       </div>
@@ -164,6 +180,7 @@ export function ServicesStep({ items, onUpdate }: ServicesStepProps) {
                   service={service}
                   quantity={getItemQuantity(service.id)}
                   onQuantityChange={handleQuantityChange}
+                  serviceType={serviceType} // Pass service type to card
                 />
               ))}
             </div>
@@ -186,6 +203,7 @@ export function ServicesStep({ items, onUpdate }: ServicesStepProps) {
                     service={service}
                     quantity={getItemQuantity(service.id)}
                     onQuantityChange={handleQuantityChange}
+                    serviceType={serviceType} // Pass service type to card
                   />
                 ))}
               </div>
@@ -217,11 +235,25 @@ export function ServicesStep({ items, onUpdate }: ServicesStepProps) {
                     <span className="font-medium">{service.name}</span>
                     <span className="text-sm text-muted-foreground ml-2">x{item.quantity}</span>
                   </div>
-                  <div className="font-semibold">{(service.base_price * item.quantity).toFixed(2)}€</div>
+                  <div className="font-semibold">
+                    {serviceType === "classic" ? `${(service.base_price * item.quantity).toFixed(2)}€` : "Inclus"}
+                  </div>
                 </div>
               )
             })}
           </div>
+
+          {serviceType === "classic" && (
+            <div className="mt-4 p-3 bg-primary/10 rounded-lg">
+              <div className="flex items-center justify-between">
+                <span className="font-medium">Total estimé</span>
+                <span className="text-lg font-bold text-primary">{getTotalPrice().toFixed(2)}€</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Prix final calculé selon le poids réel (24,99€ pour 8kg, +1€/kg supplémentaire)
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>

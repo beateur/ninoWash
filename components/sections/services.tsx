@@ -9,46 +9,52 @@ const services = [
     id: "classic",
     name: "Service Classique",
     description: "Parfait pour vos besoins ponctuels",
-    price: "À partir de 3€",
-    priceDetail: "par pièce",
+    price: "24,99€",
+    priceDetail: "pour 8 kg (+1€/kg supplémentaire)",
     features: [
       "Collecte et livraison à domicile",
       "Nettoyage professionnel",
       "Livraison sous 48h",
       "Assurance incluse",
+      "Accessible sans connexion",
     ],
     popular: false,
+    requiresAuth: false, // New field to indicate if auth is required
   },
   {
     id: "monthly",
     name: "Abonnement Mensuel",
     description: "Pour un pressing régulier et économique",
-    price: "49€",
-    priceDetail: "par mois",
+    price: "99,99€",
+    priceDetail: "par mois (2 collectes/semaine)",
     features: [
-      "Jusqu'à 15 pièces par mois",
+      "2 collectes par semaine",
       "Collecte et livraison illimitées",
       "Priorité sur les créneaux",
-      "Remise de 20%",
+      "Tarifs préférentiels",
       "Service client dédié",
+      "1 collecte gratuite après 10 commandes",
     ],
     popular: true,
+    requiresAuth: true, // Requires authentication
   },
   {
     id: "quarterly",
     name: "Abonnement Trimestriel",
     description: "La solution la plus avantageuse",
-    price: "129€",
-    priceDetail: "par trimestre",
+    price: "249,99€",
+    priceDetail: "par trimestre (3 collectes/semaine)",
     features: [
-      "Jusqu'à 50 pièces par trimestre",
+      "3 collectes par semaine",
       "Collecte et livraison illimitées",
       "Priorité absolue",
-      "Remise de 30%",
+      "Tarifs préférentiels maximaux",
       "Service client premium",
+      "1 collecte gratuite après 10 commandes",
       "Stockage gratuit 7 jours",
     ],
     popular: false,
+    requiresAuth: true, // Requires authentication
   },
 ]
 
@@ -82,7 +88,7 @@ export function Services() {
                 <CardDescription className="text-sm">{service.description}</CardDescription>
                 <div className="mt-4">
                   <span className="text-3xl font-bold text-primary">{service.price}</span>
-                  <span className="text-sm text-muted-foreground ml-1">{service.priceDetail}</span>
+                  <span className="text-sm text-muted-foreground ml-1 block mt-1">{service.priceDetail}</span>
                 </div>
               </CardHeader>
 
@@ -101,6 +107,10 @@ export function Services() {
                     {service.id === "classic" ? "Réserver" : "S'abonner"}
                   </Link>
                 </Button>
+
+                {service.requiresAuth && (
+                  <p className="text-xs text-muted-foreground text-center">* Connexion requise pour les abonnements</p>
+                )}
               </CardContent>
             </Card>
           ))}

@@ -21,6 +21,7 @@ interface ServiceCardProps {
   isSelected?: boolean
   quantity?: number
   onQuantityChange?: (serviceId: string, quantity: number) => void
+  serviceType?: string // Added service type prop
 }
 
 export function ServiceCard({
@@ -29,6 +30,7 @@ export function ServiceCard({
   isSelected = false,
   quantity = 0,
   onQuantityChange,
+  serviceType = "classic", // Default to classic service
 }: ServiceCardProps) {
   const getCategoryLabel = (category: string) => {
     switch (category) {
@@ -69,11 +71,19 @@ export function ServiceCard({
             <Badge className={getCategoryColor(service.category)}>{getCategoryLabel(service.category)}</Badge>
           </div>
           <div className="text-right">
-            <div className="flex items-center text-lg font-semibold text-primary">
-              <Euro className="h-4 w-4 mr-1" />
-              {service.base_price.toFixed(2)}
-            </div>
-            <div className="text-sm text-muted-foreground">par {service.unit === "piece" ? "pièce" : service.unit}</div>
+            {serviceType === "classic" ? (
+              <>
+                <div className="flex items-center text-lg font-semibold text-primary">
+                  <Euro className="h-4 w-4 mr-1" />
+                  {service.base_price.toFixed(2)}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  par {service.unit === "piece" ? "pièce" : service.unit}
+                </div>
+              </>
+            ) : (
+              <div className="text-sm font-medium text-green-600">Inclus</div>
+            )}
           </div>
         </div>
       </CardHeader>

@@ -1,16 +1,17 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useAuth } from "@/lib/hooks/use-auth"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AddressStep } from "@/components/booking/address-step"
 import { ServicesStep } from "@/components/booking/services-step"
 import { DateTimeStep } from "@/components/booking/datetime-step"
 import { SummaryStep } from "@/components/booking/summary-step"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Info } from "lucide-react"
 
 const STEPS = [
   { id: 1, title: "Adresses", description: "Collecte et livraison" },
@@ -28,16 +29,25 @@ export default function ReservationPage() {
     pickupDate: "",
     pickupTimeSlot: "",
     specialInstructions: "",
+    serviceType: "classic", // Track selected service type
   })
 
   const { user, loading } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  const requestedService = searchParams.get("service") || "classic"
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push("/auth/signin?redirectTo=/reservation")
+    const requiresAuth = requestedService !== "classic"
+
+    if (!loading && requiresAuth && !user) {
+      router.push(`/auth/signin?redirectTo=/reservation?service=${requestedService}`)
+      return
     }
-  }, [user, loading, router])
+
+    setBookingData((prev) => ({ ...prev, serviceType: requestedService }))
+  }, [user, loading, router, requestedService])
 
   if (loading) {
     return (
@@ -47,7 +57,7 @@ export default function ReservationPage() {
     )
   }
 
-  if (!user) {
+  if (!user && bookingData.serviceType !== "classic") {
     return null
   }
 
@@ -82,6 +92,19 @@ export default function ReservationPage() {
     }
   }
 
+  const getServiceInfo = () => {
+    switch (bookingData.serviceType) {
+      case "monthly":
+        return { name: "Abonnement Mensuel", price: "99,99€/mois" }
+      case "quarterly":
+        return { name: "Abonnement Trimestriel", price: "249,99€/trimestre" }
+      default:
+        return { name: "Service Classique", price: "24,99€ pour 8kg" }
+    }
+  }
+
+  const serviceInfo = getServiceInfo()
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted">
       <div className="container mx-auto px-4 py-4 sm:py-8">
@@ -92,7 +115,26 @@ export default function ReservationPage() {
             <p className="text-muted-foreground text-sm sm:text-base">
               Planifiez votre service de pressing en quelques étapes
             </p>
+            <div className="mt-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+                <Info className="h-4 w-4" />
+                {serviceInfo.name} - {serviceInfo.price}
+              </div>
+            </div>
           </div>
+
+          {!user && bookingData.serviceType === "classic" && (
+            <Alert className="mb-6">
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                Vous réservez en tant qu'invité. Pour accéder aux abonnements et à la gestion de vos réservations,
+                <Button variant="link" className="p-0 h-auto ml-1" onClick={() => router.push("/auth/signin")}>
+                  connectez-vous
+                </Button>
+                .
+              </AlertDescription>
+            </Alert>
+          )}
 
           {/* Progress */}
           <div className="mb-6 sm:mb-8">
@@ -131,7 +173,13 @@ export default function ReservationPage() {
                   onUpdate={updateBookingData}
                 />
               )}
-              {currentStep === 2 && <ServicesStep items={bookingData.items} onUpdate={updateBookingData} />}
+              {currentStep === 2 && (
+                <ServicesStep
+                  items={bookingData.items}
+                  onUpdate={updateBookingData}
+                  serviceType={bookingData.serviceType} // Pass service type
+                />
+              )}
               {currentStep === 3 && (
                 <DateTimeStep
                   pickupDate={bookingData.pickupDate}
@@ -139,7 +187,12 @@ export default function ReservationPage() {
                   onUpdate={updateBookingData}
                 />
               )}
-              {currentStep === 4 && <SummaryStep bookingData={bookingData} />}
+              {currentStep === 4 && (
+                <SummaryStep
+                  bookingData={bookingData}
+                  serviceType={bookingData.serviceType} // Pass service type
+                />
+              )}
             </CardContent>
           </Card>
 
