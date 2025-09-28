@@ -59,6 +59,12 @@ export async function POST(request: NextRequest) {
 
     const isGuestBooking = !user
 
+    const generateBookingNumber = () => {
+      const date = new Date().toISOString().slice(0, 10).replace(/-/g, "")
+      const random = Math.random().toString(36).substring(2, 8).toUpperCase()
+      return `BK-${date}-${random}`
+    }
+
     // Calculate total amount
     let totalAmount = 0
     const serviceIds = validatedData.items.map((item) => item.serviceId)
@@ -102,6 +108,7 @@ export async function POST(request: NextRequest) {
     const { data: booking, error: bookingError } = await supabase
       .from("bookings")
       .insert({
+        booking_number: generateBookingNumber(), // Add required booking number
         user_id: user?.id || null, // Allow null for guest bookings
         pickup_address_id: pickupAddressId,
         delivery_address_id: deliveryAddressId,
