@@ -9,7 +9,7 @@ export async function GET() {
       .from("services")
       .select("*")
       .eq("is_active", true)
-      .order("category", { ascending: true })
+      .order("type", { ascending: true })
       .order("name", { ascending: true })
 
     if (error) {
@@ -17,13 +17,12 @@ export async function GET() {
       return NextResponse.json({ error: "Erreur lors de la récupération des services" }, { status: 500 })
     }
 
-    // Group services by category
     const groupedServices = services.reduce(
       (acc, service) => {
-        if (!acc[service.category]) {
-          acc[service.category] = []
+        if (!acc[service.type]) {
+          acc[service.type] = []
         }
-        acc[service.category].push(service)
+        acc[service.type].push(service)
         return acc
       },
       {} as Record<string, typeof services>,
