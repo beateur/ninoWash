@@ -104,12 +104,19 @@ export async function POST(request: NextRequest) {
       deliveryAddressId = null
     }
 
+    const primaryServiceId = validatedData.items[0]?.serviceId
+
+    if (!primaryServiceId) {
+      return NextResponse.json({ error: "Au moins un service doit être sélectionné" }, { status: 400 })
+    }
+
     // Create booking
     const { data: booking, error: bookingError } = await supabase
       .from("bookings")
       .insert({
-        booking_number: generateBookingNumber(), // Add required booking number
-        user_id: user?.id || null, // Allow null for guest bookings
+        booking_number: generateBookingNumber(),
+        user_id: user?.id || null,
+        service_id: primaryServiceId, // Add required service_id
         pickup_address_id: pickupAddressId,
         delivery_address_id: deliveryAddressId,
         pickup_date: validatedData.pickupDate,
