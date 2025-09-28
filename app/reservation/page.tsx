@@ -25,6 +25,8 @@ export default function ReservationPage() {
   const [bookingData, setBookingData] = useState({
     pickupAddressId: "",
     deliveryAddressId: "",
+    pickupAddress: null as any,
+    deliveryAddress: null as any,
     items: [] as Array<{ serviceId: string; quantity: number; specialInstructions?: string }>,
     pickupDate: "",
     pickupTimeSlot: "",
@@ -170,6 +172,8 @@ export default function ReservationPage() {
                 <AddressStep
                   pickupAddressId={bookingData.pickupAddressId}
                   deliveryAddressId={bookingData.deliveryAddressId}
+                  pickupAddress={bookingData.pickupAddress}
+                  deliveryAddress={bookingData.deliveryAddress}
                   onUpdate={updateBookingData}
                 />
               )}

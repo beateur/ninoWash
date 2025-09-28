@@ -23,10 +23,23 @@ interface Address {
 interface AddressStepProps {
   pickupAddressId: string
   deliveryAddressId: string
-  onUpdate: (data: { pickupAddressId?: string; deliveryAddressId?: string }) => void
+  pickupAddress?: Address | null
+  deliveryAddress?: Address | null
+  onUpdate: (data: {
+    pickupAddressId?: string
+    deliveryAddressId?: string
+    pickupAddress?: Address | null
+    deliveryAddress?: Address | null
+  }) => void
 }
 
-export function AddressStep({ pickupAddressId, deliveryAddressId, onUpdate }: AddressStepProps) {
+export function AddressStep({
+  pickupAddressId,
+  deliveryAddressId,
+  pickupAddress,
+  deliveryAddress,
+  onUpdate,
+}: AddressStepProps) {
   const [addresses, setAddresses] = useState<Address[]>([])
   const [loading, setLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -82,6 +95,28 @@ export function AddressStep({ pickupAddressId, deliveryAddressId, onUpdate }: Ad
     setIsDialogOpen(false)
   }
 
+  const handlePickupAddressSelect = (address: Address) => {
+    if (user) {
+      onUpdate({ pickupAddressId: address.id })
+    } else {
+      onUpdate({
+        pickupAddressId: address.id,
+        pickupAddress: address,
+      })
+    }
+  }
+
+  const handleDeliveryAddressSelect = (address: Address) => {
+    if (user) {
+      onUpdate({ deliveryAddressId: address.id })
+    } else {
+      onUpdate({
+        deliveryAddressId: address.id,
+        deliveryAddress: address,
+      })
+    }
+  }
+
   const getAddressIcon = (type: string) => {
     switch (type) {
       case "home":
@@ -130,7 +165,7 @@ export function AddressStep({ pickupAddressId, deliveryAddressId, onUpdate }: Ad
                 className={`cursor-pointer transition-all ${
                   pickupAddressId === address.id ? "ring-2 ring-primary border-primary" : "hover:shadow-md"
                 }`}
-                onClick={() => onUpdate({ pickupAddressId: address.id })}
+                onClick={() => handlePickupAddressSelect(address)}
               >
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between">
@@ -169,7 +204,7 @@ export function AddressStep({ pickupAddressId, deliveryAddressId, onUpdate }: Ad
                 className={`cursor-pointer transition-all ${
                   deliveryAddressId === address.id ? "ring-2 ring-green-500 border-green-500" : "hover:shadow-md"
                 }`}
-                onClick={() => onUpdate({ deliveryAddressId: address.id })}
+                onClick={() => handleDeliveryAddressSelect(address)}
               >
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between">
@@ -219,7 +254,17 @@ export function AddressStep({ pickupAddressId, deliveryAddressId, onUpdate }: Ad
         <div className="flex justify-center pt-4 border-t">
           <Button
             variant="outline"
-            onClick={() => onUpdate({ deliveryAddressId: pickupAddressId })}
+            onClick={() => {
+              const selectedAddress = addresses.find((addr) => addr.id === pickupAddressId)
+              if (user) {
+                onUpdate({ deliveryAddressId: pickupAddressId })
+              } else {
+                onUpdate({
+                  deliveryAddressId: pickupAddressId,
+                  deliveryAddress: selectedAddress || null,
+                })
+              }
+            }}
             className="bg-transparent"
           >
             Utiliser la même adresse pour la livraison

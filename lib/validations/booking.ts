@@ -42,12 +42,15 @@ export const createBookingSchema = z
       const selectedDate = new Date(date)
       const tomorrow = new Date()
       tomorrow.setDate(tomorrow.getDate() + 1)
+      tomorrow.setHours(0, 0, 0, 0)
+      selectedDate.setHours(0, 0, 0, 0)
       return selectedDate >= tomorrow
     }, "La date de collecte doit être au minimum demain"),
     pickupTimeSlot: z.enum(["09:00-12:00", "14:00-17:00", "18:00-21:00"]),
     items: z.array(bookingItemSchema).min(1, "Au moins un article requis"),
     specialInstructions: z.string().optional(),
     subscriptionId: z.string().uuid().optional(),
+    serviceType: z.string().optional(),
     guestPickupAddress: guestAddressSchema.optional(),
     guestDeliveryAddress: guestAddressSchema.optional(),
     guestContact: guestContactSchema.optional(),

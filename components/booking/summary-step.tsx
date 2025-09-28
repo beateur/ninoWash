@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@/lib/hooks/use-auth" // Fixed import path for useAuth hook
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -14,6 +15,8 @@ import { MapPin, Clock, Package, Euro, Loader2, CheckCircle, Info } from "lucide
 interface BookingData {
   pickupAddressId: string
   deliveryAddressId: string
+  pickupAddress?: any
+  deliveryAddress?: any
   items: Array<{ serviceId: string; quantity: number; specialInstructions?: string }>
   pickupDate: string
   pickupTimeSlot: string
@@ -32,6 +35,7 @@ export function SummaryStep({ bookingData, serviceType = "classic" }: SummarySte
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const { user } = useAuth() // Added useAuth hook
 
   useEffect(() => {
     fetchData()
@@ -39,11 +43,23 @@ export function SummaryStep({ bookingData, serviceType = "classic" }: SummarySte
 
   const fetchData = async () => {
     try {
-      // Fetch addresses
-      const addressResponse = await fetch("/api/addresses")
-      const addressData = await addressResponse.json()
-      if (addressResponse.ok) {
-        setAddresses(addressData.addresses || [])
+      if (user) {
+        // Fetch addresses
+        const addressResponse = await fetch("/api/addresses")
+        const addressData = await addressResponse.json()
+        if (addressResponse.ok) {
+          setAddresses(addressData.addresses || [])
+        }
+      } else {
+        // For guests, use the addresses from booking data
+        const guestAddresses = []
+        if (bookingData.pickupAddress) {
+          guestAddresses.push(bookingData.pickupAddress)
+        }
+        if (bookingData.deliveryAddress && bookingData.deliveryAddress.id !== bookingData.pickupAddress?.id) {
+          guestAddresses.push(bookingData.deliveryAddress)
+        }
+        setAddresses(guestAddresses)
       }
 
       // Fetch services
@@ -58,8 +74,13 @@ export function SummaryStep({ bookingData, serviceType = "classic" }: SummarySte
     }
   }
 
-  const pickupAddress = addresses.find((addr) => addr.id === bookingData.pickupAddressId)
-  const deliveryAddress = addresses.find((addr) => addr.id === bookingData.deliveryAddressId)
+  const pickupAddress = user
+    ? addresses.find((addr) => addr.id === bookingData.pickupAddressId)
+    : bookingData.pickupAddress
+
+  const deliveryAddress = user
+    ? addresses.find((addr) => addr.id === bookingData.deliveryAddressId)
+    : bookingData.deliveryAddress
 
   const getServiceDetails = (serviceId: string) => {
     return services.find((service) => service.id === serviceId)
@@ -119,19 +140,58 @@ export function SummaryStep({ bookingData, serviceType = "classic" }: SummarySte
     setError(null)
 
     try {
+      const bookingPayload = {
+        pickupDate: bookingData.pickupDate,
+        pickupTimeSlot: bookingData.pickupTimeSlot,
+        items: bookingData.items,
+        specialInstructions,
+        serviceType,
+      }
+
+      if (user) {
+        // For authenticated users, use address IDs
+        Object.assign(bookingPayload, {
+          pickupAddressId: bookingData.pickupAddressId,
+          deliveryAddressId: bookingData.deliveryAddressId,
+        })
+      } else {
+        // For guests, use address objects and add contact info
+        Object.assign(bookingPayload, {
+          guestPickupAddress: {
+            street_address: bookingData.pickupAddress?.street_address,
+            city: bookingData.pickupAddress?.city,
+            postal_code: bookingData.pickupAddress?.postal_code,
+            building_info: bookingData.pickupAddress?.apartment,
+            label: bookingData.pickupAddress?.label,
+          },
+          guestDeliveryAddress: {
+            street_address: bookingData.deliveryAddress?.street_address,
+            city: bookingData.deliveryAddress?.city,
+            postal_code: bookingData.deliveryAddress?.postal_code,
+            building_info: bookingData.deliveryAddress?.apartment,
+            label: bookingData.deliveryAddress?.label,
+          },
+          guestContact: {
+            first_name: "Invité", // TODO: Get from form
+            last_name: "Client", // TODO: Get from form
+            email: "guest@example.com", // TODO: Get from form
+            phone: "0123456789", // TODO: Get from form
+          },
+        })
+      }
+
+      console.log("[v0] Booking payload:", bookingPayload)
+
       const response = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...bookingData,
-          specialInstructions,
-          serviceType, // Include service type in booking
-        }),
+        body: JSON.stringify(bookingPayload),
       })
 
       const result = await response.json()
 
       if (!response.ok) {
+        console.log("[v0] Booking creation error:", result.details || result.error)
         throw new Error(result.error || "Une erreur est survenue")
       }
 
