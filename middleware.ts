@@ -1,42 +1,14 @@
-import { updateSession } from "@/lib/supabase/middleware"
 import { NextResponse, type NextRequest } from "next/server"
-import { rateLimiter, securityHeaders } from "@/lib/security"
 
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next()
 
-  // Apply security headers
-  Object.entries(securityHeaders).forEach(([key, value]) => {
-    response.headers.set(key, value)
-  })
+  // Basic security headers only
+  response.headers.set("X-Frame-Options", "DENY")
+  response.headers.set("X-Content-Type-Options", "nosniff")
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin")
 
-  // Rate limiting for API routes
-  if (request.nextUrl.pathname.startsWith("/api/")) {
-    const identifier = request.ip || "anonymous"
-    const isAllowed = rateLimiter.isAllowed(identifier, {
-      windowMs: Number.parseInt(process.env.RATE_LIMIT_WINDOW_MS || "60000"),
-      maxRequests: Number.parseInt(process.env.RATE_LIMIT_REQUESTS_PER_MINUTE || "60"),
-    })
-
-    if (!isAllowed) {
-      return new NextResponse("Too Many Requests", {
-        status: 429,
-        headers: {
-          "Retry-After": "60",
-          ...securityHeaders,
-        },
-      })
-    }
-  }
-
-  const supabaseResponse = await updateSession(request)
-
-  // Apply security headers to supabase response
-  Object.entries(securityHeaders).forEach(([key, value]) => {
-    supabaseResponse.headers.set(key, value)
-  })
-
-  return supabaseResponse
+  return response
 }
 
 export const config = {
