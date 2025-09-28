@@ -70,7 +70,8 @@
   --sidebar-ring: oklch(0.45 0.08 150);
 }
 
-@theme inline {
+/* Fixed @theme inline syntax for Tailwind CSS v4 compatibility */
+@theme {
   --font-sans: var(--font-inter);
   --font-serif: var(--font-playfair);
   --color-background: var(--background);
