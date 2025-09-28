@@ -15,9 +15,10 @@ import { addressSchema, type AddressInput } from "@/lib/validations/booking"
 
 interface AddressFormProps {
   onSuccess: (address: any) => void
+  isGuest?: boolean // Added prop to indicate guest user
 }
 
-export function AddressForm({ onSuccess }: AddressFormProps) {
+export function AddressForm({ onSuccess, isGuest = false }: AddressFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -41,20 +42,39 @@ export function AddressForm({ onSuccess }: AddressFormProps) {
     setError(null)
 
     try {
-      const response = await fetch("/api/addresses", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      })
+      if (isGuest) {
+        const guestAddress = {
+          id: `guest-${Date.now()}`,
+          type: data.type,
+          label: data.label,
+          street_address: data.streetAddress,
+          apartment: data.apartment,
+          city: data.city,
+          postal_code: data.postalCode,
+          access_instructions: data.deliveryInstructions,
+          access_code: data.accessCode,
+          is_default: data.isDefault,
+        }
 
-      const result = await response.json()
+        onSuccess(guestAddress)
+        form.reset()
+      } else {
+        // For authenticated users, use the API
+        const response = await fetch("/api/addresses", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        })
 
-      if (!response.ok) {
-        throw new Error(result.error || "Une erreur est survenue")
+        const result = await response.json()
+
+        if (!response.ok) {
+          throw new Error(result.error || "Une erreur est survenue")
+        }
+
+        onSuccess(result.address)
+        form.reset()
       }
-
-      onSuccess(result.address)
-      form.reset()
     } catch (err) {
       setError(err instanceof Error ? err.message : "Une erreur est survenue")
     } finally {
@@ -67,6 +87,15 @@ export function AddressForm({ onSuccess }: AddressFormProps) {
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {isGuest && (
+        <Alert>
+          <AlertDescription>
+            Cette adresse sera utilisée uniquement pour cette réservation. Pour sauvegarder vos adresses,
+            connectez-vous.
+          </AlertDescription>
         </Alert>
       )}
 
@@ -139,15 +168,17 @@ export function AddressForm({ onSuccess }: AddressFormProps) {
           />
         </div>
 
-        <div className="flex items-center space-x-2">
-          <Checkbox id="isDefault" {...form.register("isDefault")} />
-          <Label htmlFor="isDefault">Définir comme adresse par défaut</Label>
-        </div>
+        {!isGuest && (
+          <div className="flex items-center space-x-2">
+            <Checkbox id="isDefault" {...form.register("isDefault")} />
+            <Label htmlFor="isDefault">Définir comme adresse par défaut</Label>
+          </div>
+        )}
 
         <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           <Save className="mr-2 h-4 w-4" />
-          Enregistrer l'adresse
+          {isGuest ? "Ajouter l'adresse" : "Enregistrer l'adresse"}
         </Button>
       </form>
     </div>

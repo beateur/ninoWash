@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { AddressForm } from "@/components/forms/address-form"
+import { useAuth } from "@/lib/hooks/use-auth"
 import { MapPin, Plus, Home, Building, MapIcon } from "lucide-react"
 
 interface Address {
@@ -29,10 +30,16 @@ export function AddressStep({ pickupAddressId, deliveryAddressId, onUpdate }: Ad
   const [addresses, setAddresses] = useState<Address[]>([])
   const [loading, setLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const { user } = useAuth()
 
   useEffect(() => {
-    fetchAddresses()
-  }, [])
+    if (user) {
+      fetchAddresses()
+    } else {
+      setAddresses([])
+      setLoading(false)
+    }
+  }, [user])
 
   const fetchAddresses = async () => {
     try {
@@ -50,6 +57,8 @@ export function AddressStep({ pickupAddressId, deliveryAddressId, onUpdate }: Ad
             })
           }
         }
+      } else {
+        console.error("[v0] Error fetching addresses:", data.error)
       }
     } catch (error) {
       console.error("[v0] Error fetching addresses:", error)
@@ -59,7 +68,17 @@ export function AddressStep({ pickupAddressId, deliveryAddressId, onUpdate }: Ad
   }
 
   const handleAddressCreated = (newAddress: Address) => {
-    setAddresses((prev) => [newAddress, ...prev])
+    if (user) {
+      // For authenticated users, add the address returned from API
+      setAddresses((prev) => [newAddress, ...prev])
+    } else {
+      // For guest users, create a temporary address with generated ID
+      const guestAddress = {
+        ...newAddress,
+        id: `guest-${Date.now()}`, // Generate temporary ID for guest
+      }
+      setAddresses((prev) => [guestAddress, ...prev])
+    }
     setIsDialogOpen(false)
   }
 
@@ -190,7 +209,7 @@ export function AddressStep({ pickupAddressId, deliveryAddressId, onUpdate }: Ad
             <DialogHeader>
               <DialogTitle>Nouvelle adresse</DialogTitle>
             </DialogHeader>
-            <AddressForm onSuccess={handleAddressCreated} />
+            <AddressForm onSuccess={handleAddressCreated} isGuest={!user} />
           </DialogContent>
         </Dialog>
       </div>
