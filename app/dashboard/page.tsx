@@ -22,8 +22,8 @@ export default async function DashboardPage() {
     .from("bookings")
     .select(`
       *,
-      pickup_address:addresses!pickup_address_id(street_address, city),
-      delivery_address:addresses!delivery_address_id(street_address, city)
+      pickup_address:user_addresses!pickup_address_id(street_address, city),
+      delivery_address:user_addresses!delivery_address_id(street_address, city)
     `)
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
@@ -31,7 +31,7 @@ export default async function DashboardPage() {
 
   // Get user's addresses count
   const { count: addressCount } = await supabase
-    .from("addresses")
+    .from("user_addresses")
     .select("*", { count: "exact", head: true })
     .eq("user_id", user.id)
 

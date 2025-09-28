@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { data: addresses, error } = await supabase
-      .from("addresses")
+      .from("user_addresses")
       .select("*")
       .eq("user_id", user.id)
       .order("is_default", { ascending: false })
@@ -51,21 +51,19 @@ export async function POST(request: NextRequest) {
 
     // If this is set as default, unset other default addresses
     if (validatedData.isDefault) {
-      await supabase.from("addresses").update({ is_default: false }).eq("user_id", user.id)
+      await supabase.from("user_addresses").update({ is_default: false }).eq("user_id", user.id)
     }
 
     const { data: address, error } = await supabase
-      .from("addresses")
+      .from("user_addresses")
       .insert({
         user_id: user.id,
-        type: validatedData.type,
         label: validatedData.label,
         street_address: validatedData.streetAddress,
-        apartment: validatedData.apartment,
+        building_info: validatedData.apartment,
         city: validatedData.city,
         postal_code: validatedData.postalCode,
-        delivery_instructions: validatedData.deliveryInstructions,
-        access_code: validatedData.accessCode,
+        access_instructions: validatedData.deliveryInstructions,
         is_default: validatedData.isDefault,
       })
       .select()

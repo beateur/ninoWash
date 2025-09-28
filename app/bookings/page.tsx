@@ -21,8 +21,8 @@ export default async function BookingsPage() {
     .from("bookings")
     .select(`
       *,
-      pickup_address:addresses!pickup_address_id(street_address, city),
-      delivery_address:addresses!delivery_address_id(street_address, city),
+      pickup_address:user_addresses!pickup_address_id(street_address, city),
+      delivery_address:user_addresses!delivery_address_id(street_address, city),
       booking_items(
         id,
         quantity,
