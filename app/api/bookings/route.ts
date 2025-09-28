@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
         quantity: item.quantity,
         unit_price: service?.base_price || 0,
         special_instructions: item.specialInstructions,
-        service_option_id: item.serviceId,
+        service_id: item.serviceId,
       }
     })
 
