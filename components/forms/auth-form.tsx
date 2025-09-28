@@ -1,0 +1,235 @@
+"use client"
+
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Loader2, Mail, Lock, User, Phone } from "lucide-react"
+import { signUpSchema, signInSchema, type SignUpInput, type SignInInput } from "@/lib/validations/auth"
+
+interface AuthFormProps {
+  mode: "signin" | "signup"
+  onSuccess?: () => void
+}
+
+export function AuthForm({ mode, onSuccess }: AuthFormProps) {
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+  const router = useRouter()
+
+  const isSignUp = mode === "signup"
+  const schema = isSignUp ? signUpSchema : signInSchema
+
+  const form = useForm<SignUpInput | SignInInput>({
+    resolver: zodResolver(schema),
+    defaultValues: isSignUp
+      ? {
+          email: "",
+          password: "",
+          firstName: "",
+          lastName: "",
+          phone: "",
+          marketingConsent: false,
+        }
+      : {
+          email: "",
+          password: "",
+        },
+  })
+
+  const onSubmit = async (data: SignUpInput | SignInInput) => {
+    setIsLoading(true)
+    setError(null)
+    setSuccess(null)
+
+    try {
+      const endpoint = isSignUp ? "/api/auth/signup" : "/api/auth/signin"
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || "Une erreur est survenue")
+      }
+
+      if (isSignUp) {
+        setSuccess(result.message)
+        form.reset()
+      } else {
+        setSuccess("Connexion réussie")
+        onSuccess?.()
+        router.push("/dashboard")
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Une erreur est survenue")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-2xl font-bold text-center">
+          {isSignUp ? "Créer un compte" : "Se connecter"}
+        </CardTitle>
+        <CardDescription className="text-center">
+          {isSignUp
+            ? "Rejoignez Nino Wash pour un pressing de qualité à domicile"
+            : "Connectez-vous à votre compte Nino Wash"}
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent className="space-y-4">
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {success && (
+          <Alert className="border-green-200 bg-green-50 text-green-800">
+            <AlertDescription>{success}</AlertDescription>
+          </Alert>
+        )}
+
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          {isSignUp && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">Prénom</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="firstName"
+                    placeholder="Jean"
+                    className="pl-10"
+                    {...form.register("firstName" as keyof (SignUpInput | SignInInput))}
+                  />
+                </div>
+                {form.formState.errors.firstName && (
+                  <p className="text-sm text-red-600">{form.formState.errors.firstName.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Nom</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="lastName"
+                    placeholder="Dupont"
+                    className="pl-10"
+                    {...form.register("lastName" as keyof (SignUpInput | SignInInput))}
+                  />
+                </div>
+                {form.formState.errors.lastName && (
+                  <p className="text-sm text-red-600">{form.formState.errors.lastName.message}</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="email"
+                type="email"
+                placeholder="jean.dupont@example.com"
+                className="pl-10"
+                {...form.register("email")}
+              />
+            </div>
+            {form.formState.errors.email && (
+              <p className="text-sm text-red-600">{form.formState.errors.email.message}</p>
+            )}
+          </div>
+
+          {isSignUp && (
+            <div className="space-y-2">
+              <Label htmlFor="phone">Téléphone</Label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="06 12 34 56 78"
+                  className="pl-10"
+                  {...form.register("phone" as keyof (SignUpInput | SignInInput))}
+                />
+              </div>
+              {form.formState.errors.phone && (
+                <p className="text-sm text-red-600">{form.formState.errors.phone.message}</p>
+              )}
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Mot de passe</Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                className="pl-10"
+                {...form.register("password")}
+              />
+            </div>
+            {form.formState.errors.password && (
+              <p className="text-sm text-red-600">{form.formState.errors.password.message}</p>
+            )}
+          </div>
+
+          {isSignUp && (
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="marketingConsent"
+                {...form.register("marketingConsent" as keyof (SignUpInput | SignInInput))}
+              />
+              <Label htmlFor="marketingConsent" className="text-sm">
+                J'accepte de recevoir des offres promotionnelles par email
+              </Label>
+            </div>
+          )}
+
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isSignUp ? "Créer mon compte" : "Se connecter"}
+          </Button>
+        </form>
+
+        <div className="text-center text-sm">
+          {isSignUp ? (
+            <p>
+              Déjà un compte ?{" "}
+              <Button variant="link" className="p-0 h-auto" onClick={() => router.push("/auth/signin")}>
+                Se connecter
+              </Button>
+            </p>
+          ) : (
+            <p>
+              Pas encore de compte ?{" "}
+              <Button variant="link" className="p-0 h-auto" onClick={() => router.push("/auth/signup")}>
+                Créer un compte
+              </Button>
+            </p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
