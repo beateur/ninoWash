@@ -40,8 +40,10 @@ export function ServicesStep({ items, onUpdate, serviceType = "classic" }: Servi
     try {
       const response = await fetch("/api/services")
       const data = await response.json()
+      console.log("[v0] Fetched services:", data) // Debug log to see what services are returned
       if (response.ok) {
         const allServices = Object.values(data.services || {}).flat() as Service[]
+        console.log("[v0] All services:", allServices) // Debug log
         setServices(allServices)
       }
     } catch (error) {
@@ -105,7 +107,7 @@ export function ServicesStep({ items, onUpdate, serviceType = "classic" }: Servi
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {serviceType !== "classic" && (
         <Alert>
           <Info className="h-4 w-4" />
@@ -131,56 +133,87 @@ export function ServicesStep({ items, onUpdate, serviceType = "classic" }: Servi
         </div>
       )}
 
-      <div className="space-y-6">
-        {/* Service Classique Section */}
-        <div>
-          <h3 className="text-lg font-semibold mb-4">Service Classique - 72h</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {services
-              .filter((service) => service.category === "Service Classique")
-              .map((service) => (
-                <ServiceCard
-                  key={service.id}
-                  service={service}
-                  quantity={getItemQuantity(service.id)}
-                  onQuantityChange={handleQuantityChange}
-                  serviceType={serviceType}
-                />
-              ))}
-          </div>
+      {/* Service Classique Section */}
+      <div>
+        <div className="mb-4">
+          <h3 className="text-xl font-semibold">Service Classique - 72h</h3>
+          <p className="text-sm text-muted-foreground mt-1">Délai standard, qualité garantie</p>
         </div>
-
-        {/* Service Express Section */}
-        <div>
-          <h3 className="text-lg font-semibold mb-4">Service Express - 24h</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {services
-              .filter((service) => service.category === "Service Express")
-              .map((service) => (
-                <ServiceCard
-                  key={service.id}
-                  service={service}
-                  quantity={getItemQuantity(service.id)}
-                  onQuantityChange={handleQuantityChange}
-                  serviceType={serviceType}
-                />
-              ))}
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {services
+            .filter((service) => {
+              console.log("[v0] Filtering service:", service.name, "category:", service.category) // Debug log
+              return service.category === "Service Classique"
+            })
+            .map((service) => (
+              <ServiceCard
+                key={service.id}
+                service={service}
+                quantity={getItemQuantity(service.id)}
+                onQuantityChange={handleQuantityChange}
+                serviceType={serviceType}
+              />
+            ))}
         </div>
-
-        {services.length === 0 && (
-          <div className="text-center py-8">
-            <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium mb-2">Aucun service disponible</h3>
-            <p className="text-muted-foreground">Veuillez contacter le support</p>
-          </div>
+        {services.filter((s) => s.category === "Service Classique").length === 0 && (
+          <div className="text-center py-4 text-muted-foreground">Aucun service classique disponible</div>
         )}
       </div>
+
+      {/* Service Express Section */}
+      <div>
+        <div className="mb-4">
+          <h3 className="text-xl font-semibold">Service Express - 24h</h3>
+          <p className="text-sm text-muted-foreground mt-1">Traitement prioritaire, livraison rapide</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {services
+            .filter((service) => service.category === "Service Express")
+            .map((service) => (
+              <ServiceCard
+                key={service.id}
+                service={service}
+                quantity={getItemQuantity(service.id)}
+                onQuantityChange={handleQuantityChange}
+                serviceType={serviceType}
+              />
+            ))}
+        </div>
+        {services.filter((s) => s.category === "Service Express").length === 0 && (
+          <div className="text-center py-4 text-muted-foreground">Aucun service express disponible</div>
+        )}
+      </div>
+
+      {services.length > 0 &&
+        services.filter((s) => s.category === "Service Classique" || s.category === "Service Express").length === 0 && (
+          <div className="border-t pt-6">
+            <h3 className="text-lg font-semibold mb-4">Tous les services disponibles</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {services.map((service) => (
+                <ServiceCard
+                  key={service.id}
+                  service={service}
+                  quantity={getItemQuantity(service.id)}
+                  onQuantityChange={handleQuantityChange}
+                  serviceType={serviceType}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+      {services.length === 0 && (
+        <div className="text-center py-8">
+          <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-medium mb-2">Aucun service disponible</h3>
+          <p className="text-muted-foreground">Veuillez contacter le support</p>
+        </div>
+      )}
 
       {/* Selected Items Summary */}
       {items.length > 0 && (
         <div className="border-t pt-6">
-          <h3 className="text-lg font-medium mb-4">Articles sélectionnés</h3>
+          <h3 className="text-lg font-semibold mb-4">Articles sélectionnés</h3>
           <div className="space-y-2">
             {items.map((item) => {
               const service = services.find((s) => s.id === item.serviceId)
