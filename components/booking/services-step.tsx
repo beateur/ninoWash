@@ -25,7 +25,7 @@ interface BookingItem {
 interface ServicesStepProps {
   items: BookingItem[]
   onUpdate: (data: { items: BookingItem[] }) => void
-  serviceType?: string // Added service type prop
+  serviceType?: string
 }
 
 export function ServicesStep({ items, onUpdate, serviceType = "classic" }: ServicesStepProps) {
@@ -40,14 +40,12 @@ export function ServicesStep({ items, onUpdate, serviceType = "classic" }: Servi
     try {
       const response = await fetch("/api/services")
       const data = await response.json()
-      console.log("[v0] Fetched services:", data) // Debug log to see what services are returned
       if (response.ok) {
         const allServices = Object.values(data.services || {}).flat() as Service[]
-        console.log("[v0] All services:", allServices) // Debug log
         setServices(allServices)
       }
     } catch (error) {
-      console.error("[v0] Error fetching services:", error)
+      console.error("Error fetching services:", error)
     } finally {
       setLoading(false)
     }
@@ -58,12 +56,10 @@ export function ServicesStep({ items, onUpdate, serviceType = "classic" }: Servi
     const existingIndex = updatedItems.findIndex((item) => item.serviceId === serviceId)
 
     if (quantity === 0) {
-      // Remove item if quantity is 0
       if (existingIndex !== -1) {
         updatedItems.splice(existingIndex, 1)
       }
     } else {
-      // Update or add item
       if (existingIndex !== -1) {
         updatedItems[existingIndex].quantity = quantity
       } else {
@@ -85,13 +81,11 @@ export function ServicesStep({ items, onUpdate, serviceType = "classic" }: Servi
 
   const getTotalPrice = () => {
     if (serviceType === "classic") {
-      // Classic service: 24.99€ for 8kg, +1€ per additional kg
-      const totalKg = getTotalItems() // Assuming 1 item = 1kg for simplicity
+      const totalKg = getTotalItems()
       const basePrice = 24.99
       const additionalKg = Math.max(0, totalKg - 8)
       return basePrice + additionalKg * 1
     } else {
-      // For subscriptions, show included in plan
       return 0
     }
   }
@@ -133,74 +127,20 @@ export function ServicesStep({ items, onUpdate, serviceType = "classic" }: Servi
         </div>
       )}
 
-      {/* Service Classique Section */}
       <div>
-        <div className="mb-4">
-          <h3 className="text-xl font-semibold">Service Classique - 72h</h3>
-          <p className="text-sm text-muted-foreground mt-1">Délai standard, qualité garantie</p>
-        </div>
+        <h3 className="text-lg font-semibold mb-4">Tous les services disponibles</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {services
-            .filter((service) => {
-              console.log("[v0] Filtering service:", service.name, "category:", service.category) // Debug log
-              return service.category === "Service Classique"
-            })
-            .map((service) => (
-              <ServiceCard
-                key={service.id}
-                service={service}
-                quantity={getItemQuantity(service.id)}
-                onQuantityChange={handleQuantityChange}
-                serviceType={serviceType}
-              />
-            ))}
+          {services.map((service) => (
+            <ServiceCard
+              key={service.id}
+              service={service}
+              quantity={getItemQuantity(service.id)}
+              onQuantityChange={handleQuantityChange}
+              serviceType={serviceType}
+            />
+          ))}
         </div>
-        {services.filter((s) => s.category === "Service Classique").length === 0 && (
-          <div className="text-center py-4 text-muted-foreground">Aucun service classique disponible</div>
-        )}
       </div>
-
-      {/* Service Express Section */}
-      <div>
-        <div className="mb-4">
-          <h3 className="text-xl font-semibold">Service Express - 24h</h3>
-          <p className="text-sm text-muted-foreground mt-1">Traitement prioritaire, livraison rapide</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {services
-            .filter((service) => service.category === "Service Express")
-            .map((service) => (
-              <ServiceCard
-                key={service.id}
-                service={service}
-                quantity={getItemQuantity(service.id)}
-                onQuantityChange={handleQuantityChange}
-                serviceType={serviceType}
-              />
-            ))}
-        </div>
-        {services.filter((s) => s.category === "Service Express").length === 0 && (
-          <div className="text-center py-4 text-muted-foreground">Aucun service express disponible</div>
-        )}
-      </div>
-
-      {services.length > 0 &&
-        services.filter((s) => s.category === "Service Classique" || s.category === "Service Express").length === 0 && (
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-semibold mb-4">Tous les services disponibles</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {services.map((service) => (
-                <ServiceCard
-                  key={service.id}
-                  service={service}
-                  quantity={getItemQuantity(service.id)}
-                  onQuantityChange={handleQuantityChange}
-                  serviceType={serviceType}
-                />
-              ))}
-            </div>
-          </div>
-        )}
 
       {services.length === 0 && (
         <div className="text-center py-8">
