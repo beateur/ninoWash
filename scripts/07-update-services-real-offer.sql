@@ -1,22 +1,13 @@
 -- Nino Wash - Real Service Offer Update
 -- This script cleans up the services table and inserts only the real services offered
 
--- First, deactivate all existing services
-UPDATE services SET is_active = false WHERE is_active = true;
+-- First, delete all test bookings to avoid foreign key constraint errors
+DELETE FROM bookings;
 
--- Delete old service categories that don't match the real business
-DELETE FROM service_categories;
+-- Now we can safely delete all old services
+DELETE FROM services;
 
--- Insert the real service categories
-INSERT INTO service_categories (id, name, description, icon, sort_order) VALUES
-    (uuid_generate_v4(), 'Service Classique', 'Traitement en 72 heures', 'clock', 1),
-    (uuid_generate_v4(), 'Service Express', 'Traitement en 24 heures', 'zap', 2)
-ON CONFLICT DO NOTHING;
-
--- Delete all old services
-DELETE FROM services WHERE code NOT IN ('classic', 'monthly_sub', 'quarterly_sub');
-
--- Insert the 4 real services
+-- Insert only the 4 real services according to the actual business offer
 INSERT INTO services (
     id, 
     code, 
@@ -26,7 +17,6 @@ INSERT INTO services (
     base_price, 
     vat_rate, 
     processing_days,
-    category,
     is_active,
     metadata
 ) VALUES
@@ -40,9 +30,8 @@ INSERT INTO services (
         24.99,
         20.00,
         3,
-        'Service Classique',
         true,
-        '{"weight_kg": 7, "includes": ["washing", "folding"], "delivery_time": "72h"}'::jsonb
+        '{\"weight_kg\": 7, \"includes\": [\"washing\", \"folding\"], \"delivery_time\": \"72h\", \"category\": \"classic\"}'::jsonb
     ),
     (
         uuid_generate_v4(),
@@ -53,9 +42,8 @@ INSERT INTO services (
         29.99,
         20.00,
         3,
-        'Service Classique',
         true,
-        '{"weight_kg": 7, "includes": ["washing", "ironing", "folding"], "delivery_time": "72h"}'::jsonb
+        '{\"weight_kg\": 7, \"includes\": [\"washing\", \"ironing\", \"folding\"], \"delivery_time\": \"72h\", \"category\": \"classic\"}'::jsonb
     ),
     
     -- Service Express - 24h
@@ -68,9 +56,8 @@ INSERT INTO services (
         34.99,
         20.00,
         1,
-        'Service Express',
         true,
-        '{"weight_kg": 7, "includes": ["washing", "folding"], "delivery_time": "24h"}'::jsonb
+        '{\"weight_kg\": 7, \"includes\": [\"washing\", \"folding\"], \"delivery_time\": \"24h\", \"category\": \"express\"}'::jsonb
     ),
     (
         uuid_generate_v4(),
@@ -81,25 +68,9 @@ INSERT INTO services (
         39.99,
         20.00,
         1,
-        'Service Express',
         true,
-        '{"weight_kg": 7, "includes": ["washing", "ironing", "folding"], "delivery_time": "24h"}'::jsonb
-    )
-ON CONFLICT (code) DO UPDATE SET
-    name = EXCLUDED.name,
-    description = EXCLUDED.description,
-    base_price = EXCLUDED.base_price,
-    processing_days = EXCLUDED.processing_days,
-    category = EXCLUDED.category,
-    is_active = EXCLUDED.is_active,
-    metadata = EXCLUDED.metadata;
+        '{\"weight_kg\": 7, \"includes\": [\"washing\", \"ironing\", \"folding\"], \"delivery_time\": \"24h\", \"category\": \"express\"}'::jsonb
+    );
 
 -- Clean up service options that are no longer relevant
 DELETE FROM service_options;
-
--- Update any existing bookings to use the new service structure
--- (This is a safety measure - adjust based on your needs)
-UPDATE bookings 
-SET status = 'pending' 
-WHERE status = 'pending' 
-AND service_id NOT IN (SELECT id FROM services WHERE is_active = true);
