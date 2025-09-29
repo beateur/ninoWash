@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createServerSupabaseClient } from "@/lib/supabase/server"
+import { createClient } from "@/lib/supabase/server"
 import { signUpSchema } from "@/lib/validations/auth"
 import { z } from "zod"
 
@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     // Validate input
     const validatedData = signUpSchema.parse(body)
 
-    const supabase = await createServerSupabaseClient()
+    const supabase = await createClient()
 
     // Create user with Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
