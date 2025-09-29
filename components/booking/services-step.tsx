@@ -80,14 +80,10 @@ export function ServicesStep({ items, onUpdate, serviceType = "classic" }: Servi
   }
 
   const getTotalPrice = () => {
-    if (serviceType === "classic") {
-      const totalKg = getTotalItems()
-      const basePrice = 24.99
-      const additionalKg = Math.max(0, totalKg - 8)
-      return basePrice + additionalKg * 1
-    } else {
-      return 0
-    }
+    return items.reduce((total, item) => {
+      const service = services.find((s) => s.id === item.serviceId)
+      return total + (service?.base_price || 0) * item.quantity
+    }, 0)
   }
 
   if (loading) {
@@ -180,7 +176,7 @@ export function ServicesStep({ items, onUpdate, serviceType = "classic" }: Servi
                 <span className="text-lg font-bold text-primary">{getTotalPrice().toFixed(2)}€</span>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Prix final calculé selon le poids réel (24,99€ pour 8kg, +1€/kg supplémentaire)
+                Prix pour 7kg de linge. Le prix final sera ajusté selon le poids réel.
               </p>
             </div>
           )}
