@@ -5,11 +5,33 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Menu, X, Home, Calendar, User, CreditCard, Package } from "lucide-react"
+import {
+  Menu,
+  X,
+  Home,
+  Calendar,
+  User,
+  CreditCard,
+  Package,
+  Wrench,
+  DollarSign,
+  HelpCircle,
+  Info,
+  Phone,
+} from "lucide-react"
 import { useAuth } from "@/lib/hooks/use-auth"
 import { cn } from "@/lib/utils"
 
-const navigation = [
+const publicNavigation = [
+  { name: "Accueil", href: "/", icon: Home },
+  { name: "Services", href: "/services", icon: Wrench },
+  { name: "Tarifs", href: "/tarifs", icon: DollarSign },
+  { name: "Comment ça marche", href: "/comment-ca-marche", icon: HelpCircle },
+  { name: "À propos", href: "/a-propos", icon: Info },
+  { name: "Contact", href: "/contact", icon: Phone },
+]
+
+const authenticatedNavigation = [
   { name: "Accueil", href: "/", icon: Home },
   { name: "Réserver", href: "/reservation", icon: Calendar },
   { name: "Mes réservations", href: "/bookings", icon: Package },
@@ -21,6 +43,8 @@ export function MobileNav() {
   const [isOpen, setIsOpen] = useState(false)
   const { user } = useAuth()
   const pathname = usePathname()
+
+  const navigation = user ? authenticatedNavigation : publicNavigation
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
