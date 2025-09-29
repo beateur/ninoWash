@@ -195,8 +195,13 @@ export function SummaryStep({ bookingData, serviceType = "classic" }: SummarySte
         throw new Error(result.error || "Une erreur est survenue")
       }
 
-      // Redirect to success page or booking details
-      router.push(`/bookings/${result.booking.id}?success=true`)
+      if (user) {
+        // Authenticated users go to booking details
+        router.push(`/bookings/${result.booking.id}?success=true`)
+      } else {
+        // Guest users go to homepage with success message
+        router.push(`/?booking_success=true&booking_number=${result.booking.booking_number}`)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Une erreur est survenue")
     } finally {
