@@ -87,16 +87,10 @@ export function SummaryStep({ bookingData, serviceType = "classic" }: SummarySte
   }
 
   const getTotalPrice = () => {
-    if (serviceType === "classic") {
-      // Classic service: 24.99€ for 8kg, +1€ per additional kg
-      const totalKg = getTotalItems() // Assuming 1 item = 1kg for simplicity
-      const basePrice = 24.99
-      const additionalKg = Math.max(0, totalKg - 8)
-      return basePrice + additionalKg * 1
-    } else {
-      // For subscriptions, show 0 as it's included
-      return 0
-    }
+    return bookingData.items.reduce((total, item) => {
+      const service = getServiceDetails(item.serviceId)
+      return total + (service?.base_price || 0) * item.quantity
+    }, 0)
   }
 
   const getTotalItems = () => {
@@ -123,13 +117,34 @@ export function SummaryStep({ bookingData, serviceType = "classic" }: SummarySte
   }
 
   const getServiceTypeInfo = () => {
+    // Check if any selected service is express (has metadata with delivery_type: "express")
+    const hasExpressService = bookingData.items.some((item) => {
+      const service = getServiceDetails(item.serviceId)
+      return service?.metadata?.delivery_type === "express"
+    })
+
+    if (hasExpressService) {
+      return { name: "Service Express", price: "Livraison en 24h", included: false }
+    }
+
+    // Check for classic service
+    const hasClassicService = bookingData.items.some((item) => {
+      const service = getServiceDetails(item.serviceId)
+      return service?.metadata?.delivery_type === "classic"
+    })
+
+    if (hasClassicService) {
+      return { name: "Service Classique", price: "Livraison en 72h", included: false }
+    }
+
+    // Default for subscriptions
     switch (serviceType) {
       case "monthly":
         return { name: "Abonnement Mensuel", price: "99,99€/mois", included: true }
       case "quarterly":
         return { name: "Abonnement Trimestriel", price: "249,99€/trimestre", included: true }
       default:
-        return { name: "Service Classique", price: "24,99€ pour 8kg", included: false }
+        return { name: "Service Classique", price: "Livraison en 72h", included: false }
     }
   }
 
@@ -356,9 +371,7 @@ export function SummaryStep({ bookingData, serviceType = "classic" }: SummarySte
           </div>
 
           {serviceType === "classic" && (
-            <p className="text-xs text-muted-foreground mt-2">
-              Prix final calculé selon le poids réel (24,99€ pour 8kg, +1€/kg supplémentaire)
-            </p>
+            <p className="text-xs text-muted-foreground mt-2">Prix pour 7kg de linge par service sélectionné</p>
           )}
         </CardContent>
       </Card>
