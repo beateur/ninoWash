@@ -51,11 +51,6 @@ export function Footer() {
                   Abonnement trimestriel
                 </Link>
               </li>
-              <li>
-                <Link href="/tarifs" className="hover:text-background transition-colors">
-                  Grille tarifaire
-                </Link>
-              </li>
             </ul>
           </div>
 
