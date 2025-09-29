@@ -31,7 +31,7 @@ INSERT INTO services (
         20.00,
         3,
         true,
-        '{\"weight_kg\": 7, \"includes\": [\"washing\", \"folding\"], \"delivery_time\": \"72h\", \"category\": \"classic\"}'::jsonb
+        '{"weight_kg": 7, "includes": ["washing", "folding"], "delivery_time": "72h", "category": "classic"}'::jsonb
     ),
     (
         uuid_generate_v4(),
@@ -43,7 +43,7 @@ INSERT INTO services (
         20.00,
         3,
         true,
-        '{\"weight_kg\": 7, \"includes\": [\"washing\", \"ironing\", \"folding\"], \"delivery_time\": \"72h\", \"category\": \"classic\"}'::jsonb
+        '{"weight_kg": 7, "includes": ["washing", "ironing", "folding"], "delivery_time": "72h", "category": "classic"}'::jsonb
     ),
     
     -- Service Express - 24h
@@ -57,7 +57,7 @@ INSERT INTO services (
         20.00,
         1,
         true,
-        '{\"weight_kg\": 7, \"includes\": [\"washing\", \"folding\"], \"delivery_time\": \"24h\", \"category\": \"express\"}'::jsonb
+        '{"weight_kg": 7, "includes": ["washing", "folding"], "delivery_time": "24h", "category": "express"}'::jsonb
     ),
     (
         uuid_generate_v4(),
@@ -69,7 +69,7 @@ INSERT INTO services (
         20.00,
         1,
         true,
-        '{\"weight_kg\": 7, \"includes\": [\"washing\", \"ironing\", \"folding\"], \"delivery_time\": \"24h\", \"category\": \"express\"}'::jsonb
+        '{"weight_kg": 7, "includes": ["washing", "ironing", "folding"], "delivery_time": "24h", "category": "express"}'::jsonb
     );
 
 -- Clean up service options that are no longer relevant
