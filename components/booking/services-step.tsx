@@ -2,11 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { ServiceCard } from "@/components/ui/service-card"
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Search, Package, Info } from "lucide-react"
+import { Package, Info } from "lucide-react"
 
 interface Service {
   id: string
@@ -31,10 +29,8 @@ interface ServicesStepProps {
 }
 
 export function ServicesStep({ items, onUpdate, serviceType = "classic" }: ServicesStepProps) {
-  const [services, setServices] = useState<Record<string, Service[]>>({})
+  const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [activeCategory, setActiveCategory] = useState("all")
 
   useEffect(() => {
     fetchServices()
@@ -45,7 +41,8 @@ export function ServicesStep({ items, onUpdate, serviceType = "classic" }: Servi
       const response = await fetch("/api/services")
       const data = await response.json()
       if (response.ok) {
-        setServices(data.services || {})
+        const allServices = Object.values(data.services || {}).flat() as Service[]
+        setServices(allServices)
       }
     } catch (error) {
       console.error("[v0] Error fetching services:", error)
@@ -97,22 +94,6 @@ export function ServicesStep({ items, onUpdate, serviceType = "classic" }: Servi
     }
   }
 
-  const filteredServices = Object.entries(services).reduce(
-    (acc, [category, categoryServices]) => {
-      const filtered = categoryServices.filter((service) =>
-        service.name.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
-      if (filtered.length > 0) {
-        acc[category] = filtered
-      }
-      return acc
-    },
-    {} as Record<string, Service[]>,
-  )
-
-  const categories = Object.keys(services)
-  const allServices = Object.values(filteredServices).flat()
-
   if (loading) {
     return (
       <div className="space-y-4">
@@ -136,87 +117,65 @@ export function ServicesStep({ items, onUpdate, serviceType = "classic" }: Servi
         </Alert>
       )}
 
-      {/* Search and Summary */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Rechercher un service..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
+      {/* Summary */}
+      {items.length > 0 && (
+        <div className="flex items-center justify-end space-x-4">
+          <Badge variant="secondary" className="flex items-center space-x-1">
+            <Package className="h-3 w-3" />
+            <span>{getTotalItems()} articles</span>
+          </Badge>
+          {serviceType === "classic" && (
+            <div className="text-lg font-semibold text-primary">{getTotalPrice().toFixed(2)}€</div>
+          )}
+          {serviceType !== "classic" && <div className="text-sm text-muted-foreground">Inclus dans l'abonnement</div>}
         </div>
+      )}
 
-        {items.length > 0 && (
-          <div className="flex items-center space-x-4">
-            <Badge variant="secondary" className="flex items-center space-x-1">
-              <Package className="h-3 w-3" />
-              <span>{getTotalItems()} articles</span>
-            </Badge>
-            {serviceType === "classic" && (
-              <div className="text-lg font-semibold text-primary">{getTotalPrice().toFixed(2)}€</div>
-            )}
-            {serviceType !== "classic" && <div className="text-sm text-muted-foreground">Inclus dans l'abonnement</div>}
-          </div>
-        )}
-      </div>
-
-      {/* Services */}
-      <Tabs value={activeCategory} onValueChange={setActiveCategory}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="all">Tous</TabsTrigger>
-          <TabsTrigger value="cleaning">Nettoyage</TabsTrigger>
-          <TabsTrigger value="ironing">Repassage</TabsTrigger>
-          <TabsTrigger value="special">Spécialisé</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="all" className="space-y-4 mt-6">
-          {allServices.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {allServices.map((service) => (
+      <div className="space-y-6">
+        {/* Service Classique Section */}
+        <div>
+          <h3 className="text-lg font-semibold mb-4">Service Classique - 72h</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {services
+              .filter((service) => service.category === "Service Classique")
+              .map((service) => (
                 <ServiceCard
                   key={service.id}
                   service={service}
                   quantity={getItemQuantity(service.id)}
                   onQuantityChange={handleQuantityChange}
-                  serviceType={serviceType} // Pass service type to card
+                  serviceType={serviceType}
                 />
               ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">Aucun service trouvé</h3>
-              <p className="text-muted-foreground">Essayez de modifier votre recherche</p>
-            </div>
-          )}
-        </TabsContent>
+          </div>
+        </div>
 
-        {categories.map((category) => (
-          <TabsContent key={category} value={category} className="space-y-4 mt-6">
-            {filteredServices[category] && filteredServices[category].length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredServices[category].map((service) => (
-                  <ServiceCard
-                    key={service.id}
-                    service={service}
-                    quantity={getItemQuantity(service.id)}
-                    onQuantityChange={handleQuantityChange}
-                    serviceType={serviceType} // Pass service type to card
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">Aucun service dans cette catégorie</h3>
-                <p className="text-muted-foreground">Essayez une autre catégorie</p>
-              </div>
-            )}
-          </TabsContent>
-        ))}
-      </Tabs>
+        {/* Service Express Section */}
+        <div>
+          <h3 className="text-lg font-semibold mb-4">Service Express - 24h</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {services
+              .filter((service) => service.category === "Service Express")
+              .map((service) => (
+                <ServiceCard
+                  key={service.id}
+                  service={service}
+                  quantity={getItemQuantity(service.id)}
+                  onQuantityChange={handleQuantityChange}
+                  serviceType={serviceType}
+                />
+              ))}
+          </div>
+        </div>
+
+        {services.length === 0 && (
+          <div className="text-center py-8">
+            <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-medium mb-2">Aucun service disponible</h3>
+            <p className="text-muted-foreground">Veuillez contacter le support</p>
+          </div>
+        )}
+      </div>
 
       {/* Selected Items Summary */}
       {items.length > 0 && (
@@ -224,9 +183,7 @@ export function ServicesStep({ items, onUpdate, serviceType = "classic" }: Servi
           <h3 className="text-lg font-medium mb-4">Articles sélectionnés</h3>
           <div className="space-y-2">
             {items.map((item) => {
-              const service = Object.values(services)
-                .flat()
-                .find((s) => s.id === item.serviceId)
+              const service = services.find((s) => s.id === item.serviceId)
               if (!service) return null
 
               return (
