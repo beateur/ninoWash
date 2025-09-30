@@ -85,7 +85,7 @@ export default async function DashboardPage() {
       subscription_plans (
         name,
         billing_interval,
-        price
+        price_amount
       )
     `)
     .eq("user_id", user.id)
@@ -171,7 +171,7 @@ export default async function DashboardPage() {
                   <div>
                     <h3 className="font-semibold text-lg">Abonnement actif</h3>
                     <p className="text-sm text-muted-foreground">
-                      Plan {subscription.subscription_plans?.name} - {subscription.subscription_plans?.price}€/
+                      Plan {subscription.subscription_plans?.name} - {subscription.subscription_plans?.price_amount}€/
                       {subscription.subscription_plans?.billing_interval === "monthly"
                         ? "mois"
                         : subscription.subscription_plans?.billing_interval === "yearly"
