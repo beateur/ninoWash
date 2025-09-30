@@ -20,16 +20,23 @@ export async function GET(request: NextRequest) {
       },
     )
 
-    // Get all active subscription plans
+    // This allows users to see plans before signing up
     const { data: plans, error } = await supabase
       .from("subscription_plans")
       .select("*")
       .eq("is_active", true)
+      .eq("is_public", true)
+      .order("sort_order", { ascending: true })
       .order("price_amount", { ascending: true })
 
     if (error) {
       console.error("[v0] Error fetching subscription plans:", error)
       return NextResponse.json({ error: "Erreur lors de la récupération des plans" }, { status: 500 })
+    }
+
+    if (!Array.isArray(plans)) {
+      console.error("[v0] Invalid plans data type:", typeof plans)
+      return NextResponse.json({ plans: [] })
     }
 
     return NextResponse.json({ plans })
