@@ -28,6 +28,8 @@ END $$;
 -- Step 2: Create new subscription plans
 -- =====================================================
 
+-- Removed ON CONFLICT clause that was causing errors due to missing UNIQUE constraint
+
 -- Monthly Subscription Plan (99.99 EUR)
 INSERT INTO subscription_plans (
   name,
@@ -67,20 +69,7 @@ INSERT INTO subscription_plans (
     'dedicated_support', true,
     'loyalty_bonus', '1 collecte gratuite après 10 commandes'
   )
-)
-ON CONFLICT (name) DO UPDATE SET
-  description = EXCLUDED.description,
-  plan_type = EXCLUDED.plan_type,
-  billing_interval = EXCLUDED.billing_interval,
-  price_amount = EXCLUDED.price_amount,
-  currency = EXCLUDED.currency,
-  trial_days = EXCLUDED.trial_days,
-  features = EXCLUDED.features,
-  is_active = EXCLUDED.is_active,
-  is_public = EXCLUDED.is_public,
-  sort_order = EXCLUDED.sort_order,
-  metadata = EXCLUDED.metadata,
-  updated_at = NOW();
+);
 
 -- Quarterly Subscription Plan (249.99 EUR)
 INSERT INTO subscription_plans (
@@ -123,20 +112,7 @@ INSERT INTO subscription_plans (
     'loyalty_bonus', '1 collecte gratuite après 10 commandes',
     'free_storage_days', 7
   )
-)
-ON CONFLICT (name) DO UPDATE SET
-  description = EXCLUDED.description,
-  plan_type = EXCLUDED.plan_type,
-  billing_interval = EXCLUDED.billing_interval,
-  price_amount = EXCLUDED.price_amount,
-  currency = EXCLUDED.currency,
-  trial_days = EXCLUDED.trial_days,
-  features = EXCLUDED.features,
-  is_active = EXCLUDED.is_active,
-  is_public = EXCLUDED.is_public,
-  sort_order = EXCLUDED.sort_order,
-  metadata = EXCLUDED.metadata,
-  updated_at = NOW();
+);
 
 -- =====================================================
 -- Step 3: Verify the new plans
