@@ -21,15 +21,17 @@ export const createPaymentSchema = z.object({
 })
 
 export const subscriptionPlanSchema = z.object({
-  code: z.string().min(1, "Code requis"),
   name: z.string().min(1, "Nom requis"),
-  description: z.string().optional(),
-  type: z.enum(["monthly", "quarterly", "annual"]),
-  price: z.number().positive("Prix invalide"),
-  discountPercentage: z.number().min(0).max(100).default(0),
-  includedServices: z.number().min(0).default(0),
-  extraServicePrice: z.number().positive().optional(),
-  features: z.array(z.string()).default([]),
+  description: z.string().optional().nullable(),
+  plan_type: z.string().min(1, "Type de plan requis"), // Changed from 'type' to 'plan_type'
+  price_amount: z.number().positive("Prix invalide"), // Changed from 'price' to 'price_amount'
+  billing_interval: z.string().min(1, "Intervalle de facturation requis"),
+  currency: z.string().length(3).default("EUR"),
+  trial_days: z.number().min(0).optional().nullable(),
+  features: z.array(z.string()).optional().nullable(),
+  is_active: z.boolean().default(true),
+  is_public: z.boolean().default(true),
+  sort_order: z.number().optional().nullable(),
 })
 
 export const createSubscriptionSchema = z.object({

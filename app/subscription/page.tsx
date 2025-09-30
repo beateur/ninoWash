@@ -12,24 +12,25 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 interface SubscriptionPlan {
   id: string
-  code: string
   name: string
-  description: string
-  type: "monthly" | "quarterly" | "annual"
-  price: number
-  discount_percentage: number
-  included_services: number
-  extra_service_price: number
-  features: string[]
+  description: string | null
+  plan_type: string // Changed from 'type' to 'plan_type'
+  price_amount: number // Changed from 'price' to 'price_amount'
+  billing_interval: string
+  currency: string
+  trial_days: number | null
+  features: string[] | null
+  is_active: boolean
+  is_public: boolean
+  sort_order: number | null
 }
 
 interface UserSubscription {
   id: string
   status: string
-  start_date: string
-  end_date: string
-  services_used: number
-  services_remaining: number
+  current_period_start: string
+  current_period_end: string
+  quantity: number | null
   subscription_plans: SubscriptionPlan
 }
 
@@ -92,8 +93,8 @@ export default function SubscriptionPage() {
     router.push(`/subscription/checkout?plan=${planId}`)
   }
 
-  const getPlanIcon = (type: string) => {
-    switch (type) {
+  const getPlanIcon = (planType: string) => {
+    switch (planType) {
       case "monthly":
         return <Star className="h-6 w-6" />
       case "quarterly":
@@ -105,10 +106,10 @@ export default function SubscriptionPage() {
     }
   }
 
-  const getTypeLabel = (type: string) => {
-    if (!type) return "Mensuel"
+  const getTypeLabel = (planType: string | null | undefined) => {
+    if (!planType) return "Mensuel"
 
-    switch (type) {
+    switch (planType) {
       case "monthly":
         return "Mensuel"
       case "quarterly":
@@ -116,7 +117,22 @@ export default function SubscriptionPage() {
       case "annual":
         return "Annuel"
       default:
-        return type
+        return planType
+    }
+  }
+
+  const getBillingLabel = (interval: string | null | undefined) => {
+    if (!interval) return "mois"
+
+    switch (interval) {
+      case "monthly":
+        return "mois"
+      case "quarterly":
+        return "trimestre"
+      case "annual":
+        return "an"
+      default:
+        return interval
     }
   }
 
@@ -166,7 +182,7 @@ export default function SubscriptionPage() {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="flex items-center gap-2">
-                  {getPlanIcon(currentSubscription.subscription_plans.type)}
+                  {getPlanIcon(currentSubscription.subscription_plans.plan_type)}
                   Votre abonnement actuel
                 </CardTitle>
                 <CardDescription>{currentSubscription.subscription_plans.name}</CardDescription>
@@ -177,18 +193,16 @@ export default function SubscriptionPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-primary">{currentSubscription.services_remaining}</div>
-                <div className="text-sm text-muted-foreground">Services restants</div>
+                <div className="text-2xl font-bold">{currentSubscription.quantity || 1}</div>
+                <div className="text-sm text-muted-foreground">Quantité</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold">{currentSubscription.services_used}</div>
-                <div className="text-sm text-muted-foreground">Services utilisés</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold">{new Date(currentSubscription.end_date).toLocaleDateString()}</div>
-                <div className="text-sm text-muted-foreground">Date d'expiration</div>
+                <div className="text-2xl font-bold">
+                  {new Date(currentSubscription.current_period_end).toLocaleDateString()}
+                </div>
+                <div className="text-sm text-muted-foreground">Prochaine facturation</div>
               </div>
             </div>
           </CardContent>
@@ -199,28 +213,29 @@ export default function SubscriptionPage() {
         {plans.map((plan) => (
           <Card
             key={plan.id}
-            className={`relative ${plan.type === "quarterly" ? "border-primary shadow-lg scale-105" : ""}`}
+            className={`relative ${plan.plan_type === "quarterly" ? "border-primary shadow-lg scale-105" : ""}`}
           >
-            {plan.type === "quarterly" && (
+            {plan.plan_type === "quarterly" && (
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                 <Badge className="bg-primary text-primary-foreground">Le plus populaire</Badge>
               </div>
             )}
 
             <CardHeader className="text-center">
-              <div className="flex justify-center mb-4">{getPlanIcon(plan.type)}</div>
+              <div className="flex justify-center mb-4">{getPlanIcon(plan.plan_type)}</div>
               <CardTitle className="text-2xl">{plan.name}</CardTitle>
               <CardDescription>{plan.description}</CardDescription>
               <div className="mt-4">
                 <div className="text-4xl font-bold">
-                  {plan.price}€
+                  {plan.price_amount}
+                  {plan.currency === "EUR" ? "€" : plan.currency}
                   <span className="text-lg font-normal text-muted-foreground">
-                    /{plan.type ? getTypeLabel(plan.type).toLowerCase() : "mensuel"}
+                    /{getBillingLabel(plan.billing_interval)}
                   </span>
                 </div>
-                {plan.discount_percentage > 0 && (
+                {plan.trial_days && plan.trial_days > 0 && (
                   <Badge variant="secondary" className="mt-2">
-                    -{plan.discount_percentage}%
+                    {plan.trial_days} jours d'essai
                   </Badge>
                 )}
               </div>
@@ -228,26 +243,17 @@ export default function SubscriptionPage() {
 
             <CardContent>
               <div className="space-y-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">{plan.included_services}</div>
-                  <div className="text-sm text-muted-foreground">Services inclus</div>
-                </div>
-
                 <Separator />
 
-                <ul className="space-y-2">
-                  {plan.features.map((feature, index) => (
-                    <li key={index} className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-primary" />
-                      <span className="text-sm">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                {plan.extra_service_price && (
-                  <div className="text-center text-sm text-muted-foreground">
-                    Services supplémentaires : {plan.extra_service_price}€/service
-                  </div>
+                {plan.features && plan.features.length > 0 && (
+                  <ul className="space-y-2">
+                    {plan.features.map((feature, index) => (
+                      <li key={index} className="flex items-center gap-2">
+                        <Check className="h-4 w-4 text-primary" />
+                        <span className="text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
                 )}
               </div>
             </CardContent>
@@ -255,7 +261,7 @@ export default function SubscriptionPage() {
             <CardFooter>
               <Button
                 className="w-full"
-                variant={plan.type === "quarterly" ? "default" : "outline"}
+                variant={plan.plan_type === "quarterly" ? "default" : "outline"}
                 onClick={() => handleSubscribe(plan.id)}
                 disabled={currentSubscription?.subscription_plans.id === plan.id}
               >
