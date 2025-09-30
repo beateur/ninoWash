@@ -32,17 +32,45 @@ export default async function DashboardPage() {
     redirect("/auth/signin")
   }
 
-  // Get user's recent bookings
   const { data: bookings } = await supabase
     .from("bookings")
-    .select(`
-      *,
-      pickup_address:user_addresses!pickup_address_id(street_address, city),
-      delivery_address:user_addresses!delivery_address_id(street_address, city)
-    `)
+    .select("*")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(5)
+
+  let addressMap: Record<string, any> = {}
+  if (bookings && bookings.length > 0) {
+    const addressIds = [
+      ...new Set([
+        ...bookings.map((b) => b.pickup_address_id).filter(Boolean),
+        ...bookings.map((b) => b.delivery_address_id).filter(Boolean),
+      ]),
+    ]
+
+    if (addressIds.length > 0) {
+      const { data: addresses } = await supabase
+        .from("user_addresses")
+        .select("id, street_address, city")
+        .in("id", addressIds)
+
+      if (addresses) {
+        addressMap = addresses.reduce(
+          (acc, addr) => {
+            acc[addr.id] = addr
+            return acc
+          },
+          {} as Record<string, any>,
+        )
+      }
+    }
+  }
+
+  const enrichedBookings = bookings?.map((booking) => ({
+    ...booking,
+    pickup_address: booking.pickup_address_id ? addressMap[booking.pickup_address_id] : null,
+    delivery_address: booking.delivery_address_id ? addressMap[booking.delivery_address_id] : null,
+  }))
 
   // Get user's addresses count
   const { count: addressCount } = await supabase
@@ -89,7 +117,7 @@ export default async function DashboardPage() {
               <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{bookings?.length || 0}</div>
+              <div className="text-2xl font-bold">{enrichedBookings?.length || 0}</div>
             </CardContent>
           </Card>
 
@@ -110,7 +138,7 @@ export default async function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {bookings?.find((b) => b.status === "confirmed") ? "Demain" : "Aucune"}
+                {enrichedBookings?.find((b) => b.status === "confirmed") ? "Demain" : "Aucune"}
               </div>
             </CardContent>
           </Card>
@@ -154,9 +182,9 @@ export default async function DashboardPage() {
             <CardDescription>Vos dernières demandes de pressing</CardDescription>
           </CardHeader>
           <CardContent>
-            {bookings && bookings.length > 0 ? (
+            {enrichedBookings && enrichedBookings.length > 0 ? (
               <div className="space-y-4">
-                {bookings.map((booking) => (
+                {enrichedBookings.map((booking) => (
                   <div key={booking.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="space-y-1">
                       <div className="flex items-center space-x-2">
