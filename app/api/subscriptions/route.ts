@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
 
     // Get user's subscriptions with plan details
     const { data: subscriptions, error } = await supabase
-      .from("user_subscriptions")
+      .from("subscriptions")
       .select(`
         *,
         subscription_plans (
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
           name,
           description,
           type,
-          price,
+          price_amount,
           included_services,
           extra_service_price,
           features
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
 
     // Create subscription
     const { data: subscription, error } = await supabase
-      .from("user_subscriptions")
+      .from("subscriptions")
       .insert({
         user_id: user.id,
         plan_id: validatedData.planId,
@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
       subscription_id: subscription.id,
       payment_method_id: validatedData.paymentMethodId,
       type: "subscription",
-      amount: plan.price,
+      amount: plan.price_amount,
       currency: "EUR",
       status: "succeeded", // In real app, this would be handled by payment processor
       description: `Abonnement ${plan.name}`,

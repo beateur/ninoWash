@@ -38,7 +38,10 @@ export async function GET(request: NextRequest) {
       { count: newUsers },
     ] = await Promise.all([
       supabase.from("bookings").select("*", { count: "exact", head: true }),
-      supabase.from("user_subscriptions").select("*", { count: "exact", head: true }).eq("status", "active"),
+      supabase
+        .from("subscriptions")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "active"), // Changed table name from user_subscriptions to subscriptions
       supabase.from("bookings").select("*", { count: "exact", head: true }).eq("status", "pending"),
       supabase.from("bookings").select("*", { count: "exact", head: true }).eq("status", "completed"),
       supabase

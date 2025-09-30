@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -39,19 +39,9 @@ export default function SubscriptionPage() {
   const [currentSubscription, setCurrentSubscription] = useState<UserSubscription | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push("/auth/signin")
-      return
-    }
-
-    if (user) {
-      fetchData()
-    }
-  }, [user, loading, router])
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
+      console.log("[v0] Fetching subscription data...")
       // Fetch subscription plans
       const plansResponse = await fetch("/api/subscriptions/plans")
       const plansData = await plansResponse.json()
@@ -72,7 +62,18 @@ export default function SubscriptionPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, []) // Empty dependency array since fetchData doesn't depend on any props or state
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/auth/signin")
+      return
+    }
+
+    if (user) {
+      fetchData()
+    }
+  }, [user, loading, router, fetchData])
 
   const handleSubscribe = async (planId: string) => {
     // In a real app, this would integrate with a payment processor
