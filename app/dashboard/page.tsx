@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Package, MapPin, Clock, Plus } from "lucide-react"
+import { Calendar, Package, MapPin, Clock, Plus, Crown } from "lucide-react"
 import Link from "next/link"
 import { cookies } from "next/headers"
 
@@ -78,6 +78,13 @@ export default async function DashboardPage() {
     .select("*", { count: "exact", head: true })
     .eq("user_id", user.id)
 
+  const { data: subscription } = await supabase
+    .from("subscriptions")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("status", "active")
+    .single()
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "pending":
@@ -143,6 +150,32 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
         </div>
+
+        {!subscription && (
+          <Card className="mb-8 border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Crown className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Passez au plan supérieur</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Profitez de tarifs réduits et d'avantages exclusifs avec nos abonnements
+                    </p>
+                  </div>
+                </div>
+                <Button asChild size="lg" className="shrink-0">
+                  <Link href="/subscription">
+                    <Crown className="h-4 w-4 mr-2" />
+                    S'abonner
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
