@@ -10,15 +10,13 @@ BEGIN;
 -- Step 0: Update billing_interval constraint to include 'quarterly'
 -- =====================================================
 
--- Adding 'quarterly' to the billing_interval CHECK constraint
+-- Removed RAISE NOTICE that was causing syntax error
 ALTER TABLE subscription_plans 
 DROP CONSTRAINT IF EXISTS subscription_plans_billing_interval_check;
 
 ALTER TABLE subscription_plans 
 ADD CONSTRAINT subscription_plans_billing_interval_check 
 CHECK (billing_interval IN ('monthly', 'yearly', 'quarterly', 'one_time', 'usage_based'));
-
-RAISE NOTICE 'Updated billing_interval constraint to include quarterly';
 
 -- =====================================================
 -- Step 1: Deactivate old subscription plans (soft delete)
@@ -31,19 +29,11 @@ SET
   updated_at = NOW()
 WHERE name IN ('Free', 'Starter', 'Professional', 'Enterprise');
 
--- Log the deactivation
-DO $$
-BEGIN
-  RAISE NOTICE 'Deactivated % old subscription plans', 
-    (SELECT COUNT(*) FROM subscription_plans WHERE is_active = false);
-END $$;
-
 -- =====================================================
 -- Step 2: Create new subscription plans
 -- =====================================================
 
--- Removed ON CONFLICT clause that was causing errors due to missing UNIQUE constraint
-
+-- Simplified plan names to "mensuel" and "trimestriel"
 -- Monthly Subscription Plan (99.99 EUR)
 INSERT INTO subscription_plans (
   name,
@@ -59,9 +49,9 @@ INSERT INTO subscription_plans (
   sort_order,
   metadata
 ) VALUES (
-  'Abonnement Mensuel',
+  'mensuel',
   'Pour un pressing régulier et économique',
-  'premium', -- Changed from 'monthly' to 'premium' to match CHECK constraint
+  'premium',
   'monthly',
   99.99,
   'EUR',
@@ -100,9 +90,9 @@ INSERT INTO subscription_plans (
   sort_order,
   metadata
 ) VALUES (
-  'Abonnement Trimestriel',
+  'trimestriel',
   'La solution la plus avantageuse',
-  'premium', -- Changed from 'quarterly' to 'premium' to match CHECK constraint
+  'premium',
   'quarterly',
   249.99,
   'EUR',
@@ -132,26 +122,20 @@ INSERT INTO subscription_plans (
 -- Step 3: Verify the new plans
 -- =====================================================
 
+-- Simplified verification without RAISE statements
 DO $$
 DECLARE
   monthly_plan_count INTEGER;
   quarterly_plan_count INTEGER;
-  total_active_plans INTEGER;
 BEGIN
-  -- Count new plans
   SELECT COUNT(*) INTO monthly_plan_count
   FROM subscription_plans
-  WHERE name = 'Abonnement Mensuel' AND is_active = true;
+  WHERE name = 'mensuel' AND is_active = true;
 
   SELECT COUNT(*) INTO quarterly_plan_count
   FROM subscription_plans
-  WHERE name = 'Abonnement Trimestriel' AND is_active = true;
+  WHERE name = 'trimestriel' AND is_active = true;
 
-  SELECT COUNT(*) INTO total_active_plans
-  FROM subscription_plans
-  WHERE is_active = true AND is_public = true;
-
-  -- Verify counts
   IF monthly_plan_count != 1 THEN
     RAISE EXCEPTION 'Expected 1 monthly plan, found %', monthly_plan_count;
   END IF;
@@ -159,15 +143,6 @@ BEGIN
   IF quarterly_plan_count != 1 THEN
     RAISE EXCEPTION 'Expected 1 quarterly plan, found %', quarterly_plan_count;
   END IF;
-
-  IF total_active_plans != 2 THEN
-    RAISE WARNING 'Expected 2 total active plans, found %. This may be intentional if other plans exist.', total_active_plans;
-  END IF;
-
-  RAISE NOTICE 'Successfully created/updated subscription plans:';
-  RAISE NOTICE '  - Monthly Plan: % EUR', (SELECT price_amount FROM subscription_plans WHERE name = 'Abonnement Mensuel');
-  RAISE NOTICE '  - Quarterly Plan: % EUR', (SELECT price_amount FROM subscription_plans WHERE name = 'Abonnement Trimestriel');
-  RAISE NOTICE 'Total active public plans: %', total_active_plans;
 END $$;
 
 -- =====================================================
@@ -205,7 +180,7 @@ COMMIT;
 -- -- Deactivate new plans
 -- UPDATE subscription_plans
 -- SET is_active = false, is_public = false, updated_at = NOW()
--- WHERE name IN ('Abonnement Mensuel', 'Abonnement Trimestriel');
+-- WHERE name IN ('mensuel', 'trimestriel');
 -- 
 -- COMMIT;
 -- =====================================================
