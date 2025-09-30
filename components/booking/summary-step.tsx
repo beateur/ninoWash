@@ -211,8 +211,7 @@ export function SummaryStep({ bookingData, serviceType = "classic" }: SummarySte
       }
 
       if (user) {
-        // Authenticated users go to booking details
-        router.push(`/bookings/${result.booking.id}?success=true`)
+        router.push(`/dashboard?success=true`)
       } else {
         // Guest users go to homepage with success message
         router.push(`/?booking_success=true&booking_number=${result.booking.booking_number}`)
