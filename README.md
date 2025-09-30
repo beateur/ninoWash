@@ -14,16 +14,23 @@ Nino Wash est une plateforme moderne de pressing à domicile qui permet aux util
 - 💳 **Paiements sécurisés** avec Stripe
 - 📱 **Interface mobile optimisée** (PWA)
 - 💰 **Système d'abonnements** avec tarifs dégressifs (Classique, Mensuel, Trimestriel)
+- 🔄 **Synchronisation automatique** des abonnements Stripe
 - 📊 **Suivi des commandes** en temps réel
-- 📄 **Pages informatives** (Comment ça marche, Services, Tarifs)
+- 📄 **Pages informatives** (Comment ça marche, Services, Tarifs, À propos)
 
 ### Pour les Administrateurs
-- 📈 **Dashboard analytique** avec KPIs
+- 📈 **Dashboard analytique** avec KPIs et statistiques intégrées
 - 🗓️ **Gestion des réservations** et planification
 - 👥 **Gestion des clients** et historique
 - 💼 **Gestion des services** et tarification
 - 📊 **Statistiques détaillées** (revenus, clients, réservations)
+- 🔍 **Visualiseur de base de données** pour le debug
 - 📱 **Interface mobile responsive**
+
+### Outils de Monitoring
+- 🏥 **Health Checks API** pour surveiller l'état de l'application
+- 🔄 **Synchronisation manuelle** des abonnements Stripe
+- 📊 **Database Viewer** pour inspecter les données
 
 ## 🛠️ Stack Technique
 
@@ -41,7 +48,7 @@ Nino Wash est une plateforme moderne de pressing à domicile qui permet aux util
 - **Supabase 2.58.0** (PostgreSQL + Auth + Real-time)
 - **@supabase/ssr 0.7.0** pour l'authentification SSR
 - **API Routes Next.js** pour la logique métier
-- **Stripe 18.5.0** pour les paiements
+- **Stripe 18.5.0** pour les paiements et abonnements
 
 ### UI Components
 - **Radix UI** (Accordion, Alert Dialog, Avatar, Checkbox, Dialog, Dropdown Menu, Label, Popover, Progress, Radio Group, Scroll Area, Select, Separator, Slider, Switch, Tabs, Toast, Tooltip, etc.)
@@ -103,6 +110,9 @@ NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL=http://localhost:3000/auth/callback
 \`\`\`
 
 4. **Initialiser la base de données**
+
+Exécutez les scripts SQL dans l'ordre depuis le dossier `scripts/` via l'interface Supabase SQL Editor ou utilisez les scripts Node.js :
+
 \`\`\`bash
 npm run db:migrate
 npm run db:seed
@@ -184,23 +194,39 @@ Le déploiement automatique est configuré via GitHub Actions :
 nino-wash/
 ├── app/                    # Pages et API routes (App Router)
 │   ├── (main)/            # Routes principales (page d'accueil)
+│   ├── a-propos/          # Page À propos
 │   ├── admin/             # Interface administrateur
 │   │   ├── bookings/      # Gestion des réservations
-│   │   └── stats/         # Statistiques et analytics
+│   │   └── page.tsx       # Dashboard avec statistiques intégrées
 │   ├── api/               # API endpoints
+│   │   ├── addresses/     # Gestion des adresses utilisateur
 │   │   ├── auth/          # Endpoints d'authentification
 │   │   ├── bookings/      # Gestion des réservations
+│   │   ├── health/        # Health checks (app, db, auth, stripe)
 │   │   ├── payments/      # Intégration Stripe
-│   │   └── services/      # Gestion des services
+│   │   │   └── methods/   # Méthodes de paiement
+│   │   ├── services/      # Gestion des services
+│   │   ├── subscriptions/ # Gestion des abonnements
+│   │   │   └── sync/      # Synchronisation Stripe
+│   │   └── webhooks/      # Webhooks Stripe
 │   ├── auth/              # Pages d'authentification
-│   │   ├── signin/        # Connexion
+│   │   ├── callback/      # Callback OAuth
+│   │   ├── login/         # Connexion
 │   │   └── signup/        # Inscription
 │   ├── bookings/          # Historique des réservations
 │   ├── comment-ca-marche/ # Page "Comment ça marche"
 │   ├── dashboard/         # Dashboard utilisateur
+│   ├── database-viewer/   # Visualiseur de base de données (debug)
 │   ├── profile/           # Profil utilisateur
 │   ├── reservation/       # Processus de réservation
 │   ├── services/          # Page des services
+│   ├── subscription/      # Gestion des abonnements
+│   │   ├── checkout/      # Processus de paiement
+│   │   ├── error/         # Page d'erreur
+│   │   ├── manage/        # Gestion de l'abonnement
+│   │   └── success/       # Confirmation de paiement
+│   ├── actions/           # Server Actions
+│   │   └── stripe.ts      # Actions Stripe
 │   └── layout.tsx         # Layout principal
 ├── components/            # Composants React réutilisables
 │   ├── admin/             # Composants admin (header, stats cards)
@@ -209,50 +235,72 @@ nino-wash/
 │   ├── layout/            # Composants de layout (header, footer, nav)
 │   ├── mobile/            # Composants mobiles (bottom nav)
 │   ├── sections/          # Sections de pages (hero, services, testimonials)
+│   ├── subscription/      # Composants d'abonnement
+│   │   ├── plan-card.tsx  # Carte de plan d'abonnement
+│   │   ├── subscription-status.tsx # Statut de l'abonnement
+│   │   └── manage-subscription.tsx # Gestion de l'abonnement
 │   └── ui/                # Composants UI de base (shadcn/ui)
+├── hooks/                 # Hooks React personnalisés
+│   ├── use-auth.ts        # Hook d'authentification
+│   ├── use-mobile.tsx     # Hook de détection mobile
+│   └── use-toast.ts       # Hook de notifications
 ├── lib/                   # Utilitaires et configurations
-│   ├── hooks/             # Hooks React personnalisés (use-auth, use-toast)
 │   ├── supabase/          # Configuration Supabase (client, middleware)
 │   ├── validations/       # Schémas Zod (auth, booking, payment)
 │   └── utils.ts           # Fonctions utilitaires
 ├── scripts/               # Scripts de base de données et maintenance
+│   ├── 001_core_user_management.sql
+│   ├── 001_allow_guest_bookings.sql
+│   ├── 002_subscription_billing.sql
+│   ├── 003_team_organization.sql
+│   ├── 004_analytics_tracking.sql
+│   ├── 005_audit_security.sql
+│   ├── 006_update_subscription_plans.sql
+│   ├── 009_fix_booking_items_service_reference.sql
 │   ├── 01-create-database-schema.sql
 │   ├── 02-seed-initial-data.sql
 │   ├── 03-add-payments-subscriptions.sql
+│   ├── 03-create-database-schema-fixed.sql
+│   ├── 04-seed-initial-data-fixed.sql
 │   ├── 04-seed-subscription-plans.sql
 │   ├── 05-smart-database-setup.sql
 │   ├── 06-seed-corrected-data.sql
 │   ├── 07-update-pricing-data.sql
+│   ├── 07-update-services-real-offer.sql
 │   ├── 08-fix-pricing-and-tables.sql
-│   ├── 001_allow_guest_bookings.sql
-│   ├── 009_fix_booking_items_service_reference.sql
-│   ├── migrate.js         # Script de migration
-│   ├── seed.js            # Script de seed
+│   ├── 10-consolidation-and-cleanup.sql
+│   ├── 11-rapport-complet-database.sql
 │   ├── backup-database.js # Sauvegarde de la BDD
-│   └── restore-database.js # Restauration de la BDD
+│   ├── deploy.js          # Script de déploiement
+│   ├── health-check.js    # Vérification de santé
+│   ├── migrate.js         # Script de migration
+│   ├── performance-audit.js # Audit de performance
+│   ├── restore-database.js # Restauration de la BDD
+│   ├── security-scan.js   # Scan de sécurité
+│   └── seed.js            # Script de seed
 ├── __tests__/             # Tests unitaires
 ├── docs/                  # Documentation
+│   ├── CONTRIBUTING.md    # Guide de contribution
+│   ├── SUBSCRIPTION_RESOLUTION_LOG.md # Log de résolution des abonnements
 │   ├── api-integration-guide.md
+│   ├── architecture.md
+│   ├── booking-system-workflow.md
 │   ├── database-schema-documentation.md
 │   ├── routes-and-interfaces.md
-│   └── architecture.md
+│   └── services-documentation.md
 └── public/                # Assets statiques
 \`\`\`
 
 ## 🔧 Configuration Avancée
 
 ### Base de Données
-Les migrations et seeds sont dans le dossier `scripts/` :
-- `01-create-database-schema.sql` : Schéma initial (users, bookings, services, addresses)
-- `02-seed-initial-data.sql` : Données de test
-- `03-add-payments-subscriptions.sql` : Tables paiements et abonnements
-- `04-seed-subscription-plans.sql` : Plans d'abonnement (Classique, Mensuel, Trimestriel)
-- `05-smart-database-setup.sql` : Configuration intelligente de la base
-- `06-seed-corrected-data.sql` : Données corrigées
-- `07-update-pricing-data.sql` : Mise à jour des tarifs
-- `08-fix-pricing-and-tables.sql` : Corrections des tables de tarification
-- `001_allow_guest_bookings.sql` : Support des réservations invités
-- `009_fix_booking_items_service_reference.sql` : Corrections des références de services
+Les migrations et seeds sont dans le dossier `scripts/`. Les scripts principaux incluent :
+- Scripts de schéma de base de données (001-011)
+- Scripts de migration et seed (migrate.js, seed.js)
+- Scripts de maintenance (backup-database.js, restore-database.js)
+- Scripts d'audit (performance-audit.js, security-scan.js)
+
+Pour plus de détails sur l'exécution des scripts, consultez `SCRIPTS_EXECUTION_GUIDE.md`.
 
 ### Authentification
 L'authentification utilise Supabase Auth avec :
@@ -263,21 +311,36 @@ L'authentification utilise Supabase Auth avec :
 - Sessions sécurisées avec JWT
 - Middleware SSR pour la protection des routes
 
-### Paiements
+### Paiements et Abonnements
 Intégration Stripe complète :
-- Paiements one-time
+- Paiements one-time pour les réservations
 - Abonnements récurrents (Classique, Mensuel, Trimestriel)
-- Webhooks pour synchronisation
+- Webhooks pour synchronisation automatique
+- Synchronisation manuelle via `/api/subscriptions/sync`
 - Gestion des échecs de paiement
+- Interface de gestion d'abonnement pour les utilisateurs
+
+### Health Checks
+L'application expose plusieurs endpoints de monitoring :
+- `/api/health` - Santé globale de l'application
+- `/api/health/db` - État de la base de données
+- `/api/health/auth` - État de l'authentification
+- `/api/health/stripe` - État de l'intégration Stripe
+
+### Database Viewer
+Un outil de visualisation de base de données est disponible à `/database-viewer` pour inspecter les données en développement.
 
 ### Routes et Navigation
 Pour une documentation complète des routes, interfaces et conditions de routage, consultez :
 - `docs/routes-and-interfaces.md` : Liste exhaustive des routes publiques et protégées
 - `docs/architecture.md` : Architecture de l'application
+- `docs/booking-system-workflow.md` : Workflow du système de réservation
+- `docs/services-documentation.md` : Documentation des services
 
 ## 📊 Monitoring et Analytics
 
 - **Vercel Analytics** pour les performances
+- **Health Checks API** pour surveiller l'état de l'application
 - **Lighthouse** pour les audits de performance
 - **Supabase Dashboard** pour les métriques base de données
 - **Bundle Analyzer** pour l'optimisation du bundle
@@ -293,6 +356,13 @@ Pour contribuer au projet, veuillez consulter le guide de contribution :
 4. Push vers la branche (`git push origin feature/nouvelle-fonctionnalite`)
 5. Ouvrir une Pull Request
 
+## 📚 Documentation Supplémentaire
+
+- `DEPLOYMENT.md` : Guide de déploiement détaillé
+- `SCHEMA_FIX_README.md` : Documentation sur les corrections de schéma
+- `SCRIPTS_EXECUTION_GUIDE.md` : Guide d'exécution des scripts
+- `docs/SUBSCRIPTION_RESOLUTION_LOG.md` : Log de résolution des problèmes d'abonnement
+
 ## 📄 Licence
 
 Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
@@ -301,8 +371,7 @@ Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 
 Pour toute question ou problème :
 - 📧 Email : support@ninowash.fr
-- 💬 Discord : [Lien vers le serveur]
-- 📖 Documentation : [Lien vers la doc complète]
+- 📖 Documentation : Consultez le dossier `docs/` pour la documentation complète
 
 ---
 
