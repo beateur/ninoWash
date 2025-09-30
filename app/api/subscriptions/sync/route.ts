@@ -105,14 +105,6 @@ export async function POST() {
         .maybeSingle()
 
       let planId = subscription.metadata?.planId
-      let totalAmount = 0
-
-      if (subscription.items.data.length > 0) {
-        const item = subscription.items.data[0]
-        const unitAmount = item.price.unit_amount || 0
-        const quantity = item.quantity || 1
-        totalAmount = (unitAmount * quantity) / 100 // Convert from cents to dollars
-      }
 
       if (!planId && subscription.items.data.length > 0) {
         // Try to find plan by price amount
@@ -145,19 +137,33 @@ export async function POST() {
         continue
       }
 
+      const { data: planDetails } = await supabaseAdmin
+        .from("subscription_plans")
+        .select("price_amount")
+        .eq("id", planId)
+        .single()
+
+      if (!planDetails) {
+        console.log("[v0] Skipping subscription - plan not found:", planId)
+        continue
+      }
+
       const subscriptionData = {
         user_id: user.id,
         plan_id: planId,
         stripe_subscription_id: subscription.id,
         stripe_customer_id: subscription.customer as string,
         status: subscription.status,
-        total_amount: totalAmount,
         current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
         current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
         cancel_at_period_end: subscription.cancel_at_period_end,
         canceled_at: subscription.canceled_at ? new Date(subscription.canceled_at * 1000).toISOString() : null,
         trial_start: subscription.trial_start ? new Date(subscription.trial_start * 1000).toISOString() : null,
         trial_end: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null,
+        total_amount: planDetails.price_amount,
+        quantity: 1,
+        discount_amount: 0,
+        tax_amount: 0,
       }
 
       if (existing) {
