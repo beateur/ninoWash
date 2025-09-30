@@ -78,12 +78,21 @@ export default async function DashboardPage() {
     .select("*", { count: "exact", head: true })
     .eq("user_id", user.id)
 
-  const { data: subscription } = await supabase
+  const { data: subscription, error: subscriptionError } = await supabase
     .from("subscriptions")
-    .select("*")
+    .select(`
+      *,
+      subscription_plans (
+        name,
+        billing_interval,
+        price
+      )
+    `)
     .eq("user_id", user.id)
-    .eq("status", "active")
+    .in("status", ["active", "trialing"])
     .maybeSingle()
+
+  console.log("[v0] Subscription query result:", { subscription, subscriptionError })
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -150,6 +159,38 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
         </div>
+
+        {subscription && (
+          <Card className="mb-8 border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Crown className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Abonnement actif</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Plan {subscription.subscription_plans?.name} - {subscription.subscription_plans?.price}€/
+                      {subscription.subscription_plans?.billing_interval === "monthly"
+                        ? "mois"
+                        : subscription.subscription_plans?.billing_interval === "yearly"
+                          ? "an"
+                          : "trimestre"}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {subscription.status === "trialing" ? "Période d'essai" : "Actif"} jusqu'au{" "}
+                      {new Date(subscription.current_period_end).toLocaleDateString("fr-FR")}
+                    </p>
+                  </div>
+                </div>
+                <Button asChild variant="outline" size="lg" className="shrink-0 bg-transparent">
+                  <Link href="/subscription/manage">Gérer mon abonnement</Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {!subscription && (
           <Card className="mb-8 border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
