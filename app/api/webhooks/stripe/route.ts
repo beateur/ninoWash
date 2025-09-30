@@ -9,6 +9,8 @@ export async function POST(req: Request) {
   const body = await req.text()
   const signature = (await headers()).get("stripe-signature")
 
+  console.log("[v0] Webhook received, signature present:", !!signature)
+
   if (!signature) {
     return NextResponse.json({ error: "No signature provided" }, { status: 400 })
   }
@@ -17,6 +19,7 @@ export async function POST(req: Request) {
 
   try {
     event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!)
+    console.log("[v0] Webhook event type:", event.type)
   } catch (err) {
     console.error("[v0] Webhook signature verification failed:", err)
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
@@ -40,18 +43,35 @@ export async function POST(req: Request) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session
 
+        console.log("[v0] Checkout session completed:", {
+          sessionId: session.id,
+          customerId: session.customer,
+          subscriptionId: session.subscription,
+          metadata: session.metadata,
+        })
+
         // Get user ID from metadata
         const userId = session.metadata?.userId
         const planId = session.metadata?.planId
 
         if (!userId || !planId) {
-          console.error("[v0] Missing userId or planId in session metadata")
+          console.error("[v0] Missing userId or planId in session metadata:", {
+            userId,
+            planId,
+            metadata: session.metadata,
+          })
           break
         }
 
         // Get subscription details
         const subscriptionId = session.subscription as string
         const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+
+        console.log("[v0] Retrieved subscription from Stripe:", {
+          id: subscription.id,
+          status: subscription.status,
+          customerId: subscription.customer,
+        })
 
         // Create subscription record in database
         const { error: subscriptionError } = await supabase.from("subscriptions").insert({
@@ -63,6 +83,8 @@ export async function POST(req: Request) {
           current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
           current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
           cancel_at_period_end: subscription.cancel_at_period_end,
+          trial_start: subscription.trial_start ? new Date(subscription.trial_start * 1000).toISOString() : null,
+          trial_end: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null,
         })
 
         if (subscriptionError) {

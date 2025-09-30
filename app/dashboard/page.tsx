@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Calendar, Package, MapPin, Clock, Plus, Crown } from "lucide-react"
 import Link from "next/link"
 import { cookies } from "next/headers"
+import { SyncSubscriptionButton } from "@/components/subscription/sync-subscription-button"
 
 export default async function DashboardPage() {
   const cookieStore = await cookies()
@@ -205,14 +206,20 @@ export default async function DashboardPage() {
                     <p className="text-sm text-muted-foreground">
                       Profitez de tarifs réduits et d'avantages exclusifs avec nos abonnements
                     </p>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Vous venez de payer ? Cliquez sur synchroniser pour récupérer votre abonnement
+                    </p>
                   </div>
                 </div>
-                <Button asChild size="lg" className="shrink-0">
-                  <Link href="/subscription">
-                    <Crown className="h-4 w-4 mr-2" />
-                    S'abonner
-                  </Link>
-                </Button>
+                <div className="flex flex-col gap-2">
+                  <Button asChild size="lg" className="shrink-0">
+                    <Link href="/subscription">
+                      <Crown className="h-4 w-4 mr-2" />
+                      S'abonner
+                    </Link>
+                  </Button>
+                  <SyncSubscriptionButton />
+                </div>
               </div>
             </CardContent>
           </Card>
