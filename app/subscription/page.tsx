@@ -117,13 +117,13 @@ export default async function SubscriptionPage() {
   const getPlanIcon = (planType: string) => {
     switch (planType) {
       case "monthly":
-        return <Calendar className="h-6 w-6" />
+        return <Calendar className="h-5 w-5" />
       case "quarterly":
-        return <Zap className="h-6 w-6" />
+        return <Zap className="h-5 w-5" />
       case "annual":
-        return <Crown className="h-6 w-6" />
+        return <Crown className="h-5 w-5" />
       default:
-        return <Calendar className="h-6 w-6" />
+        return <Calendar className="h-5 w-5" />
     }
   }
 
@@ -238,14 +238,14 @@ export default async function SubscriptionPage() {
                 )}
 
                 <CardHeader className="text-center">
-                  <div className="flex justify-center mb-4">{getPlanIcon(plan.plan_type)}</div>
-                  <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                  <div className="flex justify-center mb-3">{getPlanIcon(plan.plan_type)}</div>
+                  <CardTitle className="text-xl">{plan.name}</CardTitle>
                   <CardDescription>{plan.description}</CardDescription>
-                  <div className="mt-4">
-                    <div className="text-4xl font-bold">
+                  <div className="mt-3">
+                    <div className="text-3xl font-bold">
                       {plan.price_amount}
                       {plan.currency === "EUR" ? "€" : plan.currency}
-                      <span className="text-lg font-normal text-muted-foreground">
+                      <span className="text-base font-normal text-muted-foreground">
                         /{getBillingLabel(plan.billing_interval)}
                       </span>
                     </div>
