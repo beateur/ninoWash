@@ -105,6 +105,14 @@ export async function POST() {
         .maybeSingle()
 
       let planId = subscription.metadata?.planId
+      let totalAmount = 0
+
+      if (subscription.items.data.length > 0) {
+        const item = subscription.items.data[0]
+        const unitAmount = item.price.unit_amount || 0
+        const quantity = item.quantity || 1
+        totalAmount = (unitAmount * quantity) / 100 // Convert from cents to dollars
+      }
 
       if (!planId && subscription.items.data.length > 0) {
         // Try to find plan by price amount
@@ -143,6 +151,7 @@ export async function POST() {
         stripe_subscription_id: subscription.id,
         stripe_customer_id: subscription.customer as string,
         status: subscription.status,
+        total_amount: totalAmount,
         current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
         current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
         cancel_at_period_end: subscription.cancel_at_period_end,
