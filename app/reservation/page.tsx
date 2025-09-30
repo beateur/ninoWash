@@ -20,6 +20,10 @@ const STEPS = [
   { id: 4, title: "Récapitulatif", description: "Confirmation" },
 ]
 
+export function BookingFlow() {
+  return <ReservationPage />
+}
+
 export default function ReservationPage() {
   const [currentStep, setCurrentStep] = useState(1)
   const [bookingData, setBookingData] = useState({
