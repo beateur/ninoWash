@@ -83,7 +83,7 @@ export default async function DashboardPage() {
     .select("*")
     .eq("user_id", user.id)
     .eq("status", "active")
-    .single()
+    .maybeSingle()
 
   const getStatusBadge = (status: string) => {
     switch (status) {
