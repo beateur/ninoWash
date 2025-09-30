@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Check, Crown, Star, Zap } from "lucide-react"
+import { Check, Crown, Star, Zap, AlertCircle } from "lucide-react"
 import { useAuth } from "@/lib/hooks/use-auth"
 import { useRouter } from "next/navigation"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 interface SubscriptionPlan {
   id: string
@@ -38,31 +39,42 @@ export default function SubscriptionPage() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([])
   const [currentSubscription, setCurrentSubscription] = useState<UserSubscription | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const fetchData = useCallback(async () => {
     try {
-      console.log("[v0] Fetching subscription data...")
-      // Fetch subscription plans
+      setError(null)
       const plansResponse = await fetch("/api/subscriptions/plans")
+      if (!plansResponse.ok) {
+        if (plansResponse.status === 429) {
+          throw new Error("Trop de requêtes. Veuillez réessayer dans quelques instants.")
+        }
+        throw new Error(`Erreur lors du chargement des plans: ${plansResponse.status}`)
+      }
       const plansData = await plansResponse.json()
 
-      // Fetch current subscription
       const subscriptionsResponse = await fetch("/api/subscriptions")
+      if (!subscriptionsResponse.ok) {
+        if (subscriptionsResponse.status === 429) {
+          throw new Error("Trop de requêtes. Veuillez réessayer dans quelques instants.")
+        }
+        throw new Error(`Erreur lors du chargement des abonnements: ${subscriptionsResponse.status}`)
+      }
       const subscriptionsData = await subscriptionsResponse.json()
 
       setPlans(plansData.plans || [])
 
-      // Find active subscription
       const activeSubscription = subscriptionsData.subscriptions?.find(
         (sub: UserSubscription) => sub.status === "active",
       )
       setCurrentSubscription(activeSubscription || null)
     } catch (error) {
       console.error("[v0] Error fetching subscription data:", error)
+      setError(error instanceof Error ? error.message : "Une erreur est survenue")
     } finally {
       setIsLoading(false)
     }
-  }, []) // Empty dependency array since fetchData doesn't depend on any props or state
+  }, [])
 
   useEffect(() => {
     if (!loading && !user) {
@@ -70,15 +82,13 @@ export default function SubscriptionPage() {
       return
     }
 
-    if (user) {
+    if (user && isLoading) {
       fetchData()
     }
-  }, [user, loading, router, fetchData])
+  }, [user, loading, router, fetchData, isLoading])
 
   const handleSubscribe = async (planId: string) => {
-    // In a real app, this would integrate with a payment processor
     console.log("[v0] Subscribe to plan:", planId)
-    // For now, just redirect to a payment setup page
     router.push(`/subscription/checkout?plan=${planId}`)
   }
 
@@ -96,6 +106,8 @@ export default function SubscriptionPage() {
   }
 
   const getTypeLabel = (type: string) => {
+    if (!type) return "Mensuel"
+
     switch (type) {
       case "monthly":
         return "Mensuel"
@@ -116,6 +128,29 @@ export default function SubscriptionPage() {
     )
   }
 
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Erreur</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+        <div className="mt-4 text-center">
+          <Button
+            onClick={() => {
+              setIsLoading(true)
+              setError(null)
+              fetchData()
+            }}
+          >
+            Réessayer
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="text-center mb-12">
@@ -125,7 +160,6 @@ export default function SubscriptionPage() {
         </p>
       </div>
 
-      {/* Current Subscription */}
       {currentSubscription && (
         <Card className="mb-8 border-primary">
           <CardHeader>
@@ -161,7 +195,6 @@ export default function SubscriptionPage() {
         </Card>
       )}
 
-      {/* Subscription Plans */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {plans.map((plan) => (
           <Card
@@ -182,7 +215,7 @@ export default function SubscriptionPage() {
                 <div className="text-4xl font-bold">
                   {plan.price}€
                   <span className="text-lg font-normal text-muted-foreground">
-                    /{getTypeLabel(plan.type).toLowerCase()}
+                    /{plan.type ? getTypeLabel(plan.type).toLowerCase() : "mensuel"}
                   </span>
                 </div>
                 {plan.discount_percentage > 0 && (
@@ -233,7 +266,6 @@ export default function SubscriptionPage() {
         ))}
       </div>
 
-      {/* Benefits Section */}
       <div className="mt-16 text-center">
         <h2 className="text-3xl font-bold mb-8">Pourquoi choisir un abonnement ?</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
