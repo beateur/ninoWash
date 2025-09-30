@@ -47,7 +47,7 @@ INSERT INTO subscription_plans (
 ) VALUES (
   'Abonnement Mensuel',
   'Pour un pressing régulier et économique',
-  'monthly',
+  'premium', -- Changed from 'monthly' to 'premium' to match CHECK constraint
   'monthly',
   99.99,
   'EUR',
@@ -88,7 +88,7 @@ INSERT INTO subscription_plans (
 ) VALUES (
   'Abonnement Trimestriel',
   'La solution la plus avantageuse',
-  'quarterly',
+  'premium', -- Changed from 'quarterly' to 'premium' to match CHECK constraint
   'quarterly',
   249.99,
   'EUR',
