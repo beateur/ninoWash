@@ -7,6 +7,20 @@
 BEGIN;
 
 -- =====================================================
+-- Step 0: Update billing_interval constraint to include 'quarterly'
+-- =====================================================
+
+-- Adding 'quarterly' to the billing_interval CHECK constraint
+ALTER TABLE subscription_plans 
+DROP CONSTRAINT IF EXISTS subscription_plans_billing_interval_check;
+
+ALTER TABLE subscription_plans 
+ADD CONSTRAINT subscription_plans_billing_interval_check 
+CHECK (billing_interval IN ('monthly', 'yearly', 'quarterly', 'one_time', 'usage_based'));
+
+RAISE NOTICE 'Updated billing_interval constraint to include quarterly';
+
+-- =====================================================
 -- Step 1: Deactivate old subscription plans (soft delete)
 -- =====================================================
 
