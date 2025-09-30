@@ -4,7 +4,7 @@ import { cookies } from "next/headers"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Check, Crown, Star, Zap, AlertCircle } from "lucide-react"
+import { Check, Crown, Calendar, Zap, AlertCircle, Sparkles } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { SubscribePlanButton } from "@/components/subscription/subscribe-plan-button"
 
@@ -117,13 +117,13 @@ export default async function SubscriptionPage() {
   const getPlanIcon = (planType: string) => {
     switch (planType) {
       case "monthly":
-        return <Star className="h-6 w-6" />
+        return <Calendar className="h-6 w-6" />
       case "quarterly":
         return <Zap className="h-6 w-6" />
       case "annual":
         return <Crown className="h-6 w-6" />
       default:
-        return <Star className="h-6 w-6" />
+        return <Calendar className="h-6 w-6" />
     }
   }
 
@@ -187,7 +187,7 @@ export default async function SubscriptionPage() {
                   </CardTitle>
                   <CardDescription>{currentSubscription.subscription_plans.name}</CardDescription>
                 </div>
-                <Badge variant="secondary" className="bg-primary/10 text-primary">
+                <Badge variant="secondary" className="bg-primary text-primary">
                   {currentSubscription.status === "active" ? "Actif" : currentSubscription.status}
                 </Badge>
               </div>
@@ -231,7 +231,7 @@ export default async function SubscriptionPage() {
                 {isPopular && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                     <Badge className="bg-primary text-primary-foreground">
-                      <Star className="w-3 h-3 mr-1" />
+                      <Sparkles className="w-3 h-3 mr-1" />
                       Le plus populaire
                     </Badge>
                   </div>
@@ -293,7 +293,7 @@ export default async function SubscriptionPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <div className="space-y-4">
               <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                <Star className="h-6 w-6 text-primary" />
+                <Check className="h-6 w-6 text-primary" />
               </div>
               <h3 className="text-xl font-semibold">Économies garanties</h3>
               <p className="text-muted-foreground">
