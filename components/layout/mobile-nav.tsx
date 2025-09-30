@@ -5,7 +5,8 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Menu, X, Home, Calendar, User, CreditCard, Package, Wrench, HelpCircle, Info, Phone } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Menu, X, Home, Calendar, User, Package, Wrench, HelpCircle, Info, Phone, Crown } from "lucide-react"
 import { useAuth } from "@/lib/hooks/use-auth"
 import { cn } from "@/lib/utils"
 
@@ -21,7 +22,7 @@ const authenticatedNavigation = [
   { name: "Accueil", href: "/", icon: Home },
   { name: "Réserver", href: "/reservation", icon: Calendar },
   { name: "Mes réservations", href: "/bookings", icon: Package },
-  { name: "Abonnement", href: "/subscription", icon: CreditCard },
+  { name: "Abonnement", href: "/subscription", icon: Crown, highlight: true },
   { name: "Profil", href: "/profile", icon: User },
 ]
 
@@ -53,20 +54,28 @@ export function MobileNav() {
         <nav className="space-y-2">
           {navigation.map((item) => {
             const isActive = pathname === item.href
+            const isHighlighted = "highlight" in item && item.highlight
             return (
               <Link
                 key={item.name}
                 href={item.href}
                 onClick={() => setIsOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors relative",
                   isActive
                     ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted",
+                    : isHighlighted
+                      ? "text-primary hover:bg-primary/10 font-semibold"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted",
                 )}
               >
                 <item.icon className="h-4 w-4" />
                 {item.name}
+                {isHighlighted && !isActive && (
+                  <Badge variant="secondary" className="ml-auto bg-primary/10 text-primary text-xs">
+                    Upgrade
+                  </Badge>
+                )}
               </Link>
             )
           })}
