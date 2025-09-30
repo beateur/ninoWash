@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
       .from("subscription_plans")
       .select("*")
       .eq("is_active", true)
-      .order("price", { ascending: true })
+      .order("price_amount", { ascending: true })
 
     if (error) {
       console.error("[v0] Error fetching subscription plans:", error)
