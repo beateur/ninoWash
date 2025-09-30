@@ -36,21 +36,23 @@ export async function GET(request: NextRequest) {
       .select(`
         *,
         subscription_plans (
-          code,
+          id,
           name,
           description,
-          type,
+          plan_type,
           price_amount,
-          included_services,
-          extra_service_price,
-          features
+          billing_interval,
+          currency,
+          features,
+          trial_days,
+          is_active
         )
       `)
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
 
     if (error) {
-      console.error("[v0] Error fetching subscriptions:", error)
+      console.error("[v0] Error fetching subscriptions:", error.message)
       return NextResponse.json({ error: "Erreur lors de la récupération des abonnements" }, { status: 500 })
     }
 
@@ -107,7 +109,7 @@ export async function POST(request: NextRequest) {
     const startDate = new Date()
     const endDate = new Date()
 
-    switch (plan.type) {
+    switch (plan.billing_interval) {
       case "monthly":
         endDate.setMonth(endDate.getMonth() + 1)
         break
@@ -128,7 +130,7 @@ export async function POST(request: NextRequest) {
         start_date: startDate.toISOString().split("T")[0],
         end_date: endDate.toISOString().split("T")[0],
         auto_renew: validatedData.autoRenew,
-        services_remaining: plan.included_services,
+        services_remaining: plan.features,
         payment_method_id: validatedData.paymentMethodId,
       })
       .select()
@@ -146,7 +148,7 @@ export async function POST(request: NextRequest) {
       payment_method_id: validatedData.paymentMethodId,
       type: "subscription",
       amount: plan.price_amount,
-      currency: "EUR",
+      currency: plan.currency,
       status: "succeeded", // In real app, this would be handled by payment processor
       description: `Abonnement ${plan.name}`,
       processed_at: new Date().toISOString(),
