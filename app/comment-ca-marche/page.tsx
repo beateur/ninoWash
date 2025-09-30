@@ -1,4 +1,4 @@
-import { HowItWorks } from "@/components/sections/how-it-works"
+import { HowItWorksSection } from "@/components/sections/how-it-works-section"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
@@ -19,8 +19,7 @@ export default function CommentCaMarchePage() {
         </div>
       </section>
 
-      {/* How It Works Component */}
-      <HowItWorks />
+      <HowItWorksSection />
 
       {/* CTA Section */}
       <section className="py-16 bg-primary/5">
