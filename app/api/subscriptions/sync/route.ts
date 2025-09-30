@@ -143,10 +143,14 @@ export async function POST() {
         .eq("id", planId)
         .single()
 
+      console.log("[v0] Plan details retrieved:", planDetails)
+
       if (!planDetails) {
         console.log("[v0] Skipping subscription - plan not found:", planId)
         continue
       }
+
+      console.log("[v0] Price amount from plan:", planDetails.price_amount)
 
       const subscriptionData = {
         user_id: user.id,
@@ -165,6 +169,8 @@ export async function POST() {
         discount_amount: 0,
         tax_amount: 0,
       }
+
+      console.log("[v0] Subscription data to insert:", JSON.stringify(subscriptionData, null, 2))
 
       if (existing) {
         // Update existing subscription
