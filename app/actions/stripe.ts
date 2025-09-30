@@ -91,7 +91,13 @@ export async function createCheckoutSession(planId: string) {
               plan.billing_interval !== "one_time"
                 ? {
                     interval:
-                      plan.billing_interval === "quarterly" ? "month" : (plan.billing_interval as "month" | "year"),
+                      plan.billing_interval === "quarterly"
+                        ? "month"
+                        : plan.billing_interval === "monthly"
+                          ? "month"
+                          : plan.billing_interval === "yearly"
+                            ? "year"
+                            : "month", // fallback
                     interval_count: plan.billing_interval === "quarterly" ? 3 : 1,
                   }
                 : undefined,
