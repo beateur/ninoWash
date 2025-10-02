@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Calendar, Package, MapPin, Clock, Plus, Crown } from "lucide-react"
 import Link from "next/link"
 import { SyncSubscriptionButton } from "@/components/subscription/sync-subscription-button"
+import { LogoutButton } from "@/components/auth/logout-button"
 
 export default async function DashboardPage() {
   const { user, supabase } = await requireAuth()
@@ -104,11 +105,14 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted">
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-balance">Bonjour {user.user_metadata?.first_name || ""}</h1>
-          <p className="text-muted-foreground mt-2">
-            Gérez vos réservations et votre profil depuis votre tableau de bord
-          </p>
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-balance">Bonjour {user.user_metadata?.first_name || ""}</h1>
+            <p className="text-muted-foreground mt-2">
+              Gérez vos réservations et votre profil depuis votre tableau de bord
+            </p>
+          </div>
+          <LogoutButton />
         </div>
 
         {/* Quick Stats */}
