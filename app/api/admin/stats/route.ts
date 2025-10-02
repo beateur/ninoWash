@@ -1,8 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
+import { withAdminGuard } from "@/lib/middleware/admin-guard"
 
-export async function GET(request: NextRequest) {
+export const GET = withAdminGuard(async (request: NextRequest) => {
   try {
     const cookieStore = await cookies()
     const supabase = createServerClient(
@@ -20,15 +21,6 @@ export async function GET(request: NextRequest) {
       },
     )
 
-    // Get current user and verify admin role
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-    if (authError || !user || user.user_metadata?.role !== "admin") {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
-    }
-
     // Get dashboard statistics
     const [
       { count: totalBookings },
@@ -38,10 +30,7 @@ export async function GET(request: NextRequest) {
       { count: newUsers },
     ] = await Promise.all([
       supabase.from("bookings").select("*", { count: "exact", head: true }),
-      supabase
-        .from("subscriptions")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "active"), // Changed table name from user_subscriptions to subscriptions
+      supabase.from("subscriptions").select("*", { count: "exact", head: true }).eq("status", "active"),
       supabase.from("bookings").select("*", { count: "exact", head: true }).eq("status", "pending"),
       supabase.from("bookings").select("*", { count: "exact", head: true }).eq("status", "completed"),
       supabase
@@ -73,4 +62,4 @@ export async function GET(request: NextRequest) {
     console.error("[v0] Admin stats API error:", error)
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
   }
-}
+})

@@ -1,5 +1,5 @@
+import { requireAuth } from "@/lib/guards/auth-guards"
 import { createServerClient } from "@supabase/ssr"
-import { redirect } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -8,6 +8,8 @@ import Link from "next/link"
 import { cookies } from "next/headers"
 
 export default async function BookingsPage() {
+  const user = await requireAuth()
+
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -23,14 +25,6 @@ export default async function BookingsPage() {
       },
     },
   )
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect("/auth/signin")
-  }
 
   const { data: bookings } = await supabase
     .from("bookings")

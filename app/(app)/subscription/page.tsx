@@ -1,5 +1,4 @@
 import { createServerClient } from "@supabase/ssr"
-import { redirect } from "next/navigation"
 import { cookies } from "next/headers"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -7,6 +6,7 @@ import { Separator } from "@/components/ui/separator"
 import { Check, Crown, Calendar, Zap, AlertCircle, Sparkles } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { SubscribePlanButton } from "@/components/subscription/subscribe-plan-button"
+import { requireAuth } from "@/lib/guards/auth-guards"
 
 interface SubscriptionPlan {
   id: string
@@ -33,6 +33,8 @@ interface UserSubscription {
 }
 
 export default async function SubscriptionPage() {
+  const user = await requireAuth()
+
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -48,15 +50,6 @@ export default async function SubscriptionPage() {
       },
     },
   )
-
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
-
-  if (authError || !user) {
-    redirect("/auth/signin?redirect=/subscription")
-  }
 
   let plans: SubscriptionPlan[] = []
   let currentSubscription: UserSubscription | null = null

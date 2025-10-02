@@ -1,38 +1,14 @@
-"use client"
-
 import type React from "react"
-
-import { useEffect } from "react"
-import { useAuth } from "@/lib/hooks/use-auth"
-import { useRouter } from "next/navigation"
+import { requireAdmin } from "@/lib/guards/auth-guards"
 import { Sidebar } from "@/components/admin/sidebar"
 import { AdminHeader } from "@/components/admin/header"
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const { user, loading } = useAuth()
-  const router = useRouter()
-
-  useEffect(() => {
-    if (!loading && (!user || user.user_metadata?.role !== "admin")) {
-      router.push("/")
-    }
-  }, [user, loading, router])
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">Chargement...</div>
-      </div>
-    )
-  }
-
-  if (!user || user.user_metadata?.role !== "admin") {
-    return null
-  }
+  await requireAdmin()
 
   return (
     <div className="flex h-screen bg-background">

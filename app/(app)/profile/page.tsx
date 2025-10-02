@@ -1,10 +1,12 @@
+import { requireAuth } from "@/lib/guards/auth-guards"
 import { createServerClient } from "@supabase/ssr"
-import { redirect } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ProfileForm } from "@/components/forms/profile-form"
 import { cookies } from "next/headers"
 
 export default async function ProfilePage() {
+  const user = await requireAuth()
+
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -20,14 +22,6 @@ export default async function ProfilePage() {
       },
     },
   )
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect("/auth/signin")
-  }
 
   // Get user profile data
   const { data: profile } = await supabase.from("users").select("*").eq("id", user.id).single()

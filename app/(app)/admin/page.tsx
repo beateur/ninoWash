@@ -1,6 +1,4 @@
-"use client"
-
-import { useState, useEffect } from "react"
+import { requireAdmin } from "@/lib/guards/auth-guards"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -24,67 +22,44 @@ interface RecentBooking {
   total_amount: number
 }
 
-export default function AdminDashboard() {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalBookings: 0,
-    activeSubscriptions: 0,
-    monthlyRevenue: 0,
-    pendingBookings: 0,
-    completedBookings: 0,
-    newUsers: 0,
-  })
-  const [recentBookings, setRecentBookings] = useState<RecentBooking[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+export default async function AdminDashboard() {
+  await requireAdmin()
 
-  useEffect(() => {
-    fetchDashboardData()
-  }, [])
-
-  const fetchDashboardData = async () => {
-    try {
-      // In a real app, these would be separate API calls
-      // For now, we'll simulate the data
-      setStats({
-        totalBookings: 1247,
-        activeSubscriptions: 89,
-        monthlyRevenue: 15420,
-        pendingBookings: 23,
-        completedBookings: 156,
-        newUsers: 34,
-      })
-
-      setRecentBookings([
-        {
-          id: "1",
-          booking_number: "NW-20241201-001",
-          user_name: "Marie Dubois",
-          status: "pending",
-          pickup_date: "2024-12-02",
-          total_amount: 45.9,
-        },
-        {
-          id: "2",
-          booking_number: "NW-20241201-002",
-          user_name: "Pierre Martin",
-          status: "confirmed",
-          pickup_date: "2024-12-02",
-          total_amount: 32.5,
-        },
-        {
-          id: "3",
-          booking_number: "NW-20241201-003",
-          user_name: "Sophie Laurent",
-          status: "collecting",
-          pickup_date: "2024-12-01",
-          total_amount: 67.8,
-        },
-      ])
-    } catch (error) {
-      console.error("[v0] Error fetching dashboard data:", error)
-    } finally {
-      setIsLoading(false)
-    }
+  const stats: DashboardStats = {
+    totalBookings: 1247,
+    activeSubscriptions: 89,
+    monthlyRevenue: 15420,
+    pendingBookings: 23,
+    completedBookings: 156,
+    newUsers: 34,
   }
+
+  const recentBookings: RecentBooking[] = [
+    {
+      id: "1",
+      booking_number: "NW-20241201-001",
+      user_name: "Marie Dubois",
+      status: "pending",
+      pickup_date: "2024-12-02",
+      total_amount: 45.9,
+    },
+    {
+      id: "2",
+      booking_number: "NW-20241201-002",
+      user_name: "Pierre Martin",
+      status: "confirmed",
+      pickup_date: "2024-12-02",
+      total_amount: 32.5,
+    },
+    {
+      id: "3",
+      booking_number: "NW-20241201-003",
+      user_name: "Sophie Laurent",
+      status: "collecting",
+      pickup_date: "2024-12-01",
+      total_amount: 67.8,
+    },
+  ]
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -99,14 +74,6 @@ export default function AdminDashboard() {
 
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pending
     return <Badge variant={config.variant}>{config.label}</Badge>
-  }
-
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="text-center">Chargement du dashboard...</div>
-      </div>
-    )
   }
 
   return (
