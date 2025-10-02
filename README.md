@@ -78,8 +78,8 @@ Nino Wash est une plateforme moderne de pressing à domicile qui permet aux util
 
 1. **Cloner le repository**
 \`\`\`bash
-git clone https://github.com/ninoWash/nino-wash.git
-cd nino-wash
+git clone https://github.com/beateur/ninoWash.git
+cd ninoWash
 \`\`\`
 
 2. **Installer les dépendances**
