@@ -17,7 +17,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-  const supabase = createClient()
 
   const refreshSession = async () => {
     const session = await clientAuth.getSession()
@@ -25,6 +24,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
+    const supabase = createClient()
+
     // Get initial session
     const getInitialSession = async () => {
       const session = await clientAuth.getSession()
@@ -44,7 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
 
     return () => subscription.unsubscribe()
-  }, [supabase.auth])
+  }, []) // Empty dependency array - only run once on mount
 
   const signOut = async () => {
     await clientAuth.signOut()
