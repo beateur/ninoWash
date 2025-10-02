@@ -71,7 +71,8 @@
     "vaul": "^0.9.9",
     "vite": "latest",
     "vitest": "latest",
-    "zod": "3.25.67"
+    "zod": "3.25.67",
+    "@neondatabase/serverless": "1.0.2"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^15.0.0",
