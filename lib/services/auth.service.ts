@@ -27,17 +27,17 @@ export interface SessionInfo {
  * Use this in client components and browser contexts
  */
 export class ClientAuthService {
+  private supabase = createBrowserClient()
+
   /**
    * Sign up a new user
    */
   async signUp(data: SignUpInput): Promise<AuthResult> {
     try {
-      const supabase = createBrowserClient()
-
       // Validate input
       const validatedData = signUpSchema.parse(data)
 
-      const { data: authData, error } = await supabase.auth.signUp({
+      const { data: authData, error } = await this.supabase.auth.signUp({
         email: validatedData.email,
         password: validatedData.password,
         options: {
@@ -76,12 +76,10 @@ export class ClientAuthService {
    */
   async signIn(data: SignInInput): Promise<AuthResult> {
     try {
-      const supabase = createBrowserClient()
-
       // Validate input
       const validatedData = signInSchema.parse(data)
 
-      const { data: authData, error } = await supabase.auth.signInWithPassword({
+      const { data: authData, error } = await this.supabase.auth.signInWithPassword({
         email: validatedData.email,
         password: validatedData.password,
       })
@@ -111,9 +109,7 @@ export class ClientAuthService {
    */
   async signOut(): Promise<AuthResult> {
     try {
-      const supabase = createBrowserClient()
-
-      const { error } = await supabase.auth.signOut()
+      const { error } = await this.supabase.auth.signOut()
 
       if (error) {
         return {
@@ -139,12 +135,10 @@ export class ClientAuthService {
    */
   async getSession(): Promise<SessionInfo> {
     try {
-      const supabase = createBrowserClient()
-
       const {
         data: { session },
         error,
-      } = await supabase.auth.getSession()
+      } = await this.supabase.auth.getSession()
 
       if (error || !session) {
         return {
@@ -170,12 +164,10 @@ export class ClientAuthService {
    */
   async getUser(): Promise<User | null> {
     try {
-      const supabase = createBrowserClient()
-
       const {
         data: { user },
         error,
-      } = await supabase.auth.getUser()
+      } = await this.supabase.auth.getUser()
 
       if (error || !user) {
         return null
@@ -192,9 +184,7 @@ export class ClientAuthService {
    */
   async resetPassword(email: string): Promise<AuthResult> {
     try {
-      const supabase = createBrowserClient()
-
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
       })
 
@@ -222,9 +212,7 @@ export class ClientAuthService {
    */
   async updatePassword(newPassword: string): Promise<AuthResult> {
     try {
-      const supabase = createBrowserClient()
-
-      const { error } = await supabase.auth.updateUser({
+      const { error } = await this.supabase.auth.updateUser({
         password: newPassword,
       })
 
