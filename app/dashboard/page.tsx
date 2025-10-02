@@ -1,35 +1,19 @@
-import { createServerClient } from "@supabase/ssr"
-import { redirect } from "next/navigation"
+import { requireAuth, redirect } from "@/lib/auth/route-guards"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, Package, MapPin, Clock, Plus, Crown } from "lucide-react"
 import Link from "next/link"
-import { cookies } from "next/headers"
 import { SyncSubscriptionButton } from "@/components/subscription/sync-subscription-button"
 
 export default async function DashboardPage() {
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
-        },
-      },
-    },
-  )
+  const { user, supabase } = await requireAuth()
 
   const {
-    data: { user },
+    data: { user: fetchedUser },
   } = await supabase.auth.getUser()
 
-  if (!user) {
+  if (!fetchedUser) {
     redirect("/auth/signin")
   }
 

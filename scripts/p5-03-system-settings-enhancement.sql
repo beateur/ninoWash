@@ -16,6 +16,13 @@ BEGIN
   END IF;
 END $$;
 
+-- Update existing data to match constraint before adding it
+-- First, update any existing rows with invalid categories to 'general'
+UPDATE system_settings 
+SET category = 'general' 
+WHERE category NOT IN ('general', 'security', 'billing', 'notifications', 'integrations', 'features', 'limits');
+
+-- Now add the constraint
 DO $$ 
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_system_settings_category') THEN

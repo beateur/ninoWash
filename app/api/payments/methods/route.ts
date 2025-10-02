@@ -1,37 +1,17 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createServerClient } from "@supabase/ssr"
+import { apiRequireAuth } from "@/lib/auth/api-guards"
 import { paymentMethodSchema } from "@/lib/validations/payment"
-import { cookies } from "next/headers"
 
 export async function GET(request: NextRequest) {
+  const { user, supabase, error } = await apiRequireAuth(request)
+
+  if (error) {
+    return error
+  }
+
   try {
-    const cookieStore = await cookies()
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll()
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
-          },
-        },
-      },
-    )
-
-    // Get current user
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
-    }
-
     // Get user's payment methods
-    const { data: paymentMethods, error } = await supabase
+    const { data: paymentMethods, error: fetchError } = await supabase
       .from("payment_methods")
       .select("*")
       .eq("user_id", user.id)
@@ -39,8 +19,8 @@ export async function GET(request: NextRequest) {
       .order("is_default", { ascending: false })
       .order("created_at", { ascending: false })
 
-    if (error) {
-      console.error("[v0] Error fetching payment methods:", error)
+    if (fetchError) {
+      console.error("[v0] Error fetching payment methods:", fetchError)
       return NextResponse.json({ error: "Erreur lors de la récupération des méthodes de paiement" }, { status: 500 })
     }
 
@@ -52,32 +32,13 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const { user, supabase, error } = await apiRequireAuth(request)
+
+  if (error) {
+    return error
+  }
+
   try {
-    const cookieStore = await cookies()
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll()
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
-          },
-        },
-      },
-    )
-
-    // Get current user
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
-    }
-
     const body = await request.json()
     const validatedData = paymentMethodSchema.parse(body)
 
@@ -87,7 +48,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create payment method
-    const { data: paymentMethod, error } = await supabase
+    const { data: paymentMethod, error: createError } = await supabase
       .from("payment_methods")
       .insert({
         user_id: user.id,
@@ -103,8 +64,8 @@ export async function POST(request: NextRequest) {
       .select()
       .single()
 
-    if (error) {
-      console.error("[v0] Error creating payment method:", error)
+    if (createError) {
+      console.error("[v0] Error creating payment method:", createError)
       return NextResponse.json({ error: "Erreur lors de la création de la méthode de paiement" }, { status: 500 })
     }
 

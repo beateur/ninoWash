@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import { AuthProvider } from "@/lib/hooks/use-auth"
 import { Toaster } from "@/components/ui/toaster"
+import { CookieBanner } from "@/components/gdpr/cookie-banner"
 import "./globals.css"
 
 const inter = Inter({
@@ -49,6 +50,7 @@ export default function RootLayout({
           <Suspense fallback={null}>{children}</Suspense>
           <Toaster />
         </AuthProvider>
+        <CookieBanner />
         <Analytics />
       </body>
     </html>

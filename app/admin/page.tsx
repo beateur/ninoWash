@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Calendar, CreditCard, DollarSign, Package, TrendingUp, Users, Clock, CheckCircle } from "lucide-react"
+import { requireAdmin } from "@/lib/auth/route-guards"
 
 interface DashboardStats {
   totalBookings: number
@@ -24,7 +25,9 @@ interface RecentBooking {
   total_amount: number
 }
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
+  await requireAdmin()
+
   const [stats, setStats] = useState<DashboardStats>({
     totalBookings: 0,
     activeSubscriptions: 0,

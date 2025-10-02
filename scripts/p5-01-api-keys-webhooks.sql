@@ -188,14 +188,15 @@ CREATE INDEX IF NOT EXISTS idx_email_queue_scheduled_for ON email_queue(schedule
 CREATE INDEX IF NOT EXISTS idx_email_queue_priority ON email_queue(priority, created_at) WHERE status = 'pending';
 CREATE INDEX IF NOT EXISTS idx_email_queue_created_at ON email_queue(created_at);
 
--- Add triggers for updated_at
+-- Add DROP TRIGGER IF EXISTS before creating triggers to prevent "already exists" errors
+DROP TRIGGER IF EXISTS update_api_keys_updated_at ON api_keys;
 CREATE TRIGGER update_api_keys_updated_at BEFORE UPDATE ON api_keys
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_webhooks_updated_at ON webhooks;
 CREATE TRIGGER update_webhooks_updated_at BEFORE UPDATE ON webhooks
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_notification_preferences_updated_at ON notification_preferences;
 CREATE TRIGGER update_notification_preferences_updated_at BEFORE UPDATE ON notification_preferences
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
--- Additional updates can be added here if needed

@@ -1,41 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createServerClient } from "@supabase/ssr"
-import { cookies } from "next/headers"
+import { apiRequireAdmin } from "@/lib/auth/api-guards"
 
 export async function GET(request: NextRequest) {
+  const { user, supabase, error } = await apiRequireAdmin(request)
+
+  if (error) {
+    return error
+  }
+
   try {
-    const cookieStore = await cookies()
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll()
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
-          },
-        },
-      },
-    )
-
-    // Get current user and verify admin role
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-
-    if (authError || !user || user.user_metadata?.role !== "admin") {
-      console.warn("[v0] Unauthorized admin access attempt:", {
-        userId: user?.id,
-        role: user?.user_metadata?.role,
-        path: request.nextUrl.pathname,
-        timestamp: new Date().toISOString(),
-      })
-      return NextResponse.json({ error: "Non autorisé" }, { status: 403 })
-    }
-
     // Get dashboard statistics
     const [
       { count: totalBookings },
