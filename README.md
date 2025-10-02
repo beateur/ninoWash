@@ -234,7 +234,12 @@ nino-wash/
 │   ├── forms/             # Formulaires (auth, booking, profile)
 │   ├── layout/            # Composants de layout (header, footer, nav)
 │   ├── mobile/            # Composants mobiles (bottom nav)
-│   ├── sections/          # Sections de pages (hero, services, testimonials)
+│   ├── sections/          # Sections de pages
+│   │   ├── hero-section.tsx          # Section héros
+│   │   ├── services-section.tsx      # Section services
+│   │   ├── how-it-works-section.tsx  # Section comment ça marche
+│   │   ├── testimonials-section.tsx  # Section témoignages
+│   │   └── cta-section.tsx           # Section appel à l'action
 │   ├── subscription/      # Composants d'abonnement
 │   │   ├── plan-card.tsx  # Carte de plan d'abonnement
 │   │   ├── subscription-status.tsx # Statut de l'abonnement

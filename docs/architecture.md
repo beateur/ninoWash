@@ -85,10 +85,11 @@ nino-wash/
 │   ├── mobile/                   # Navigation mobile
 │   │   └── bottom-nav.tsx
 │   ├── sections/                 # Sections de pages
-│   │   ├── hero.tsx
-│   │   ├── how-it-works.tsx
-│   │   ├── services.tsx
-│   │   └── testimonials.tsx
+│   │   ├── hero-section.tsx              # Ajout du suffixe -section
+│   │   ├── how-it-works-section.tsx      # Ajout du suffixe -section
+│   │   ├── services-section.tsx          # Ajout du suffixe -section
+│   │   ├── testimonials-section.tsx      # Ajout du suffixe -section
+│   │   └── cta-section.tsx               # Ajout du suffixe -section
 │   └── ui/                       # Composants UI (shadcn/ui)
 ├── lib/                          # Utilitaires et configurations
 │   ├── hooks/                    # Hooks personnalisés
@@ -359,13 +360,13 @@ export async function POST(request: Request) {
 \`\`\`
 1. Utilisateur → Page Réservation (/reservation)
    ↓
-2. Sélection Service (services-step.tsx)
+2. Sélection Service (services-step.tsx)  # Ajout du suffixe -step
    ↓
-3. Sélection Date/Heure (datetime-step.tsx)
+3. Sélection Date/Heure (datetime-step.tsx)  # Ajout du suffixe -step
    ↓
-4. Adresse Collecte/Livraison (address-step.tsx)
+4. Adresse Collecte/Livraison (address-step.tsx)  # Ajout du suffixe -step
    ↓
-5. Récapitulatif (summary-step.tsx)
+5. Récapitulatif (summary-step.tsx)  # Ajout du suffixe -step
    ↓
 6. POST /api/bookings
    ↓
