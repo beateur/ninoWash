@@ -59,39 +59,83 @@ CREATE INDEX IF NOT EXISTS idx_coupon_redemptions_user_id ON coupon_redemptions(
 CREATE INDEX IF NOT EXISTS idx_coupon_redemptions_coupon_id ON coupon_redemptions(coupon_id);
 CREATE INDEX IF NOT EXISTS idx_coupon_redemptions_subscription_id ON coupon_redemptions(subscription_id);
 
--- Add constraints
-ALTER TABLE subscription_plans
-  ADD CONSTRAINT IF NOT EXISTS chk_subscription_plans_billing_interval
-  CHECK (billing_interval IN ('monthly', 'yearly', 'quarterly', 'weekly'));
+-- Add constraints using DO blocks
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_subscription_plans_billing_interval') THEN
+    ALTER TABLE subscription_plans
+      ADD CONSTRAINT chk_subscription_plans_billing_interval
+      CHECK (billing_interval IN ('monthly', 'yearly', 'quarterly', 'weekly'));
+  END IF;
+END $$;
 
-ALTER TABLE subscription_plans
-  ADD CONSTRAINT IF NOT EXISTS chk_subscription_plans_price_positive
-  CHECK (price_amount >= 0);
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_subscription_plans_price_positive') THEN
+    ALTER TABLE subscription_plans
+      ADD CONSTRAINT chk_subscription_plans_price_positive
+      CHECK (price_amount >= 0);
+  END IF;
+END $$;
 
-ALTER TABLE subscriptions
-  ADD CONSTRAINT IF NOT EXISTS chk_subscriptions_status
-  CHECK (status IN ('active', 'canceled', 'past_due', 'trialing', 'incomplete', 'incomplete_expired', 'unpaid'));
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_subscriptions_status') THEN
+    ALTER TABLE subscriptions
+      ADD CONSTRAINT chk_subscriptions_status
+      CHECK (status IN ('active', 'canceled', 'past_due', 'trialing', 'incomplete', 'incomplete_expired', 'unpaid'));
+  END IF;
+END $$;
 
-ALTER TABLE invoices
-  ADD CONSTRAINT IF NOT EXISTS chk_invoices_status
-  CHECK (status IN ('draft', 'open', 'paid', 'void', 'uncollectible'));
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_invoices_status') THEN
+    ALTER TABLE invoices
+      ADD CONSTRAINT chk_invoices_status
+      CHECK (status IN ('draft', 'open', 'paid', 'void', 'uncollectible'));
+  END IF;
+END $$;
 
-ALTER TABLE payment_transactions
-  ADD CONSTRAINT IF NOT EXISTS chk_payment_transactions_status
-  CHECK (status IN ('pending', 'processing', 'succeeded', 'failed', 'canceled', 'refunded'));
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_payment_transactions_status') THEN
+    ALTER TABLE payment_transactions
+      ADD CONSTRAINT chk_payment_transactions_status
+      CHECK (status IN ('pending', 'processing', 'succeeded', 'failed', 'canceled', 'refunded'));
+  END IF;
+END $$;
 
-ALTER TABLE payment_transactions
-  ADD CONSTRAINT IF NOT EXISTS chk_payment_transactions_amount_positive
-  CHECK (amount >= 0);
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_payment_transactions_amount_positive') THEN
+    ALTER TABLE payment_transactions
+      ADD CONSTRAINT chk_payment_transactions_amount_positive
+      CHECK (amount >= 0);
+  END IF;
+END $$;
 
-ALTER TABLE coupons
-  ADD CONSTRAINT IF NOT EXISTS chk_coupons_discount_type
-  CHECK (discount_type IN ('percentage', 'fixed_amount'));
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_coupons_discount_type') THEN
+    ALTER TABLE coupons
+      ADD CONSTRAINT chk_coupons_discount_type
+      CHECK (discount_type IN ('percentage', 'fixed_amount'));
+  END IF;
+END $$;
 
-ALTER TABLE coupons
-  ADD CONSTRAINT IF NOT EXISTS chk_coupons_discount_value_positive
-  CHECK (discount_value > 0);
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_coupons_discount_value_positive') THEN
+    ALTER TABLE coupons
+      ADD CONSTRAINT chk_coupons_discount_value_positive
+      CHECK (discount_value > 0);
+  END IF;
+END $$;
 
--- Ensure unique constraints
-ALTER TABLE coupons
-  ADD CONSTRAINT IF NOT EXISTS uq_coupons_code UNIQUE (code);
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'uq_coupons_code') THEN
+    ALTER TABLE coupons
+      ADD CONSTRAINT uq_coupons_code UNIQUE (code);
+  END IF;
+END $$;

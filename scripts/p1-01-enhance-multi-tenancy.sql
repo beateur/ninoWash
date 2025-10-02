@@ -38,43 +38,98 @@ CREATE INDEX IF NOT EXISTS idx_team_members_user_id ON team_members(user_id);
 CREATE INDEX IF NOT EXISTS idx_team_members_is_active ON team_members(is_active) WHERE is_active = true;
 CREATE INDEX IF NOT EXISTS idx_team_members_team_user ON team_members(team_id, user_id);
 
--- Add constraints for data integrity
-ALTER TABLE organizations
-  ADD CONSTRAINT IF NOT EXISTS chk_organizations_slug_format
-  CHECK (slug ~* '^[a-z0-9-]+$');
+-- Add constraints for data integrity using DO blocks
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_organizations_slug_format') THEN
+    ALTER TABLE organizations
+      ADD CONSTRAINT chk_organizations_slug_format
+      CHECK (slug ~* '^[a-z0-9-]+$');
+  END IF;
+END $$;
 
-ALTER TABLE workspaces
-  ADD CONSTRAINT IF NOT EXISTS chk_workspaces_slug_format
-  CHECK (slug ~* '^[a-z0-9-]+$');
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_workspaces_slug_format') THEN
+    ALTER TABLE workspaces
+      ADD CONSTRAINT chk_workspaces_slug_format
+      CHECK (slug ~* '^[a-z0-9-]+$');
+  END IF;
+END $$;
 
-ALTER TABLE workspaces
-  ADD CONSTRAINT IF NOT EXISTS chk_workspaces_visibility
-  CHECK (visibility IN ('private', 'organization', 'public'));
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_workspaces_visibility') THEN
+    ALTER TABLE workspaces
+      ADD CONSTRAINT chk_workspaces_visibility
+      CHECK (visibility IN ('private', 'organization', 'public'));
+  END IF;
+END $$;
 
-ALTER TABLE organization_members
-  ADD CONSTRAINT IF NOT EXISTS chk_organization_members_role
-  CHECK (role IN ('owner', 'admin', 'member', 'guest'));
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_organization_members_role') THEN
+    ALTER TABLE organization_members
+      ADD CONSTRAINT chk_organization_members_role
+      CHECK (role IN ('owner', 'admin', 'member', 'guest'));
+  END IF;
+END $$;
 
-ALTER TABLE workspace_members
-  ADD CONSTRAINT IF NOT EXISTS chk_workspace_members_role
-  CHECK (role IN ('owner', 'admin', 'editor', 'viewer'));
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_workspace_members_role') THEN
+    ALTER TABLE workspace_members
+      ADD CONSTRAINT chk_workspace_members_role
+      CHECK (role IN ('owner', 'admin', 'editor', 'viewer'));
+  END IF;
+END $$;
 
-ALTER TABLE team_members
-  ADD CONSTRAINT IF NOT EXISTS chk_team_members_role
-  CHECK (role IN ('lead', 'member', 'contributor'));
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_team_members_role') THEN
+    ALTER TABLE team_members
+      ADD CONSTRAINT chk_team_members_role
+      CHECK (role IN ('lead', 'member', 'contributor'));
+  END IF;
+END $$;
 
 -- Ensure unique constraints
-ALTER TABLE organizations
-  ADD CONSTRAINT IF NOT EXISTS uq_organizations_slug UNIQUE (slug);
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'uq_organizations_slug') THEN
+    ALTER TABLE organizations
+      ADD CONSTRAINT uq_organizations_slug UNIQUE (slug);
+  END IF;
+END $$;
 
-ALTER TABLE workspaces
-  ADD CONSTRAINT IF NOT EXISTS uq_workspaces_org_slug UNIQUE (organization_id, slug);
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'uq_workspaces_org_slug') THEN
+    ALTER TABLE workspaces
+      ADD CONSTRAINT uq_workspaces_org_slug UNIQUE (organization_id, slug);
+  END IF;
+END $$;
 
-ALTER TABLE organization_members
-  ADD CONSTRAINT IF NOT EXISTS uq_organization_members_org_user UNIQUE (organization_id, user_id);
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'uq_organization_members_org_user') THEN
+    ALTER TABLE organization_members
+      ADD CONSTRAINT uq_organization_members_org_user UNIQUE (organization_id, user_id);
+  END IF;
+END $$;
 
-ALTER TABLE workspace_members
-  ADD CONSTRAINT IF NOT EXISTS uq_workspace_members_workspace_user UNIQUE (workspace_id, user_id);
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'uq_workspace_members_workspace_user') THEN
+    ALTER TABLE workspace_members
+      ADD CONSTRAINT uq_workspace_members_workspace_user UNIQUE (workspace_id, user_id);
+  END IF;
+END $$;
 
-ALTER TABLE team_members
-  ADD CONSTRAINT IF NOT EXISTS uq_team_members_team_user UNIQUE (team_id, user_id);
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'uq_team_members_team_user') THEN
+    ALTER TABLE team_members
+      ADD CONSTRAINT uq_team_members_team_user UNIQUE (team_id, user_id);
+  END IF;
+END $$;

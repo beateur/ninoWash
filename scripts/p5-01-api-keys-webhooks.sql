@@ -197,3 +197,5 @@ CREATE TRIGGER update_webhooks_updated_at BEFORE UPDATE ON webhooks
 
 CREATE TRIGGER update_notification_preferences_updated_at BEFORE UPDATE ON notification_preferences
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Additional updates can be added here if needed

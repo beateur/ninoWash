@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { serverAuth } from "@/lib/services/auth.service"
 import { redirect } from "next/navigation"
 
 /**
@@ -15,28 +15,12 @@ import { redirect } from "next/navigation"
  * ```
  */
 export async function requireAdmin() {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser()
-
-  // Redirect if no user or authentication error
-  if (error || !user) {
-    console.warn("[v0] Admin access denied: No authenticated user")
+  try {
+    await serverAuth.requireAdmin()
+  } catch (error) {
+    console.warn("[v0] Admin access denied:", error)
     redirect("/")
   }
-
-  // Check if user has admin role
-  const isAdmin = user.user_metadata?.role === "admin" || user.app_metadata?.role === "admin"
-
-  if (!isAdmin) {
-    console.warn("[v0] Admin access denied: User", user.id, "is not an admin")
-    redirect("/")
-  }
-
-  return user
 }
 
 /**
@@ -44,19 +28,5 @@ export async function requireAdmin() {
  * Useful for conditional rendering or API routes
  */
 export async function isAdmin(): Promise<boolean> {
-  try {
-    const supabase = await createClient()
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser()
-
-    if (error || !user) {
-      return false
-    }
-
-    return user.user_metadata?.role === "admin" || user.app_metadata?.role === "admin"
-  } catch {
-    return false
-  }
+  return await serverAuth.isAdmin()
 }

@@ -7,15 +7,26 @@ CREATE INDEX IF NOT EXISTS idx_system_settings_category ON system_settings(categ
 CREATE INDEX IF NOT EXISTS idx_system_settings_is_public ON system_settings(is_public);
 CREATE INDEX IF NOT EXISTS idx_system_settings_updated_by ON system_settings(updated_by);
 
--- Add constraints
-ALTER TABLE system_settings
-  ADD CONSTRAINT IF NOT EXISTS uq_system_settings_key UNIQUE (key);
+-- Add constraints using DO blocks
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'uq_system_settings_key') THEN
+    ALTER TABLE system_settings
+      ADD CONSTRAINT uq_system_settings_key UNIQUE (key);
+  END IF;
+END $$;
 
-ALTER TABLE system_settings
-  ADD CONSTRAINT IF NOT EXISTS chk_system_settings_category
-  CHECK (category IN ('general', 'security', 'billing', 'notifications', 'integrations', 'features', 'limits'));
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_system_settings_category') THEN
+    ALTER TABLE system_settings
+      ADD CONSTRAINT chk_system_settings_category
+      CHECK (category IN ('general', 'security', 'billing', 'notifications', 'integrations', 'features', 'limits'));
+  END IF;
+END $$;
 
 -- Add trigger for updated_at
+DROP TRIGGER IF EXISTS update_system_settings_updated_at ON system_settings;
 CREATE TRIGGER update_system_settings_updated_at BEFORE UPDATE ON system_settings
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 

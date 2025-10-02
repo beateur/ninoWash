@@ -52,6 +52,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({
+      success: true,
       message: "Compte créé avec succès. Vérifiez votre email pour confirmer votre inscription.",
       user: authData.user,
     })

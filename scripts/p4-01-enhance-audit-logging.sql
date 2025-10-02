@@ -65,22 +65,47 @@ CREATE INDEX IF NOT EXISTS idx_performance_metrics_metric_name ON performance_me
 CREATE INDEX IF NOT EXISTS idx_performance_metrics_metric_type ON performance_metrics(metric_type);
 CREATE INDEX IF NOT EXISTS idx_performance_metrics_timestamp ON performance_metrics(timestamp);
 
--- Add constraints
-ALTER TABLE activities
-  ADD CONSTRAINT IF NOT EXISTS chk_activities_action
-  CHECK (action IN ('create', 'read', 'update', 'delete', 'login', 'logout', 'invite', 'accept', 'reject', 'archive', 'restore', 'export', 'import'));
+-- Add constraints using DO blocks
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_activities_action') THEN
+    ALTER TABLE activities
+      ADD CONSTRAINT chk_activities_action
+      CHECK (action IN ('create', 'read', 'update', 'delete', 'login', 'logout', 'invite', 'accept', 'reject', 'archive', 'restore', 'export', 'import'));
+  END IF;
+END $$;
 
-ALTER TABLE error_logs
-  ADD CONSTRAINT IF NOT EXISTS chk_error_logs_error_level
-  CHECK (error_level IN ('debug', 'info', 'warning', 'error', 'critical'));
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_error_logs_error_level') THEN
+    ALTER TABLE error_logs
+      ADD CONSTRAINT chk_error_logs_error_level
+      CHECK (error_level IN ('debug', 'info', 'warning', 'error', 'critical'));
+  END IF;
+END $$;
 
-ALTER TABLE feature_usage
-  ADD CONSTRAINT IF NOT EXISTS chk_feature_usage_usage_type
-  CHECK (usage_type IN ('view', 'click', 'submit', 'download', 'upload', 'share', 'export', 'import'));
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_feature_usage_usage_type') THEN
+    ALTER TABLE feature_usage
+      ADD CONSTRAINT chk_feature_usage_usage_type
+      CHECK (usage_type IN ('view', 'click', 'submit', 'download', 'upload', 'share', 'export', 'import'));
+  END IF;
+END $$;
 
 -- Ensure unique constraints for daily aggregations
-ALTER TABLE user_engagement_daily
-  ADD CONSTRAINT IF NOT EXISTS uq_user_engagement_daily_user_date UNIQUE (user_id, date);
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'uq_user_engagement_daily_user_date') THEN
+    ALTER TABLE user_engagement_daily
+      ADD CONSTRAINT uq_user_engagement_daily_user_date UNIQUE (user_id, date);
+  END IF;
+END $$;
 
-ALTER TABLE organization_metrics_daily
-  ADD CONSTRAINT IF NOT EXISTS uq_organization_metrics_daily_org_date UNIQUE (organization_id, date);
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'uq_organization_metrics_daily_org_date') THEN
+    ALTER TABLE organization_metrics_daily
+      ADD CONSTRAINT uq_organization_metrics_daily_org_date UNIQUE (organization_id, date);
+  END IF;
+END $$;

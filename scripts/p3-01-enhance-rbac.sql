@@ -12,12 +12,22 @@ CREATE INDEX IF NOT EXISTS idx_user_roles_is_active ON user_roles(is_active) WHE
 CREATE INDEX IF NOT EXISTS idx_user_roles_expires_at ON user_roles(expires_at) WHERE expires_at IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_user_roles_user_role ON user_roles(user_id, role_id);
 
--- Add constraints
-ALTER TABLE roles
-  ADD CONSTRAINT IF NOT EXISTS uq_roles_name UNIQUE (name);
+-- Add unique constraint for roles
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'uq_roles_name') THEN
+    ALTER TABLE roles
+      ADD CONSTRAINT uq_roles_name UNIQUE (name);
+  END IF;
+END $$;
 
-ALTER TABLE user_roles
-  ADD CONSTRAINT IF NOT EXISTS uq_user_roles_user_role UNIQUE (user_id, role_id);
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'uq_user_roles_user_role') THEN
+    ALTER TABLE user_roles
+      ADD CONSTRAINT uq_user_roles_user_role UNIQUE (user_id, role_id);
+  END IF;
+END $$;
 
 -- Create permissions table if it doesn't exist
 CREATE TABLE IF NOT EXISTS permissions (
