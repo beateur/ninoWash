@@ -197,4 +197,4 @@ Si vous rencontrez des problèmes :
 4. Essayez de supprimer `node_modules` et `.next` puis réinstallez : `rm -rf node_modules .next && npm install`
 \`\`\`
 
-```env file="" isHidden
+\`\`\`env file="" isHidden
