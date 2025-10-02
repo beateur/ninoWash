@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 import { stripe } from "@/lib/stripe"
+import { createAdminClient } from "@/lib/supabase/admin"
 
 export async function POST() {
   try {
@@ -75,21 +76,7 @@ export async function POST() {
       return NextResponse.json({ error: "No subscriptions found in Stripe" }, { status: 404 })
     }
 
-    // Use service role key for database operations
-    const supabaseAdmin = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll()
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
-          },
-        },
-      },
-    )
+    const supabaseAdmin = createAdminClient()
 
     let syncedCount = 0
 

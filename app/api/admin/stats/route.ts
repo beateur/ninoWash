@@ -25,8 +25,15 @@ export async function GET(request: NextRequest) {
       data: { user },
       error: authError,
     } = await supabase.auth.getUser()
+
     if (authError || !user || user.user_metadata?.role !== "admin") {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
+      console.warn("[v0] Unauthorized admin access attempt:", {
+        userId: user?.id,
+        role: user?.user_metadata?.role,
+        path: request.nextUrl.pathname,
+        timestamp: new Date().toISOString(),
+      })
+      return NextResponse.json({ error: "Non autorisé" }, { status: 403 })
     }
 
     // Get dashboard statistics
@@ -38,10 +45,7 @@ export async function GET(request: NextRequest) {
       { count: newUsers },
     ] = await Promise.all([
       supabase.from("bookings").select("*", { count: "exact", head: true }),
-      supabase
-        .from("subscriptions")
-        .select("*", { count: "exact", head: true })
-        .eq("status", "active"), // Changed table name from user_subscriptions to subscriptions
+      supabase.from("subscriptions").select("*", { count: "exact", head: true }).eq("status", "active"),
       supabase.from("bookings").select("*", { count: "exact", head: true }).eq("status", "pending"),
       supabase.from("bookings").select("*", { count: "exact", head: true }).eq("status", "completed"),
       supabase
