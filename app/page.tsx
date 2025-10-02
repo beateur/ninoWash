@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { Header } from "@/components/layout/header"
-import { Hero } from "@/components/sections/hero"
-import { Services } from "@/components/sections/services"
-import { HowItWorks } from "@/components/sections/how-it-works"
-import { Testimonials } from "@/components/sections/testimonials"
+import { HeroSection } from "@/components/sections/hero-section"
+import { ServicesSection } from "@/components/sections/services-section"
+import { HowItWorksSection } from "@/components/sections/how-it-works-section"
+import { TestimonialsSection } from "@/components/sections/testimonials-section"
 import { Footer } from "@/components/layout/footer"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { CheckCircle, X } from "lucide-react"
@@ -67,10 +67,10 @@ export default function HomePage() {
         </div>
       )}
 
-      <Hero />
-      <Services />
-      <HowItWorks />
-      <Testimonials />
+      <HeroSection />
+      <ServicesSection />
+      <HowItWorksSection />
+      <TestimonialsSection />
       <Footer />
     </main>
   )

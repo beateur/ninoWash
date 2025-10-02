@@ -1,4 +1,4 @@
-import { Services } from "@/components/sections/services"
+import { ServicesSection } from "@/components/sections/services-section"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
@@ -19,8 +19,7 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* Services Component */}
-      <Services />
+      <ServicesSection />
 
       {/* Additional Info Section */}
       <section className="py-16 bg-muted/30">

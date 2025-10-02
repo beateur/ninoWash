@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Clock, Euro } from "lucide-react"
+import { Clock, Sparkles } from "lucide-react"
 
 interface Service {
   id: string
@@ -21,7 +21,7 @@ interface ServiceCardProps {
   isSelected?: boolean
   quantity?: number
   onQuantityChange?: (serviceId: string, quantity: number) => void
-  serviceType?: string // Added service type prop
+  serviceType?: string
 }
 
 export function ServiceCard({
@@ -30,60 +30,30 @@ export function ServiceCard({
   isSelected = false,
   quantity = 0,
   onQuantityChange,
-  serviceType = "classic", // Default to classic service
+  serviceType = "classic",
 }: ServiceCardProps) {
-  const getCategoryLabel = (category: string) => {
-    switch (category) {
-      case "cleaning":
-        return "Nettoyage"
-      case "ironing":
-        return "Repassage"
-      case "special":
-        return "Spécialisé"
-      default:
-        return category
-    }
-  }
-
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case "cleaning":
-        return "bg-blue-100 text-blue-800"
-      case "ironing":
-        return "bg-green-100 text-green-800"
-      case "special":
-        return "bg-purple-100 text-purple-800"
-      default:
-        return "bg-gray-100 text-gray-800"
-    }
-  }
+  const isExpress = service.category === "Service Express"
 
   return (
     <Card
       className={`transition-all duration-200 hover:shadow-md ${
-        isSelected ? "ring-2 ring-primary border-primary" : ""
+        quantity > 0 ? "ring-2 ring-primary border-primary" : ""
       }`}
     >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
-          <div className="space-y-1">
+          <div className="space-y-2 flex-1">
             <CardTitle className="text-lg">{service.name}</CardTitle>
-            <Badge className={getCategoryColor(service.category)}>{getCategoryLabel(service.category)}</Badge>
-          </div>
-          <div className="text-right">
-            {serviceType === "classic" ? (
-              <>
-                <div className="flex items-center text-lg font-semibold text-primary">
-                  <Euro className="h-4 w-4 mr-1" />
-                  {service.base_price.toFixed(2)}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  par {service.unit === "piece" ? "pièce" : service.unit}
-                </div>
-              </>
-            ) : (
-              <div className="text-sm font-medium text-green-600">Inclus</div>
+            {isExpress && (
+              <Badge className="bg-amber-100 text-amber-800">
+                <Sparkles className="h-3 w-3 mr-1" />
+                Express 24h
+              </Badge>
             )}
+          </div>
+          <div className="text-right ml-4">
+            <div className="flex items-center text-xl font-bold text-primary">{service.base_price.toFixed(2)}€</div>
+            <div className="text-xs text-muted-foreground">pour 7kg</div>
           </div>
         </div>
       </CardHeader>
@@ -96,34 +66,34 @@ export function ServiceCard({
           Délai: {service.processing_time_hours}h
         </div>
 
-        <div className="flex items-center justify-between">
-          {onSelect && (
+        {onQuantityChange && (
+          <div className="flex items-center justify-between pt-2">
             <Button
-              variant={isSelected ? "default" : "outline"}
-              onClick={() => onSelect(service)}
+              variant={quantity > 0 ? "default" : "outline"}
+              size="sm"
+              onClick={() => onQuantityChange(service.id, quantity > 0 ? 0 : 1)}
               className="flex-1 mr-2"
             >
-              {isSelected ? "Sélectionné" : "Sélectionner"}
+              {quantity > 0 ? "Sélectionné" : "Sélectionner"}
             </Button>
-          )}
 
-          {onQuantityChange && (
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onQuantityChange(service.id, Math.max(0, quantity - 1))}
-                disabled={quantity <= 0}
-              >
-                -
-              </Button>
-              <span className="w-8 text-center font-medium">{quantity}</span>
-              <Button variant="outline" size="sm" onClick={() => onQuantityChange(service.id, quantity + 1)}>
-                +
-              </Button>
-            </div>
-          )}
-        </div>
+            {quantity > 0 && (
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onQuantityChange(service.id, Math.max(0, quantity - 1))}
+                >
+                  -
+                </Button>
+                <span className="w-8 text-center font-medium">{quantity}</span>
+                <Button variant="outline" size="sm" onClick={() => onQuantityChange(service.id, quantity + 1)}>
+                  +
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   )

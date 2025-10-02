@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useAuth } from "@/lib/hooks/use-auth"
-import { User, Settings, LogOut, Package } from "lucide-react"
+import { User, Settings, LogOut, Package, Crown } from "lucide-react"
 import { NotificationCenter } from "@/components/notifications/notification-center"
 import { MobileNav } from "@/components/layout/mobile-nav"
 
@@ -41,9 +41,6 @@ export function Header() {
           <nav className="hidden md:flex items-center space-x-8">
             <Link href="/services" className="text-sm font-medium hover:text-primary transition-colors">
               Services
-            </Link>
-            <Link href="/tarifs" className="text-sm font-medium hover:text-primary transition-colors">
-              Tarifs
             </Link>
             <Link href="/comment-ca-marche" className="text-sm font-medium hover:text-primary transition-colors">
               Comment ça marche
@@ -87,6 +84,12 @@ export function Header() {
                       <Link href="/dashboard">
                         <User className="mr-2 h-4 w-4" />
                         Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/subscription" className="text-primary font-semibold">
+                        <Crown className="mr-2 h-4 w-4" />
+                        S'abonner
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>

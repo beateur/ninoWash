@@ -1,13 +1,29 @@
-import { createServerSupabaseClient } from "@/lib/supabase/server"
+import { createServerClient } from "@supabase/ssr"
 import { redirect } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Package, MapPin, Clock, Plus } from "lucide-react"
+import { Calendar, Package, MapPin, Clock, Plus, Crown } from "lucide-react"
 import Link from "next/link"
+import { cookies } from "next/headers"
+import { SyncSubscriptionButton } from "@/components/subscription/sync-subscription-button"
 
 export default async function DashboardPage() {
-  const supabase = await createServerSupabaseClient()
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
+        },
+      },
+    },
+  )
 
   const {
     data: { user },
@@ -17,23 +33,67 @@ export default async function DashboardPage() {
     redirect("/auth/signin")
   }
 
-  // Get user's recent bookings
   const { data: bookings } = await supabase
     .from("bookings")
-    .select(`
-      *,
-      pickup_address:user_addresses!pickup_address_id(street_address, city),
-      delivery_address:user_addresses!delivery_address_id(street_address, city)
-    `)
+    .select("*")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(5)
+
+  let addressMap: Record<string, any> = {}
+  if (bookings && bookings.length > 0) {
+    const addressIds = [
+      ...new Set([
+        ...bookings.map((b) => b.pickup_address_id).filter(Boolean),
+        ...bookings.map((b) => b.delivery_address_id).filter(Boolean),
+      ]),
+    ]
+
+    if (addressIds.length > 0) {
+      const { data: addresses } = await supabase
+        .from("user_addresses")
+        .select("id, street_address, city")
+        .in("id", addressIds)
+
+      if (addresses) {
+        addressMap = addresses.reduce(
+          (acc, addr) => {
+            acc[addr.id] = addr
+            return acc
+          },
+          {} as Record<string, any>,
+        )
+      }
+    }
+  }
+
+  const enrichedBookings = bookings?.map((booking) => ({
+    ...booking,
+    pickup_address: booking.pickup_address_id ? addressMap[booking.pickup_address_id] : null,
+    delivery_address: booking.delivery_address_id ? addressMap[booking.delivery_address_id] : null,
+  }))
 
   // Get user's addresses count
   const { count: addressCount } = await supabase
     .from("user_addresses")
     .select("*", { count: "exact", head: true })
     .eq("user_id", user.id)
+
+  const { data: subscription, error: subscriptionError } = await supabase
+    .from("subscriptions")
+    .select(`
+      *,
+      subscription_plans (
+        name,
+        billing_interval,
+        price_amount
+      )
+    `)
+    .eq("user_id", user.id)
+    .in("status", ["active", "trialing"])
+    .maybeSingle()
+
+  console.log("[v0] Subscription query result:", { subscription, subscriptionError })
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -74,7 +134,7 @@ export default async function DashboardPage() {
               <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{bookings?.length || 0}</div>
+              <div className="text-2xl font-bold">{enrichedBookings?.length || 0}</div>
             </CardContent>
           </Card>
 
@@ -95,11 +155,75 @@ export default async function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {bookings?.find((b) => b.status === "confirmed") ? "Demain" : "Aucune"}
+                {enrichedBookings?.find((b) => b.status === "confirmed") ? "Demain" : "Aucune"}
               </div>
             </CardContent>
           </Card>
         </div>
+
+        {subscription && (
+          <Card className="mb-8 border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Crown className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Abonnement actif</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Plan {subscription.subscription_plans?.name} - {subscription.subscription_plans?.price_amount}€/
+                      {subscription.subscription_plans?.billing_interval === "monthly"
+                        ? "mois"
+                        : subscription.subscription_plans?.billing_interval === "yearly"
+                          ? "an"
+                          : "trimestre"}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {subscription.status === "trialing" ? "Période d'essai" : "Actif"} jusqu'au{" "}
+                      {new Date(subscription.current_period_end).toLocaleDateString("fr-FR")}
+                    </p>
+                  </div>
+                </div>
+                <Button asChild variant="outline" size="lg" className="shrink-0 bg-transparent">
+                  <Link href="/subscription/manage">Gérer mon abonnement</Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {!subscription && (
+          <Card className="mb-8 border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Crown className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Passez au plan supérieur</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Profitez de tarifs réduits et d'avantages exclusifs avec nos abonnements
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Vous venez de payer ? Cliquez sur synchroniser pour récupérer votre abonnement
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Button asChild size="lg" className="shrink-0">
+                    <Link href="/subscription">
+                      <Crown className="h-4 w-4 mr-2" />
+                      S'abonner
+                    </Link>
+                  </Button>
+                  <SyncSubscriptionButton />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -139,9 +263,9 @@ export default async function DashboardPage() {
             <CardDescription>Vos dernières demandes de pressing</CardDescription>
           </CardHeader>
           <CardContent>
-            {bookings && bookings.length > 0 ? (
+            {enrichedBookings && enrichedBookings.length > 0 ? (
               <div className="space-y-4">
-                {bookings.map((booking) => (
+                {enrichedBookings.map((booking) => (
                   <div key={booking.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="space-y-1">
                       <div className="flex items-center space-x-2">

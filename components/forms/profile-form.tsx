@@ -34,15 +34,17 @@ export function ProfileForm({ user, profile }: ProfileFormProps) {
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
   const supabase = createClient()
 
+  const preferences = profile?.preferences || {}
+
   const form = useForm<ProfileInput>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       firstName: profile?.first_name || user.user_metadata?.first_name || "",
       lastName: profile?.last_name || user.user_metadata?.last_name || "",
       phone: profile?.phone || user.user_metadata?.phone || "",
-      marketingConsent: profile?.marketing_consent || false,
-      smsNotifications: profile?.sms_notifications || true,
-      emailNotifications: profile?.email_notifications || true,
+      marketingConsent: preferences.marketingConsent || false,
+      smsNotifications: preferences.smsNotifications !== false,
+      emailNotifications: preferences.emailNotifications !== false,
     },
   })
 
@@ -62,21 +64,26 @@ export function ProfileForm({ user, profile }: ProfileFormProps) {
 
       if (authError) throw authError
 
-      // Update user profile in database
       const { error: dbError } = await supabase
         .from("users")
         .update({
           first_name: data.firstName,
           last_name: data.lastName,
           phone: data.phone,
-          marketing_consent: data.marketingConsent,
-          sms_notifications: data.smsNotifications,
-          email_notifications: data.emailNotifications,
+          preferences: {
+            ...preferences,
+            marketingConsent: data.marketingConsent,
+            smsNotifications: data.smsNotifications,
+            emailNotifications: data.emailNotifications,
+          },
           updated_at: new Date().toISOString(),
         })
         .eq("id", user.id)
 
-      if (dbError) throw dbError
+      if (dbError) {
+        console.error("[v0] Profile update error:", dbError)
+        throw dbError
+      }
 
       setMessage({ type: "success", text: "Profil mis à jour avec succès" })
     } catch (error) {
