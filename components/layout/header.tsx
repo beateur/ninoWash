@@ -1,30 +1,23 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { useAuth } from "@/lib/hooks/use-auth"
-import { User, Settings, LogOut, Package, Crown } from "lucide-react"
-import { NotificationCenter } from "@/components/notifications/notification-center"
 import { MobileNav } from "@/components/layout/mobile-nav"
 
+/**
+ * Header Marketing - Domaine Public (www)
+ * 
+ * Ce header est utilisé pour les pages marketing publiques.
+ * Il ne fait AUCUNE vérification d'authentification.
+ * 
+ * Règles:
+ * - Pas d'appel à useAuth()
+ * - Pas de détection d'utilisateur connecté
+ * - Pas d'icône de notification
+ * - Pas d'avatar utilisateur
+ * - Uniquement: Logo, Navigation publique, "Se connecter", "S'inscrire", "Réserver"
+ */
 export function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const { user, loading, signOut } = useAuth()
-
-  const handleSignOut = async () => {
-    await signOut()
-    setIsMenuOpen(false)
-  }
-
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -53,82 +46,21 @@ export function Header() {
             </Link>
           </nav>
 
-          {/* Desktop Actions */}
+          {/* Desktop Actions - Marketing Only */}
           <div className="hidden md:flex items-center space-x-4">
-            {loading ? (
-              <div className="h-8 w-8 animate-pulse bg-muted rounded-full" />
-            ) : user ? (
-              <>
-                <NotificationCenter />
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback>
-                          {user.user_metadata?.first_name?.[0] || user.email?.[0]?.toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end" forceMount>
-                    <div className="flex items-center justify-start gap-2 p-2">
-                      <div className="flex flex-col space-y-1 leading-none">
-                        <p className="font-medium">
-                          {user.user_metadata?.first_name} {user.user_metadata?.last_name}
-                        </p>
-                        <p className="w-[200px] truncate text-sm text-muted-foreground">{user.email}</p>
-                      </div>
-                    </div>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/dashboard">
-                        <User className="mr-2 h-4 w-4" />
-                        Dashboard
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/subscription" className="text-primary font-semibold">
-                        <Crown className="mr-2 h-4 w-4" />
-                        S'abonner
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/bookings">
-                        <Package className="mr-2 h-4 w-4" />
-                        Mes réservations
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/profile">
-                        <Settings className="mr-2 h-4 w-4" />
-                        Profil
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleSignOut}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Se déconnecter
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
-            ) : (
-              <>
-                <Link href="/auth/signin" className="text-sm font-medium hover:text-primary transition-colors">
-                  Se connecter
-                </Link>
-                <Button asChild>
-                  <Link href="/auth/signup">S'inscrire</Link>
-                </Button>
-              </>
-            )}
-            <Button asChild variant={user ? "default" : "secondary"}>
+            <Link href="/auth/signin" className="text-sm font-medium hover:text-primary transition-colors">
+              Se connecter
+            </Link>
+            <Button asChild>
+              <Link href="/auth/signup">S'inscrire</Link>
+            </Button>
+            <Button asChild variant="secondary">
               <Link href="/reservation">Réserver maintenant</Link>
             </Button>
           </div>
 
-          <div className="flex items-center gap-2 md:hidden">
-            {user && <NotificationCenter />}
+          {/* Mobile Menu */}
+          <div className="md:hidden">
             <MobileNav />
           </div>
         </div>
