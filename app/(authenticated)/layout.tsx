@@ -17,17 +17,42 @@ import { BottomNav } from "@/components/mobile/bottom-nav"
  * - Avatar utilisateur
  * - Navigation utilisateur
  */
-export default function AuthenticatedLayout({
+import { ReactNode } from "react"
+import { DashboardSidebar } from "@/components/layout/dashboard-sidebar"
+import { MobileAuthNav } from "@/components/layout/mobile-auth-nav"
+import { requireAuth } from "@/lib/auth/route-guards"
+
+export default async function AuthenticatedLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: ReactNode
 }) {
+  const { user, supabase } = await requireAuth()
+
+  // Check for active subscription
+  const { data: subscription } = await supabase
+    .from("subscriptions")
+    .select("id")
+    .eq("user_id", user.id)
+    .in("status", ["active", "trialing"])
+    .maybeSingle()
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <AuthenticatedHeader />
-      <main className="flex-1 pb-16 md:pb-0">{children}</main>
-      <Footer />
-      <BottomNav />
+    <div className="flex h-screen overflow-hidden">
+      {/* Desktop Sidebar */}
+      <div className="hidden md:block">
+        <DashboardSidebar user={user} hasActiveSubscription={!!subscription} />
+      </div>
+
+      {/* Main Content Area */}
+      <main className="flex-1 overflow-y-auto bg-background">
+        {children}
+      </main>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
+        <MobileAuthNav />
+      </div>
     </div>
   )
 }
