@@ -14,6 +14,7 @@ import {
   ChevronRight,
   AlertCircle,
   Edit,
+  X,
 } from "lucide-react"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
@@ -150,10 +151,17 @@ interface BookingDetailPanelProps {
 export function BookingDetailPanel({ booking, onClose }: BookingDetailPanelProps) {
   const [showProblemForm, setShowProblemForm] = useState(false)
   const [showModifyForm, setShowModifyForm] = useState(false)
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false)
 
   const statusInfo = getStatusInfo(booking.status)
   const pickupDate = booking.pickup_date ? new Date(booking.pickup_date) : null
   const deliveryDate = booking.delivery_date ? new Date(booking.delivery_date) : null
+
+  // Check if booking is in the future (pickup date is after today)
+  const isFutureBooking = pickupDate && pickupDate > new Date()
+  
+  // Check if booking can be modified (pending or confirmed status and future date)
+  const canModify = isFutureBooking && ["pending", "confirmed"].includes(booking.status)
 
   return (
     <div className="h-full overflow-y-auto">
@@ -265,6 +273,7 @@ export function BookingDetailPanel({ booking, onClose }: BookingDetailPanelProps
 
           {/* Actions */}
           <div className="space-y-3 pt-4 border-t">
+            {/* Signaler un problème - toujours disponible */}
             <Button
               variant="outline"
               className="w-full justify-start"
@@ -273,14 +282,30 @@ export function BookingDetailPanel({ booking, onClose }: BookingDetailPanelProps
               <AlertCircle className="mr-2 h-4 w-4" />
               Signaler un problème
             </Button>
-            <Button
-              variant="outline"
-              className="w-full justify-start"
-              onClick={() => setShowModifyForm(true)}
-            >
-              <Edit className="mr-2 h-4 w-4" />
-              Modifier les réservations futures
-            </Button>
+
+            {/* Modifier la réservation - seulement pour réservations futures */}
+            {canModify && (
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => setShowModifyForm(true)}
+              >
+                <Edit className="mr-2 h-4 w-4" />
+                Modifier la réservation
+              </Button>
+            )}
+
+            {/* Annuler la réservation - seulement pour réservations futures */}
+            {canModify && (
+              <Button
+                variant="outline"
+                className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                onClick={() => setShowCancelConfirm(true)}
+              >
+                <X className="mr-2 h-4 w-4" />
+                Annuler la réservation
+              </Button>
+            )}
           </div>
 
           {/* Problem form placeholder */}
@@ -299,13 +324,39 @@ export function BookingDetailPanel({ booking, onClose }: BookingDetailPanelProps
           {/* Modify form placeholder */}
           {showModifyForm && (
             <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm font-medium mb-2">Modifier les réservations futures</p>
+              <p className="text-sm font-medium mb-2">Modifier la réservation</p>
               <p className="text-sm text-muted-foreground mb-3">
                 Formulaire de modification en développement...
               </p>
               <Button variant="outline" size="sm" onClick={() => setShowModifyForm(false)}>
                 Fermer
               </Button>
+            </div>
+          )}
+
+          {/* Cancel confirmation */}
+          {showCancelConfirm && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm font-medium mb-2 text-red-900">Annuler la réservation</p>
+              <p className="text-sm text-muted-foreground mb-3">
+                Êtes-vous sûr de vouloir annuler cette réservation ? Cette action est irréversible.
+              </p>
+              <div className="flex gap-2">
+                <Button 
+                  variant="destructive" 
+                  size="sm"
+                  onClick={() => {
+                    // TODO: Implement cancellation logic
+                    console.log("Cancelling booking:", booking.id)
+                    setShowCancelConfirm(false)
+                  }}
+                >
+                  Confirmer l'annulation
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setShowCancelConfirm(false)}>
+                  Conserver
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>

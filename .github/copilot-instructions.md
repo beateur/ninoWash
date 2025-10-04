@@ -3,6 +3,108 @@
 ## Project Overview
 Modern home laundry service platform (pressing à domicile) built with Next.js 14 App Router, TypeScript, Supabase (PostgreSQL + Auth), and Stripe payments. Features guest bookings, subscriptions, admin dashboard, and PWA capabilities.
 
+**🔥 CRITICAL: This is a FULLSTACK project. Every feature requires frontend + backend + database + DevOps considerations.**
+
+## Fullstack Development Workflow (MANDATORY)
+
+### For ANY new feature or evolution:
+
+1. **📚 Consult Documentation First**
+   - Read `docs/architecture.md` for patterns
+   - Read `docs/DATABASE_SCHEMA.md` for database structure
+   - Read `docs/api-integration-guide.md` for API patterns
+   - Check existing similar features for consistency
+
+2. **📋 Create Complete PRD (BEFORE coding)**
+   - **Context**: Why? Which user journey?
+   - **Goals**: Success criteria (what must work end-to-end)
+   - **Scope**: 
+     - Frontend: Components, pages, UI states
+     - Backend: API routes, business logic
+     - Database: Tables, columns, RLS policies, migrations
+     - DevOps: Environment variables, Supabase functions, webhooks
+   - **Technical Stack**:
+     - Frontend components to create/modify
+     - API routes to implement
+     - Database schema changes (SQL migrations)
+     - Validation schemas (Zod)
+     - Type definitions (TypeScript)
+   - **Data Flow**: Request → Validation → DB → Response → UI update
+   - **Security**: Auth guards, RLS policies, input sanitization
+   - **Error Handling**: All failure scenarios and user feedback
+   - **Testing Strategy**: Unit tests, integration tests, E2E scenarios
+
+3. **✅ Complete Implementation Checklist**
+   For each feature, implement ALL layers:
+   - [ ] **Frontend**: UI components with loading/error/success states
+   - [ ] **Validation**: Zod schemas for all inputs
+   - [ ] **API Routes**: Backend endpoints with proper error handling
+   - [ ] **Database**: 
+     - SQL migration files (if schema changes)
+     - RLS policies for security
+     - Indexes for performance
+   - [ ] **Types**: TypeScript interfaces for request/response
+   - [ ] **Tests**: At least basic happy path + error cases
+   - [ ] **Documentation**: Update relevant docs with new feature
+   - [ ] **DevOps**: Environment variables documented in `.env.example`
+
+### Example: "Annuler une réservation" (Complete Stack)
+
+**❌ WRONG (Frontend only)**:
+```tsx
+<Button onClick={() => alert("Annulation!")}>Annuler</Button>
+```
+
+**✅ CORRECT (Full implementation)**:
+
+1. **PRD Section**:
+   ```markdown
+   ## Feature: Cancel Booking
+   - Frontend: Cancel button + confirmation dialog
+   - Backend: POST /api/bookings/[id]/cancel
+   - Database: Add cancellation_reason, cancelled_at columns
+   - Validation: Zod schema for cancel request
+   - Security: User can only cancel their own bookings
+   - Business Rules: Only pending/confirmed bookings can be cancelled
+   ```
+
+2. **Frontend**: 
+   - `components/booking/cancel-dialog.tsx` (UI)
+   - API call with error handling
+
+3. **Validation**:
+   - `lib/validations/booking.ts`:
+     ```typescript
+     export const cancelBookingSchema = z.object({
+       reason: z.string().min(10).max(500),
+     })
+     ```
+
+4. **API Route**:
+   - `app/api/bookings/[id]/cancel/route.ts`:
+     ```typescript
+     export async function POST(req, { params }) {
+       // Auth check
+       // Validation
+       // Business logic
+       // DB update
+       // Return response
+     }
+     ```
+
+5. **Database Migration**:
+   - `supabase/migrations/YYYYMMDDHHMMSS_add_booking_cancellation.sql`:
+     ```sql
+     ALTER TABLE bookings 
+       ADD COLUMN cancellation_reason TEXT,
+       ADD COLUMN cancelled_at TIMESTAMPTZ;
+     ```
+
+6. **Testing**:
+   - Test API endpoint
+   - Test UI flow
+   - Test edge cases (already cancelled, not owner, etc.)
+
 ## Critical Architecture Rules
 
 ### Server/Client Component Boundary
@@ -55,27 +157,143 @@ pnpm tsc --noEmit     # TypeScript check
 pnpm test             # Run Vitest tests
 ```
 
-### UI Requests Policy (PRD-first)
-- For ANY UI-related request (feature evolution or UI debugging), start with a lightweight Product Requirements Document (PRD) before writing code.
-- The PRD must break down the request into clearly separated concerns when multiple UI elements are involved within the same ask.
-- Keep it short but complete; the goal is alignment, not bureaucracy.
+### UI Requests Policy (PRD-first + Fullstack)
+- For ANY UI-related request (feature evolution or UI debugging), start with a comprehensive Product Requirements Document (PRD) BEFORE writing any code.
+- **UI changes always impact the backend**: Even simple UI changes often require API modifications, database updates, or new validation rules.
+- The PRD must cover the COMPLETE stack: Frontend, Backend, Database, DevOps, Testing.
+- Break down complex requests into clearly separated concerns.
 
-PRD template to use in comments of the PR or in the task description:
-- Context: Why this change? Which user journey is impacted?
-- Goals (success criteria): What must be true to consider it done?
-- Scope (in/out): List UI elements included and explicitly excluded
-- UX changes: Navigation, layouts, responsive behavior, accessibility
-- States: loading/empty/error/success
-- Data contract: inputs/outputs, API calls, validation (Zod), error modes
-- Edge cases: auth, permissions, large lists, timeouts, offline
-- Visual references: links or brief description (no heavy attachments required)
-- Rollout/Tracking: flags, metrics, logs (if any)
+**PRD Template (Fullstack - MANDATORY for all features)**:
 
-Decomposition guideline (when one ask mixes multiple UI evolutions):
-- Split by surface: header/sidebar/footer/page/section/modal/toast
-- Split by flow: create/edit/delete/view/list/detail
-- Split by platform: desktop vs. mobile differences
-- Each sub-scope should have its own acceptance criteria and tests
+```markdown
+# Feature: [Name]
+
+## 1. Context
+- Why this change?
+- Which user journey is impacted?
+- Business value / user pain point
+
+## 2. Goals (Success Criteria)
+- What must be true to consider it done (end-to-end)?
+- [ ] User can perform action X
+- [ ] Data is persisted correctly
+- [ ] Errors are handled gracefully
+- [ ] Performance is acceptable (<2s response time)
+
+## 3. Scope
+
+### Frontend
+- **Components to create/modify**: List all React components
+- **Pages affected**: List all routes
+- **UI States**: loading, empty, error, success
+- **User flows**: Step-by-step interaction
+- **Responsive behavior**: Desktop vs mobile
+- **Accessibility**: ARIA labels, keyboard navigation
+
+### Backend
+- **API Routes to create**: List all endpoints with HTTP methods
+  - POST /api/resource
+  - GET /api/resource/[id]
+  - etc.
+- **Business logic**: Rules and constraints
+- **External APIs**: Stripe, email service, etc.
+
+### Database
+- **Schema changes**: New tables, columns, indexes
+- **Migrations**: SQL files to create
+- **RLS Policies**: Security rules
+- **Data relationships**: Foreign keys, joins
+
+### Validation
+- **Input validation**: Zod schemas for all user inputs
+- **Business rules**: Status transitions, permissions
+
+### Security
+- **Authentication**: Which routes require auth?
+- **Authorization**: Who can access what?
+- **RLS Policies**: Database-level security
+- **Input sanitization**: XSS prevention
+
+### DevOps
+- **Environment variables**: New secrets or configs
+- **Supabase functions**: Edge functions needed
+- **Webhooks**: External integrations
+
+## 4. Technical Implementation Plan
+
+### Step 1: Database (if schema changes)
+- [ ] Create migration file
+- [ ] Add RLS policies
+- [ ] Test in local Supabase
+
+### Step 2: Validation Schemas
+- [ ] Create Zod schemas
+- [ ] Export TypeScript types
+
+### Step 3: API Routes
+- [ ] Implement endpoints
+- [ ] Add error handling
+- [ ] Test with curl/Postman
+
+### Step 4: Frontend
+- [ ] Create/modify components
+- [ ] Integrate API calls
+- [ ] Handle loading/error states
+- [ ] Add optimistic updates (if needed)
+
+### Step 5: Testing
+- [ ] Unit tests for business logic
+- [ ] Integration tests for API
+- [ ] E2E tests for critical flows
+
+### Step 6: Documentation
+- [ ] Update architecture docs
+- [ ] Add API documentation
+- [ ] Update README if needed
+
+## 5. Data Flow
+```
+User Action → Frontend Component → API Route → Validation → 
+Database → Response → Frontend Update → User Feedback
+```
+
+## 6. Error Scenarios
+- Network failure
+- Validation errors
+- Database errors
+- Permission denied
+- Rate limiting
+- Timeout
+
+## 7. Edge Cases
+- Concurrent updates
+- Large datasets (pagination)
+- Offline mode
+- Browser compatibility
+
+## 8. Testing Strategy
+- Unit tests: Business logic
+- Integration tests: API + DB
+- E2E tests: User flows
+- Manual testing: Edge cases
+
+## 9. Rollout Plan
+- Feature flags (if phased rollout)
+- Monitoring/logging
+- Rollback strategy
+- Performance metrics
+
+## 10. Out of Scope (Explicitly)
+- List what is NOT included in this iteration
+```
+
+**Decomposition Guideline**:
+When one request mixes multiple features:
+- Split by **layer**: Frontend → Backend → Database → DevOps
+- Split by **surface**: Header/Sidebar/Modal/Page
+- Split by **flow**: Create/Read/Update/Delete
+- Split by **user role**: Guest/User/Admin
+- Each sub-scope gets its own mini-PRD
 
 ### Admin Pattern
 ```typescript
@@ -126,21 +344,40 @@ export async function POST(request: Request) {
 ## Testing & Validation Checklist
 
 Before completing any task:
-- [ ] For UI tasks: PRD created, reviewed, and checked against acceptance criteria
-- [ ] All inputs validated with Zod schemas
-- [ ] Proper Server/Client component separation verified
-- [ ] Error handling with correct HTTP status codes
-- [ ] TypeScript strict mode compliance (`pnpm tsc --noEmit`)
-- [ ] Updated existing documentation if architecture changed
-- [ ] Tested locally with `pnpm dev`
+- [ ] **PRD Created**: Complete PRD covering Frontend + Backend + Database + DevOps
+- [ ] **Documentation Consulted**: Read relevant docs before coding
+- [ ] **All Layers Implemented**:
+  - [ ] Frontend components with all UI states
+  - [ ] API routes with error handling
+  - [ ] Database migrations (if schema changes)
+  - [ ] Zod validation schemas
+  - [ ] TypeScript types
+  - [ ] RLS policies (security)
+  - [ ] Tests (at least happy path)
+- [ ] **Security Verified**:
+  - [ ] Auth guards in place
+  - [ ] RLS policies tested
+  - [ ] Input sanitization done
+- [ ] **Error Handling Complete**:
+  - [ ] All failure scenarios covered
+  - [ ] User-friendly error messages
+  - [ ] Proper HTTP status codes
+- [ ] **TypeScript strict mode compliance** (`pnpm tsc --noEmit`)
+- [ ] **Tested locally** with `pnpm dev`
+- [ ] **Documentation updated** if architecture changed
 
 ## Common Pitfalls
 
+- ❌ **Frontend-only implementations** (missing backend/database)
+- ❌ **Skipping the PRD** (jumping straight to code)
+- ❌ **Forgetting database migrations** (schema out of sync)
+- ❌ **Missing RLS policies** (security vulnerability)
 - ❌ Importing `@/lib/supabase/server` in Client Components
 - ❌ Forgetting Zod validation before database operations
 - ❌ Client-side admin checks (always server-side with `requireAdmin()`)
 - ❌ Using `npm` or `yarn` instead of `pnpm`
 - ❌ Creating new documentation files instead of updating existing ones
+- ❌ **Not consulting existing documentation** before implementing
 
 ## Quick Reference
 
