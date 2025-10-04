@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Mail, Lock, User, Phone } from "lucide-react"
 import { signUpSchema, signInSchema, type SignUpInput, type SignInInput } from "@/lib/validations/auth"
-import { clientAuth } from "@/lib/services/auth.service"
+import { clientAuth } from "@/lib/services/auth.service.client"
 
 interface AuthFormProps {
   mode: "signin" | "signup"

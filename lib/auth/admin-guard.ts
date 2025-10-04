@@ -1,4 +1,4 @@
-import { serverAuth } from "@/lib/services/auth.service"
+import { serverAuth } from "@/lib/services/auth.service.server"
 import { redirect } from "next/navigation"
 
 /**
