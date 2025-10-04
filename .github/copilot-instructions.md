@@ -55,6 +55,28 @@ pnpm tsc --noEmit     # TypeScript check
 pnpm test             # Run Vitest tests
 ```
 
+### UI Requests Policy (PRD-first)
+- For ANY UI-related request (feature evolution or UI debugging), start with a lightweight Product Requirements Document (PRD) before writing code.
+- The PRD must break down the request into clearly separated concerns when multiple UI elements are involved within the same ask.
+- Keep it short but complete; the goal is alignment, not bureaucracy.
+
+PRD template to use in comments of the PR or in the task description:
+- Context: Why this change? Which user journey is impacted?
+- Goals (success criteria): What must be true to consider it done?
+- Scope (in/out): List UI elements included and explicitly excluded
+- UX changes: Navigation, layouts, responsive behavior, accessibility
+- States: loading/empty/error/success
+- Data contract: inputs/outputs, API calls, validation (Zod), error modes
+- Edge cases: auth, permissions, large lists, timeouts, offline
+- Visual references: links or brief description (no heavy attachments required)
+- Rollout/Tracking: flags, metrics, logs (if any)
+
+Decomposition guideline (when one ask mixes multiple UI evolutions):
+- Split by surface: header/sidebar/footer/page/section/modal/toast
+- Split by flow: create/edit/delete/view/list/detail
+- Split by platform: desktop vs. mobile differences
+- Each sub-scope should have its own acceptance criteria and tests
+
 ### Admin Pattern
 ```typescript
 // app/admin/page.tsx (Server Component wrapper)
@@ -104,6 +126,7 @@ export async function POST(request: Request) {
 ## Testing & Validation Checklist
 
 Before completing any task:
+- [ ] For UI tasks: PRD created, reviewed, and checked against acceptance criteria
 - [ ] All inputs validated with Zod schemas
 - [ ] Proper Server/Client component separation verified
 - [ ] Error handling with correct HTTP status codes

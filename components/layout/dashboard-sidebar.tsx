@@ -41,16 +41,6 @@ const navItems = [
     href: "/dashboard",
     icon: LayoutDashboard,
   },
-  {
-    label: "Mes réservations",
-    href: "/bookings",
-    icon: Calendar,
-  },
-  {
-    label: "Mon abonnement",
-    href: "/subscription",
-    icon: Crown,
-  },
 ]
 
 export function DashboardSidebar({ user, hasActiveSubscription }: DashboardSidebarProps) {
@@ -118,9 +108,8 @@ export function DashboardSidebar({ user, hasActiveSubscription }: DashboardSideb
       <div className="border-t p-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="w-full justify-start gap-3 px-2 py-6 hover:bg-muted"
+            <button
+              className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <Avatar className="h-8 w-8">
                 <AvatarImage src={user.user_metadata?.avatar_url} />
@@ -128,19 +117,28 @@ export function DashboardSidebar({ user, hasActiveSubscription }: DashboardSideb
                   {userInitials}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex flex-1 flex-col items-start text-left">
-                <span className="text-sm font-medium">
+              <div className="flex flex-1 flex-col items-start overflow-hidden">
+                <span className="text-sm font-medium truncate w-full">
                   {user.user_metadata?.first_name} {user.user_metadata?.last_name}
                 </span>
-                <span className="text-xs text-muted-foreground truncate max-w-[150px]">
+                <span className="text-xs text-muted-foreground truncate w-full">
                   {user.email}
                 </span>
               </div>
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-            </Button>
+              <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
+            </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>Mon compte</DropdownMenuLabel>
+          <DropdownMenuContent side="top" align="start" className="w-56 mb-2">
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none">
+                  {user.user_metadata?.first_name} {user.user_metadata?.last_name}
+                </p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  {user.email}
+                </p>
+              </div>
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link href="/profile" className="cursor-pointer">
@@ -170,7 +168,7 @@ export function DashboardSidebar({ user, hasActiveSubscription }: DashboardSideb
             <DropdownMenuItem
               onClick={handleSignOut}
               disabled={isLoggingOut}
-              className="cursor-pointer text-red-600 focus:text-red-600"
+              className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
             >
               <LogOut className="mr-2 h-4 w-4" />
               {isLoggingOut ? "Déconnexion..." : "Se déconnecter"}
