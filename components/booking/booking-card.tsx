@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { useToast } from "@/hooks/use-toast"
 import {
   Calendar,
   MapPin,
@@ -15,9 +16,12 @@ import {
   AlertCircle,
   Edit,
   X,
+  CheckCircle,
 } from "lucide-react"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
+import { CancelBookingForm } from "./cancel-booking-form"
+import { ReportProblemForm } from "./report-problem-form"
 
 interface BookingWithAddresses {
   id: string
@@ -146,12 +150,14 @@ export function BookingCard({ booking, isSelected, onClick }: BookingCardProps) 
 interface BookingDetailPanelProps {
   booking: BookingWithAddresses
   onClose: () => void
+  onBookingUpdated?: () => void
 }
 
-export function BookingDetailPanel({ booking, onClose }: BookingDetailPanelProps) {
+export function BookingDetailPanel({ booking, onClose, onBookingUpdated }: BookingDetailPanelProps) {
   const [showProblemForm, setShowProblemForm] = useState(false)
   const [showModifyForm, setShowModifyForm] = useState(false)
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)
+  const { toast } = useToast()
 
   const statusInfo = getStatusInfo(booking.status)
   const pickupDate = booking.pickup_date ? new Date(booking.pickup_date) : null
@@ -162,6 +168,26 @@ export function BookingDetailPanel({ booking, onClose }: BookingDetailPanelProps
   
   // Check if booking can be modified (pending or confirmed status and future date)
   const canModify = isFutureBooking && ["pending", "confirmed"].includes(booking.status)
+
+  const handleCancelSuccess = () => {
+    toast({
+      title: "Réservation annulée",
+      description: "Votre réservation a été annulée avec succès.",
+      variant: "default",
+    })
+    setShowCancelConfirm(false)
+    onClose()
+    onBookingUpdated?.()
+  }
+
+  const handleReportSuccess = () => {
+    toast({
+      title: "Problème signalé",
+      description: "Notre équipe vous contactera sous 24h.",
+      variant: "default",
+    })
+    setShowProblemForm(false)
+  }
 
   return (
     <div className="h-full overflow-y-auto">
@@ -310,14 +336,13 @@ export function BookingDetailPanel({ booking, onClose }: BookingDetailPanelProps
 
           {/* Problem form placeholder */}
           {showProblemForm && (
-            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-sm font-medium mb-2">Signaler un problème</p>
-              <p className="text-sm text-muted-foreground mb-3">
-                Formulaire de signalement en développement...
-              </p>
-              <Button variant="outline" size="sm" onClick={() => setShowProblemForm(false)}>
-                Fermer
-              </Button>
+            <div className="p-4 bg-muted border rounded-lg">
+              <p className="text-sm font-medium mb-3">Signaler un problème</p>
+              <ReportProblemForm
+                bookingId={booking.id}
+                onSuccess={handleReportSuccess}
+                onCancel={() => setShowProblemForm(false)}
+              />
             </div>
           )}
 
@@ -337,26 +362,15 @@ export function BookingDetailPanel({ booking, onClose }: BookingDetailPanelProps
           {/* Cancel confirmation */}
           {showCancelConfirm && (
             <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm font-medium mb-2 text-red-900">Annuler la réservation</p>
-              <p className="text-sm text-muted-foreground mb-3">
+              <p className="text-sm font-medium mb-3 text-red-900">Annuler la réservation</p>
+              <p className="text-sm text-muted-foreground mb-4">
                 Êtes-vous sûr de vouloir annuler cette réservation ? Cette action est irréversible.
               </p>
-              <div className="flex gap-2">
-                <Button 
-                  variant="destructive" 
-                  size="sm"
-                  onClick={() => {
-                    // TODO: Implement cancellation logic
-                    console.log("Cancelling booking:", booking.id)
-                    setShowCancelConfirm(false)
-                  }}
-                >
-                  Confirmer l'annulation
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => setShowCancelConfirm(false)}>
-                  Conserver
-                </Button>
-              </div>
+              <CancelBookingForm
+                bookingId={booking.id}
+                onSuccess={handleCancelSuccess}
+                onCancel={() => setShowCancelConfirm(false)}
+              />
             </div>
           )}
         </CardContent>

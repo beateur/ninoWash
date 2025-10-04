@@ -67,8 +67,63 @@ export const createBookingSchema = z
     },
   )
 
+// Booking cancellation schema
+export const cancelBookingSchema = z.object({
+  reason: z
+    .string()
+    .min(10, "La raison doit contenir au moins 10 caractères")
+    .max(500, "La raison ne peut pas dépasser 500 caractères"),
+})
+
+// Booking modification schema
+export const modifyBookingSchema = z
+  .object({
+    pickupAddressId: z.string().uuid("Adresse de collecte invalide"),
+    pickupDate: z.string().refine((date) => {
+      const selectedDate = new Date(date)
+      const tomorrow = new Date()
+      tomorrow.setDate(tomorrow.getDate() + 1)
+      tomorrow.setHours(0, 0, 0, 0)
+      selectedDate.setHours(0, 0, 0, 0)
+      return selectedDate >= tomorrow
+    }, "La date de collecte doit être au minimum demain"),
+    pickupTimeSlot: z.enum(["09:00-12:00", "14:00-17:00", "18:00-21:00"]),
+    deliveryAddressId: z.string().uuid("Adresse de livraison invalide").optional(),
+    deliveryDate: z.string().optional(),
+    deliveryTimeSlot: z.enum(["09:00-12:00", "14:00-17:00", "18:00-21:00"]).optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.deliveryDate) {
+        const pickupDate = new Date(data.pickupDate)
+        const deliveryDate = new Date(data.deliveryDate)
+        return deliveryDate > pickupDate
+      }
+      return true
+    },
+    {
+      message: "La date de livraison doit être après la date de collecte",
+      path: ["deliveryDate"],
+    },
+  )
+
+// Problem report schema
+export const reportProblemSchema = z.object({
+  type: z.enum(["damaged_items", "missing_items", "late_delivery", "quality_issue", "other"], {
+    errorMap: () => ({ message: "Type de problème invalide" }),
+  }),
+  description: z
+    .string()
+    .min(20, "La description doit contenir au moins 20 caractères")
+    .max(1000, "La description ne peut pas dépasser 1000 caractères"),
+  photos: z.array(z.string().url("URL de photo invalide")).max(5, "Maximum 5 photos").optional(),
+})
+
 export type AddressInput = z.infer<typeof addressSchema>
 export type GuestAddressInput = z.infer<typeof guestAddressSchema>
 export type GuestContactInput = z.infer<typeof guestContactSchema>
 export type BookingItemInput = z.infer<typeof bookingItemSchema>
 export type CreateBookingInput = z.infer<typeof createBookingSchema>
+export type CancelBookingInput = z.infer<typeof cancelBookingSchema>
+export type ModifyBookingInput = z.infer<typeof modifyBookingSchema>
+export type ReportProblemInput = z.infer<typeof reportProblemSchema>

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Calendar, MapPin, Package, Plus } from "lucide-react"
@@ -41,6 +42,7 @@ export function DashboardClient({
   hasActiveSubscription,
 }: DashboardClientProps) {
   const [selectedBooking, setSelectedBooking] = useState<BookingWithAddresses | null>(null)
+  const router = useRouter()
 
   const activeBookings = bookings.filter(
     (b) => ["confirmed", "picked_up", "in_progress", "ready"].includes(b.status)
@@ -168,6 +170,11 @@ export function DashboardClient({
           <BookingDetailPanel
             booking={selectedBooking}
             onClose={() => setSelectedBooking(null)}
+            onBookingUpdated={() => {
+              // Refresh server-side data
+              router.refresh()
+              setSelectedBooking(null)
+            }}
           />
         </div>
       )}
