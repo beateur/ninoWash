@@ -2,17 +2,109 @@
 
 Merci de votre intérêt pour contribuer à Nino Wash ! Ce guide vous aidera à comprendre nos conventions de code et notre workflow de développement.
 
+> 📚 **Lectures recommandées avant de commencer :**
+> - [`QUICK_START.md`](QUICK_START.md) - Installation en 5 minutes
+> - [`architecture.md`](architecture.md) - Architecture du projet
+> - [`TECHNICAL_CHANGELOG.md`](TECHNICAL_CHANGELOG.md) - Changements récents
+
+---
+
 ## Table des Matières
 
-1. [Conventions de Code](#conventions-de-code)
-2. [Structure des Fichiers](#structure-des-fichiers)
-3. [Workflow Git](#workflow-git)
-4. [Standards de Développement](#standards-de-développement)
-5. [Tests](#tests)
-6. [Documentation](#documentation)
-7. [Revue de Code](#revue-de-code)
+1. [Prérequis](#prérequis)
+2. [Architecture Next.js 14](#architecture-nextjs-14)
+3. [Conventions de Code](#conventions-de-code)
+4. [Structure des Fichiers](#structure-des-fichiers)
+5. [Workflow Git](#workflow-git)
+6. [Standards de Développement](#standards-de-développement)
+7. [Tests](#tests)
+8. [Documentation](#documentation)
+9. [Revue de Code](#revue-de-code)
 
-## Conventions de Code
+---
+
+## Prérequis
+
+### Outils Requis
+- **Node.js** 18+ 
+- **pnpm** (package manager du projet)
+- **Git**
+- **VS Code** (recommandé) avec extensions :
+  - ESLint
+  - Prettier
+  - Tailwind CSS IntelliSense
+
+### Installation pnpm
+```bash
+npm install -g pnpm
+```
+
+### Connaissance Requise
+- TypeScript
+- React 19
+- Next.js 14 App Router
+- Supabase (authentification et base de données)
+
+---
+
+## Architecture Next.js 14
+
+### ⚠️ RÈGLE CRITIQUE : Séparation Client/Server
+
+Next.js 14 App Router impose une **séparation stricte** entre Server et Client Components.
+
+#### Server Components (par défaut)
+```typescript
+// Peuvent utiliser next/headers, cookies, etc.
+import { createClient } from "@/lib/supabase/server"
+
+export default async function MyPage() {
+  const supabase = await createClient()
+  const { data } = await supabase.from('table').select()
+  return <div>{data}</div>
+}
+```
+
+#### Client Components (avec "use client")
+```typescript
+"use client"
+// NE PEUVENT PAS utiliser next/headers
+import { createClient } from "@/lib/supabase/client"
+import { useState, useEffect } from "react"
+
+export function MyComponent() {
+  const [data, setData] = useState([])
+  const supabase = createClient()
+  // ...
+}
+```
+
+### ❌ Ne Jamais Faire
+- Importer `@/lib/supabase/server` dans un Client Component
+- Utiliser `next/headers` dans un Client Component
+- Mélanger `"use client"` + code serveur (cookies, headers)
+
+### ✅ Pattern Recommandé : Pages Admin
+```typescript
+// app/admin/my-page/page.tsx (Server Component)
+import { requireAdmin } from "@/lib/auth/route-guards"
+import MyPageClient from "./page-client"
+
+export default async function MyPage() {
+  await requireAdmin() // Vérification serveur
+  return <MyPageClient />
+}
+
+// app/admin/my-page/page-client.tsx (Client Component)
+"use client"
+export default function MyPageClient() {
+  // Hooks React, interactivité
+}
+```
+
+📖 **Plus de détails :** [`architecture.md`](architecture.md) - Section "Patterns Courants"
+
+--- Conventions de Code
 
 ### Nommage
 

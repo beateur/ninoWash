@@ -1,21 +1,18 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { apiRequireAuth } from "@/lib/auth/api-guards"
 import { createClient } from "@/lib/supabase/server"
 import { createBookingSchema } from "@/lib/validations/booking"
 import { z } from "zod"
 
 export async function GET(request: NextRequest) {
+  const { user, supabase, error } = await apiRequireAuth(request)
+
+  if (error) {
+    return error
+  }
+
   try {
-    const supabase = await createClient()
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
-    }
-
-    const { data: bookings, error } = await supabase
+    const { data: bookings, error: fetchError } = await supabase
       .from("bookings")
       .select(`
         *,
@@ -32,8 +29,8 @@ export async function GET(request: NextRequest) {
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
 
-    if (error) {
-      console.error("[v0] Bookings fetch error:", error)
+    if (fetchError) {
+      console.error("[v0] Bookings fetch error:", fetchError)
       return NextResponse.json({ error: "Erreur lors de la récupération des réservations" }, { status: 500 })
     }
 
@@ -116,7 +113,7 @@ export async function POST(request: NextRequest) {
       .insert({
         booking_number: generateBookingNumber(),
         user_id: user?.id || null,
-        service_id: primaryServiceId, // Add required service_id
+        service_id: primaryServiceId,
         pickup_address_id: pickupAddressId,
         delivery_address_id: deliveryAddressId,
         pickup_date: validatedData.pickupDate,

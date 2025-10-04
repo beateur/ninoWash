@@ -1,10 +1,16 @@
 # Guide d'Exécution des Scripts SQL - Nino Wash
 
+> 📚 **Voir aussi :** [`docs/DATABASE_SCHEMA.md`](docs/DATABASE_SCHEMA.md) pour le schéma complet
+
+---
+
 ## 📊 État Actuel
 
 Votre base de données Supabase contient **48 tables** déjà créées et fonctionnelles.
 
-## ✅ Script à Exécuter
+**Package manager :** Ce projet utilise `pnpm` pour toutes les commandes.
+
+--- ✅ Script à Exécuter
 
 ### Script Recommandé: `10-consolidation-and-cleanup.sql`
 
@@ -107,14 +113,14 @@ Le script de consolidation est **100% sécurisé**:
 - ✅ Ne supprime aucune donnée existante
 - ✅ Génère des messages informatifs à chaque étape
 
-## 📞 Support
+## 🆘 Support
 
-Si vous rencontrez des problèmes:
-1. Vérifiez les messages NOTICE dans les logs d'exécution
-2. Consultez le rapport final généré par le script
-3. Contactez le support si nécessaire
+Pour toute question ou problème :
+- 📖 Documentation : Consultez le dossier `docs/` pour la documentation complète
+- 📋 Schema : Voir [`docs/DATABASE_SCHEMA.md`](docs/DATABASE_SCHEMA.md)
+- 🚀 Démarrage : Voir [`docs/QUICK_START.md`](docs/QUICK_START.md)
 
 ---
 
-**Dernière mise à jour**: 30 septembre 2025
-**Version du script**: 10-consolidation-and-cleanup.sql v1.0
+**Dernière mise à jour :** 3 octobre 2025  
+**Version du script :** 10-consolidation-and-cleanup.sql v1.0

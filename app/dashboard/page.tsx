@@ -1,35 +1,21 @@
-import { createServerClient } from "@supabase/ssr"
+import { requireAuth } from "@/lib/auth/route-guards"
 import { redirect } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, Package, MapPin, Clock, Plus, Crown } from "lucide-react"
 import Link from "next/link"
-import { cookies } from "next/headers"
 import { SyncSubscriptionButton } from "@/components/subscription/sync-subscription-button"
+import { LogoutButton } from "@/components/auth/logout-button"
 
 export default async function DashboardPage() {
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
-        },
-      },
-    },
-  )
+  const { user, supabase } = await requireAuth()
 
   const {
-    data: { user },
+    data: { user: fetchedUser },
   } = await supabase.auth.getUser()
 
-  if (!user) {
+  if (!fetchedUser) {
     redirect("/auth/signin")
   }
 
@@ -119,11 +105,14 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted">
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-balance">Bonjour {user.user_metadata?.first_name || ""}</h1>
-          <p className="text-muted-foreground mt-2">
-            Gérez vos réservations et votre profil depuis votre tableau de bord
-          </p>
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-balance">Bonjour {user.user_metadata?.first_name || ""}</h1>
+            <p className="text-muted-foreground mt-2">
+              Gérez vos réservations et votre profil depuis votre tableau de bord
+            </p>
+          </div>
+          <LogoutButton />
         </div>
 
         {/* Quick Stats */}

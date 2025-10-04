@@ -1,6 +1,19 @@
-# Correction du problème de schéma de base de données
+# ⚠️ DOCUMENT ARCHIVÉ - Correction du problème de schéma de base de données
 
-## Problème identifié
+> **Statut :** ✅ RÉSOLU  
+> **Date de résolution :** Septembre 2025  
+> **Document actuel :** Voir [`docs/DATABASE_SCHEMA.md`](docs/DATABASE_SCHEMA.md) pour le schéma à jour  
+> **Changements récents :** Voir [`docs/TECHNICAL_CHANGELOG.md`](docs/TECHNICAL_CHANGELOG.md)
+
+---
+
+## 📌 Contexte Historique
+
+Ce document décrit un problème de schéma de base de données qui a été résolu. Il est conservé à titre de référence historique.
+
+---
+
+## Problème identifié (RÉSOLU)
 
 L'application rencontrait des erreurs 400/500 en cascade dues à un décalage entre le code et le schéma réel de la base de données Supabase.
 

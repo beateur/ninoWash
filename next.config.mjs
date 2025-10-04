@@ -1,18 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
-    ignoreDuringBuilds: false, // Enable ESLint in production builds
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    ignoreBuildErrors: false, // Enable TypeScript checking in production
+    ignoreBuildErrors: false,
   },
   images: {
-    unoptimized: false, // Enable image optimization
+    unoptimized: false,
     domains: ['images.unsplash.com', 'via.placeholder.com'],
     formats: ['image/webp', 'image/avif'],
   },
   experimental: {
-    optimizeCss: true,
+    // optimizeCss: true, // Désactivé temporairement - nécessite le package 'critters'
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
   async headers() {
@@ -30,11 +30,20 @@ const nextConfig = {
           },
           {
             key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
+            value: 'strict-origin-when-cross-origin',
           },
           {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
+          },
+        ],
+      },
+      {
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, max-age=0',
           },
         ],
       },

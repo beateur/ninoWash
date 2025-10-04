@@ -337,10 +337,31 @@ Un outil de visualisation de base de données est disponible à `/database-viewe
 
 ### Routes et Navigation
 Pour une documentation complète des routes, interfaces et conditions de routage, consultez :
-- `docs/routes-and-interfaces.md` : Liste exhaustive des routes publiques et protégées
-- `docs/architecture.md` : Architecture de l'application
-- `docs/booking-system-workflow.md` : Workflow du système de réservation
-- `docs/services-documentation.md` : Documentation des services
+- **`docs/QUICK_START.md`** : 🚀 Guide de démarrage rapide (nouveau développeur)
+- **`docs/architecture.md`** : Architecture de l'application et patterns
+- **`docs/routes-and-interfaces.md`** : Liste exhaustive des routes publiques et protégées
+- **`docs/TECHNICAL_CHANGELOG.md`** : Historique des changements techniques
+- **`docs/booking-system-workflow.md`** : Workflow du système de réservation
+- **`docs/services-documentation.md`** : Documentation des services
+
+### ⚠️ Important : Séparation Client/Server (Next.js App Router)
+
+Le projet utilise Next.js 14 App Router avec une séparation stricte entre Server et Client Components :
+
+```typescript
+// ✅ Client Component (interactivité, hooks)
+"use client"
+import { createClient } from "@/lib/supabase/client"
+
+// ✅ Server Component (auth, données)
+import { createClient } from "@/lib/supabase/server"
+```
+
+**Règle d'or :** Ne jamais importer `@/lib/supabase/server` dans un Client Component.
+
+Pour plus de détails, voir :
+- `docs/architecture.md` - Section "Patterns Courants et Bonnes Pratiques"
+- `docs/TECHNICAL_CHANGELOG.md` - Derniers changements architecturaux
 
 ## 📊 Monitoring et Analytics
 
@@ -363,10 +384,23 @@ Pour contribuer au projet, veuillez consulter le guide de contribution :
 
 ## 📚 Documentation Supplémentaire
 
-- `DEPLOYMENT.md` : Guide de déploiement détaillé
-- `SCHEMA_FIX_README.md` : Documentation sur les corrections de schéma
-- `SCRIPTS_EXECUTION_GUIDE.md` : Guide d'exécution des scripts
-- `docs/SUBSCRIPTION_RESOLUTION_LOG.md` : Log de résolution des problèmes d'abonnement
+### Guides de Développement
+- **`docs/QUICK_START.md`** : Guide de démarrage rapide (5 minutes)
+- **`docs/TECHNICAL_CHANGELOG.md`** : Historique des changements techniques
+- **`docs/architecture.md`** : Architecture complète et patterns
+- **`docs/CONTRIBUTING.md`** : Conventions de code et workflow Git
+
+### Documentation Opérationnelle
+- **`DEPLOYMENT.md`** : Guide de déploiement détaillé
+- **`SETUP_LOCAL.md`** : Configuration environnement local
+- **`SCHEMA_FIX_README.md`** : Corrections de schéma database
+- **`SCRIPTS_EXECUTION_GUIDE.md`** : Guide d'exécution des scripts
+
+### Documentation Technique
+- **`docs/DATABASE_SCHEMA.md`** : Schéma complet de la base de données
+- **`docs/api-integration-guide.md`** : Guide d'intégration API
+- **`docs/SECURITY_P0_CHECKLIST.md`** : Checklist de sécurité
+- **`docs/KEY_ROTATION_PROCEDURE.md`** : Procédure de rotation des clés
 
 ## 📄 Licence
 

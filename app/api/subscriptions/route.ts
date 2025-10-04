@@ -1,43 +1,17 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createServerClient } from "@supabase/ssr"
+import { apiRequireAuth } from "@/lib/auth/api-guards"
 import { createSubscriptionSchema } from "@/lib/validations/payment"
-import { cookies } from "next/headers"
 
 export async function GET(request: NextRequest) {
+  const { user, supabase, error } = await apiRequireAuth(request)
+
+  if (error) {
+    return error
+  }
+
   try {
-    const cookieStore = await cookies()
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll()
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
-          },
-        },
-      },
-    )
-
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      console.warn("[v0] Unauthorized access attempt to /api/subscriptions")
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
-    }
-
-    if (!user.id || typeof user.id !== "string") {
-      console.error("[v0] Invalid user ID:", user.id)
-      return NextResponse.json({ error: "ID utilisateur invalide" }, { status: 400 })
-    }
-
     // Get user's subscriptions with plan details
-    const { data: subscriptions, error } = await supabase
+    const { data: subscriptions, error: fetchError } = await supabase
       .from("subscriptions")
       .select(`
         *,
@@ -57,8 +31,8 @@ export async function GET(request: NextRequest) {
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
 
-    if (error) {
-      console.error("[v0] Error fetching subscriptions:", error.message)
+    if (fetchError) {
+      console.error("[v0] Error fetching subscriptions:", fetchError.message)
       return NextResponse.json({ error: "Erreur lors de la récupération des abonnements" }, { status: 500 })
     }
 
@@ -75,33 +49,13 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const { user, supabase, error } = await apiRequireAuth(request)
+
+  if (error) {
+    return error
+  }
+
   try {
-    const cookieStore = await cookies()
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll()
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
-          },
-        },
-      },
-    )
-
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      console.warn("[v0] Unauthorized subscription creation attempt")
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
-    }
-
     let body
     try {
       body = await request.json()
@@ -158,7 +112,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create subscription
-    const { data: subscription, error } = await supabase
+    const { data: subscription, error: createError } = await supabase
       .from("subscriptions")
       .insert({
         user_id: user.id,
@@ -172,8 +126,8 @@ export async function POST(request: NextRequest) {
       .select()
       .single()
 
-    if (error) {
-      console.error("[v0] Error creating subscription:", error)
+    if (createError) {
+      console.error("[v0] Error creating subscription:", createError)
       return NextResponse.json({ error: "Erreur lors de la création de l'abonnement" }, { status: 500 })
     }
 
@@ -190,7 +144,7 @@ export async function POST(request: NextRequest) {
       type: "subscription",
       amount: plan.price_amount,
       currency: plan.currency,
-      status: "succeeded", // In real app, this would be handled by payment processor
+      status: "succeeded",
       description: `Abonnement ${plan.name}`,
       processed_at: new Date().toISOString(),
     })

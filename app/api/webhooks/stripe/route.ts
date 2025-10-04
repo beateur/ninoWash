@@ -1,9 +1,8 @@
 import { headers } from "next/headers"
 import { NextResponse } from "next/server"
 import type Stripe from "stripe"
-import { stripe } from "@/lib/stripe"
-import { createServerClient } from "@supabase/ssr"
-import { cookies } from "next/headers"
+import { stripe, validateWebhookSignature, STRIPE_WEBHOOK_CONFIG } from "@/lib/stripe"
+import { createAdminClient } from "@/lib/supabase/admin"
 
 export async function POST(req: Request) {
   const body = await req.text()
@@ -18,25 +17,14 @@ export async function POST(req: Request) {
   let event: Stripe.Event
 
   try {
-    event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!)
+    event = validateWebhookSignature(body, signature, STRIPE_WEBHOOK_CONFIG.secret)
     console.log("[v0] Webhook event type:", event.type)
   } catch (err) {
     console.error("[v0] Webhook signature verification failed:", err)
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
   }
 
-  // Create Supabase client
-  const cookieStore = await cookies()
-  const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
-    cookies: {
-      getAll() {
-        return cookieStore.getAll()
-      },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
-      },
-    },
-  })
+  const supabase = createAdminClient()
 
   try {
     switch (event.type) {
@@ -73,19 +61,23 @@ export async function POST(req: Request) {
           customerId: subscription.customer,
         })
 
-        // Create subscription record in database
-        const { error: subscriptionError } = await supabase.from("subscriptions").insert({
-          user_id: userId,
-          plan_id: planId,
-          stripe_subscription_id: subscriptionId,
-          stripe_customer_id: session.customer as string,
-          status: subscription.status,
-          current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-          current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-          cancel_at_period_end: subscription.cancel_at_period_end,
-          trial_start: subscription.trial_start ? new Date(subscription.trial_start * 1000).toISOString() : null,
-          trial_end: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null,
-        })
+        const { error: subscriptionError } = await supabase.from("subscriptions").upsert(
+          {
+            user_id: userId,
+            plan_id: planId,
+            stripe_subscription_id: subscriptionId,
+            stripe_customer_id: session.customer as string,
+            status: subscription.status,
+            current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
+            current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+            cancel_at_period_end: subscription.cancel_at_period_end,
+            trial_start: subscription.trial_start ? new Date(subscription.trial_start * 1000).toISOString() : null,
+            trial_end: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null,
+          },
+          {
+            onConflict: "stripe_subscription_id",
+          },
+        )
 
         if (subscriptionError) {
           console.error("[v0] Error creating subscription:", subscriptionError)
@@ -99,7 +91,6 @@ export async function POST(req: Request) {
       case "customer.subscription.updated": {
         const subscription = event.data.object as Stripe.Subscription
 
-        // Update subscription in database
         const { error: updateError } = await supabase
           .from("subscriptions")
           .update({
@@ -108,6 +99,8 @@ export async function POST(req: Request) {
             current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
             cancel_at_period_end: subscription.cancel_at_period_end,
             canceled_at: subscription.canceled_at ? new Date(subscription.canceled_at * 1000).toISOString() : null,
+            trial_start: subscription.trial_start ? new Date(subscription.trial_start * 1000).toISOString() : null,
+            trial_end: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null,
           })
           .eq("stripe_subscription_id", subscription.id)
 
@@ -144,15 +137,32 @@ export async function POST(req: Request) {
       case "invoice.payment_succeeded": {
         const invoice = event.data.object as Stripe.Invoice
 
+        const { data: subscription } = await supabase
+          .from("subscriptions")
+          .select("id, user_id")
+          .eq("stripe_subscription_id", invoice.subscription as string)
+          .single()
+
+        if (!subscription) {
+          console.error("[v0] Subscription not found for invoice:", invoice.id)
+          break
+        }
+
         // Record successful payment
-        const { error: paymentError } = await supabase.from("payments").insert({
-          subscription_id: invoice.subscription as string,
-          stripe_invoice_id: invoice.id,
-          amount: invoice.amount_paid / 100, // Convert from cents
-          currency: invoice.currency,
-          status: "succeeded",
-          paid_at: new Date(invoice.status_transitions.paid_at! * 1000).toISOString(),
-        })
+        const { error: paymentError } = await supabase.from("payments").upsert(
+          {
+            user_id: subscription.user_id,
+            subscription_id: subscription.id,
+            stripe_invoice_id: invoice.id,
+            amount: invoice.amount_paid / 100,
+            currency: invoice.currency,
+            status: "succeeded",
+            paid_at: new Date(invoice.status_transitions.paid_at! * 1000).toISOString(),
+          },
+          {
+            onConflict: "stripe_invoice_id",
+          },
+        )
 
         if (paymentError) {
           console.error("[v0] Error recording payment:", paymentError)
@@ -166,14 +176,31 @@ export async function POST(req: Request) {
       case "invoice.payment_failed": {
         const invoice = event.data.object as Stripe.Invoice
 
+        const { data: subscription } = await supabase
+          .from("subscriptions")
+          .select("id, user_id")
+          .eq("stripe_subscription_id", invoice.subscription as string)
+          .single()
+
+        if (!subscription) {
+          console.error("[v0] Subscription not found for failed invoice:", invoice.id)
+          break
+        }
+
         // Record failed payment
-        const { error: paymentError } = await supabase.from("payments").insert({
-          subscription_id: invoice.subscription as string,
-          stripe_invoice_id: invoice.id,
-          amount: invoice.amount_due / 100,
-          currency: invoice.currency,
-          status: "failed",
-        })
+        const { error: paymentError } = await supabase.from("payments").upsert(
+          {
+            user_id: subscription.user_id,
+            subscription_id: subscription.id,
+            stripe_invoice_id: invoice.id,
+            amount: invoice.amount_due / 100,
+            currency: invoice.currency,
+            status: "failed",
+          },
+          {
+            onConflict: "stripe_invoice_id",
+          },
+        )
 
         if (paymentError) {
           console.error("[v0] Error recording failed payment:", paymentError)

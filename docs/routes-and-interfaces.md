@@ -75,22 +75,56 @@ Ces routes nécessitent une authentification ET le rôle "admin".
 
 | Route | Fichier | Protection | Description |
 |-------|---------|-----------|-------------|
-| `/admin` | `app/admin/page.tsx` | ✅ Role-based | Dashboard admin avec statistiques globales |
+| `/admin` | `app/admin/page.tsx` (Server) + `app/admin/dashboard-client.tsx` (Client) | ✅ Role-based (Server) | Dashboard admin avec statistiques globales |
 | `/admin/bookings` | `app/admin/bookings/page.tsx` | ✅ Role-based | Gestion de toutes les réservations |
 | `/database-viewer` | `app/database-viewer/page.tsx` | ⚠️ Dev only | Visualisation de la base de données |
 
 **Layout Admin :** `app/admin/layout.tsx`
 
+**Architecture Hybride Server/Client :**
+
+Les pages admin utilisent un pattern hybride pour la sécurité et l'interactivité :
+
+```typescript
+// ✅ Server Component (page.tsx) - Vérifie les permissions
+import { requireAdmin } from "@/lib/auth/route-guards"
+import AdminDashboardClient from "./dashboard-client"
+
+export default async function AdminDashboard() {
+  // Vérification serveur (sécurisée)
+  await requireAdmin()
+  
+  // Rend le composant client
+  return <AdminDashboardClient />
+}
+
+// ✅ Client Component (dashboard-client.tsx) - UI interactive
+"use client"
+export default function AdminDashboardClient() {
+  // Hooks React, état local, interactivité
+  const [stats, setStats] = useState({...})
+  useEffect(() => { fetchStats() }, [])
+  return <div>...</div>
+}
+```
+
 **Méthode de protection :**
-\`\`\`typescript
-// Client-side check in layout
-const { user, loading } = useAuth()
-useEffect(() => {
-  if (!loading && (!user || user.user_metadata?.role !== "admin")) {
-    router.push("/")
+```typescript
+// lib/auth/route-guards.ts (Server-side)
+import { createClient } from "@/lib/supabase/server"
+import { redirect } from "next/navigation"
+
+export async function requireAdmin() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  if (!user || user.user_metadata?.role !== "admin") {
+    redirect("/")
   }
-}, [user, loading, router])
-\`\`\`
+  
+  return { user }
+}
+```
 
 **Fallback :** Redirection vers `/` (page d'accueil) si non admin
 

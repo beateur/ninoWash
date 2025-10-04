@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Mail, Lock, User, Phone } from "lucide-react"
 import { signUpSchema, signInSchema, type SignUpInput, type SignInInput } from "@/lib/validations/auth"
+import { clientAuth } from "@/lib/services/auth.service"
 
 interface AuthFormProps {
   mode: "signin" | "signup"
@@ -50,26 +51,23 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
     setSuccess(null)
 
     try {
-      const endpoint = isSignUp ? "/api/auth/signup" : "/api/auth/signin"
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      })
+      const result = isSignUp
+        ? await clientAuth.signUp(data as SignUpInput)
+        : await clientAuth.signIn(data as SignInInput)
 
-      const result = await response.json()
-
-      if (!response.ok) {
-        throw new Error(result.error || "Une erreur est survenue")
+      if (!result.success) {
+        setError(result.error || "Une erreur est survenue")
+        return
       }
 
+      setSuccess(result.message || "Opération réussie")
+
       if (isSignUp) {
-        setSuccess(result.message)
         form.reset()
       } else {
-        setSuccess("Connexion réussie")
         onSuccess?.()
         router.push("/dashboard")
+        router.refresh()
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Une erreur est survenue")

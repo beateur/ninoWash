@@ -158,45 +158,132 @@ app/layout.tsx (Root)
 
 #### Architecture SSR
 \`\`\`typescript
-// Client Browser (components/forms/auth-form.tsx)
+#### Architecture SSR
+
+**⚠️ IMPORTANT : Séparation Client/Server Stricte**
+
+Next.js App Router impose une séparation stricte entre Server et Client Components. Les Server Components peuvent utiliser `next/headers` (cookies, headers) mais les Client Components ne le peuvent pas.
+
+```typescript
+// ✅ Client Browser (Client Components uniquement)
+// Utiliser pour : composants avec "use client", hooks React, interactivité
 import { createClient } from "@/lib/supabase/client"
 
-// Server Components (app/dashboard/page.tsx)
+// ✅ Server Components (Server Components uniquement)
+// Utiliser pour : pages server, API routes, authentification serveur
 import { createClient } from "@/lib/supabase/server"
 
-// Middleware (middleware.ts)
+// ✅ Middleware (Edge Runtime)
+// Utiliser pour : protection des routes, session refresh
 import { updateSession } from "@/lib/supabase/middleware"
+```
+
+**Règles de séparation :**
+- ❌ Ne jamais importer `lib/supabase/server.ts` dans un Client Component
+- ❌ Ne jamais utiliser `next/headers` dans un Client Component
+- ✅ Les Server Components peuvent être async et utiliser await
+- ✅ Les Client Components utilisent les hooks React (useState, useEffect, etc.)
 \`\`\`
 
 #### Flow d'Authentification
+
+**Architecture Hybride Server/Client**
+
+L'authentification suit un pattern hybride pour maximiser la sécurité et les performances :
+
 1. **Inscription** : `app/auth/signup/page.tsx`
-   - Formulaire avec validation Zod
-   - Appel API `/api/auth/signup`
-   - Envoi email de vérification
-   - Redirection vers `/auth/callback`
+   - Server Component : Vérifie la session existante
+   - Client Component (`AuthForm`) : Gère le formulaire interactif
+   - Validation Zod côté client et serveur
+   - Appel direct à `supabase.auth.signUp()` depuis le client
+   - Envoi email de vérification automatique
+   - Redirection vers `/auth/callback` après confirmation
 
 2. **Connexion** : `app/auth/signin/page.tsx`
-   - Formulaire avec validation Zod
-   - Appel API `/api/auth/signin`
-   - Création de session Supabase
-   - Redirection vers `/dashboard`
+   - Server Component : Vérifie la session existante
+   - Client Component (`AuthForm`) : Gère le formulaire interactif
+   - Appel direct à `supabase.auth.signInWithPassword()` depuis le client
+   - Création de session Supabase avec cookies
+   - Redirection vers `/dashboard` après succès
 
 3. **Réservations Invités**
-   - Pas de compte requis
+   - Pas de compte requis pour service "classique"
    - `user_id` nullable dans la table `bookings`
    - Email de confirmation envoyé
+   - Option de créer un compte après réservation
+
+**Exemple d'implémentation :**
+```typescript
+// ✅ Bon : Server Component wrapper + Client Component pour l'UI
+// app/auth/signin/page.tsx (Server Component)
+export default async function SignInPage() {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  // Redirection si déjà connecté
+  if (user) redirect('/dashboard')
+  
+  // Rend le formulaire client
+  return <AuthForm mode="signin" />
+}
+
+// components/forms/auth-form.tsx (Client Component)
+"use client"
+export function AuthForm({ mode }) {
+  const supabase = createClient() // Client Supabase
+  const handleSubmit = async (data) => {
+    const { error } = await supabase.auth.signInWithPassword(data)
+    // ...
+  }
+}
+```
 
 #### Protection des Routes
-\`\`\`typescript
+
+**Architecture Hybride pour les Routes Admin**
+
+Les pages admin utilisent une architecture hybride pour combiner sécurité serveur et interactivité client :
+
+```typescript
+// ✅ Pattern Recommandé : Server Component pour auth + Client Component pour UI
+// app/admin/page.tsx (Server Component)
+import { requireAdmin } from "@/lib/auth/route-guards"
+import AdminDashboardClient from "./dashboard-client"
+
+export default async function AdminDashboard() {
+  // Vérification serveur (sécurisé, ne peut pas être contournée)
+  await requireAdmin()
+  
+  // Délègue l'UI au composant client
+  return <AdminDashboardClient />
+}
+
+// app/admin/dashboard-client.tsx (Client Component)
+"use client"
+export default function AdminDashboardClient() {
+  const [stats, setStats] = useState({...})
+  useEffect(() => { /* fetch data */ }, [])
+  // Toute l'interactivité ici
+}
+```
+
+**Middleware pour routes protégées :**
+```typescript
 // middleware.ts
 export async function middleware(request: NextRequest) {
-  // Vérification de session pour routes protégées
+  // Refresh session automatiquement
+  await updateSession(request)
+  
   // Redirection vers /auth/signin si non authentifié
+  const { pathname } = request.nextUrl
+  if (pathname.startsWith('/dashboard') || pathname.startsWith('/admin')) {
+    // Vérification de session
+  }
 }
 
 // Matcher pour routes protégées
 export const config = {
-  matcher: ['/dashboard/:path*', '/admin/:path*', '/profile/:path*']
+  matcher: ['/dashboard/:path*', '/admin/:path*', '/profile/:path*', '/bookings/:path*']
 }
 \`\`\`
 
@@ -204,9 +291,23 @@ export const config = {
 
 #### Contextes React
 - **AuthProvider** (`lib/hooks/use-auth.tsx`)
+  - ⚠️ **Client Component uniquement**
   - Gestion de l'utilisateur connecté
-  - Méthodes : `signIn`, `signUp`, `signOut`
-  - État : `user`, `loading`, `error`
+  - Utilise `createClient()` de `@/lib/supabase/client`
+  - État : `user`, `loading`, `session`
+  - **Ne contient plus** de logique serveur (cookies, headers)
+  
+**Migration récente :**
+```typescript
+// ❌ Ancien (causait des erreurs) :
+import { clientAuth } from "@/lib/services/auth.service"
+await clientAuth.signOut()
+
+// ✅ Nouveau (correct) :
+import { createClient } from "@/lib/supabase/client"
+const supabase = createClient()
+await supabase.auth.signOut()
+```
 
 #### Hooks Personnalisés
 - **useAuth** : Accès au contexte d'authentification
@@ -484,6 +585,177 @@ test('creates booking', async () => {
   expect(response.status).toBe(201)
 })
 \`\`\`
+
+---
+
+## Patterns Courants et Bonnes Pratiques
+
+### ✅ Pattern : Page Admin Sécurisée avec Interactivité
+
+**Problème :** Les pages admin nécessitent vérification serveur ET interactivité client.
+
+**Solution :**
+\`\`\`typescript
+// app/admin/ma-page/page.tsx (Server Component)
+import { requireAdmin } from "@/lib/auth/route-guards"
+import MaPageClient from "./page-client"
+
+export default async function MaPage() {
+  // Vérification serveur (sécurisée)
+  const { user } = await requireAdmin()
+  
+  // Fetch données serveur (optionnel)
+  const data = await fetchServerData()
+  
+  // Passe les données au client
+  return <MaPageClient user={user} initialData={data} />
+}
+
+// app/admin/ma-page/page-client.tsx (Client Component)
+"use client"
+import { useState, useEffect } from "react"
+
+export default function MaPageClient({ user, initialData }) {
+  const [data, setData] = useState(initialData)
+  
+  useEffect(() => {
+    // Logique client
+  }, [])
+  
+  return <div>...</div>
+}
+\`\`\`
+
+### ✅ Pattern : Formulaire d'Authentification
+
+\`\`\`typescript
+// components/forms/auth-form.tsx
+"use client"
+import { createClient } from "@/lib/supabase/client"
+
+export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
+  const supabase = createClient() // Client uniquement
+  
+  const handleSubmit = async (data) => {
+    if (mode === "signup") {
+      const { error } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: { first_name: data.firstName, last_name: data.lastName }
+        }
+      })
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password
+      })
+    }
+  }
+  
+  return <form onSubmit={handleSubmit}>...</form>
+}
+\`\`\`
+
+### ✅ Pattern : Bouton de Déconnexion
+
+\`\`\`typescript
+// components/auth/logout-button.tsx
+"use client"
+import { createClient } from "@/lib/supabase/client"
+import { useRouter } from "next/navigation"
+
+export function LogoutButton() {
+  const router = useRouter()
+  const supabase = createClient()
+  
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut()
+    if (!error) {
+      router.push("/auth/signin")
+      router.refresh()
+    }
+  }
+  
+  return <Button onClick={handleLogout}>Déconnexion</Button>
+}
+\`\`\`
+
+### ❌ Pièges à Éviter
+
+#### 1. Mélanger Client et Server dans un même composant
+\`\`\`typescript
+// ❌ MAUVAIS
+"use client"
+import { requireAdmin } from "@/lib/auth/route-guards"
+
+export default async function AdminPage() {
+  await requireAdmin() // ❌ Erreur : requireAdmin() utilise cookies()
+  const [data, setData] = useState() // Hooks React
+}
+
+// ✅ BON : Séparer en 2 composants
+\`\`\`
+
+#### 2. Importer du code serveur dans un Client Component
+\`\`\`typescript
+// ❌ MAUVAIS
+"use client"
+import { createClient } from "@/lib/supabase/server" // ❌ Utilise next/headers
+
+// ✅ BON
+"use client"
+import { createClient } from "@/lib/supabase/client" // ✅ Client uniquement
+\`\`\`
+
+#### 3. Utiliser des services intermédiaires qui mélangent client/server
+\`\`\`typescript
+// ❌ MAUVAIS : auth.service.ts qui importe server.ts
+import { clientAuth } from "@/lib/services/auth.service"
+
+// ✅ BON : Appels directs Supabase
+import { createClient } from "@/lib/supabase/client"
+const supabase = createClient()
+\`\`\`
+
+### 🔍 Debugging : Erreurs Courantes
+
+#### Erreur : "You're importing a component that needs next/headers"
+
+**Cause :** Un Client Component importe du code qui utilise `next/headers`.
+
+**Solution :**
+1. Vérifier la trace d'import dans l'erreur
+2. Identifier le fichier qui importe `next/headers`
+3. Remplacer l'import par la version client
+
+**Exemple :**
+\`\`\`bash
+Import trace:
+./lib/supabase/server.ts      ← Utilise next/headers
+./lib/services/auth.service.ts ← Importe server.ts
+./components/auth/logout-button.tsx ← Client Component
+
+# Solution : logout-button.tsx doit importer @/lib/supabase/client
+\`\`\`
+
+#### Erreur : "Function components cannot be given refs"
+
+**Cause :** Composants UI (Input, Textarea) sans `forwardRef` utilisés avec react-hook-form.
+
+**Solution :**
+\`\`\`typescript
+// ✅ Ajouter forwardRef
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, type, ...props }, ref) => {
+    return <input ref={ref} type={type} className={className} {...props} />
+  }
+)
+Input.displayName = "Input"
+\`\`\`
+
+---
 
 ## Déploiement
 
