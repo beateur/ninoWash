@@ -2,9 +2,14 @@
 
 import type React from "react"
 import { createContext, useContext, useEffect, useState } from "react"
-import { clientAuth, type SessionInfo } from "@/lib/services/auth.service"
 import type { User } from "@supabase/supabase-js"
 import { createClient } from "@/lib/supabase/client"
+
+// Session info type (copied from auth.service to avoid server imports)
+interface SessionInfo {
+  user: User | null
+  isAuthenticated: boolean
+}
 
 interface AuthContextType extends SessionInfo {
   loading: boolean
@@ -19,8 +24,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   const refreshSession = async () => {
-    const session = await clientAuth.getSession()
-    setUser(session.user)
+    const supabase = createClient()
+    const { data: { session } } = await supabase.auth.getSession()
+    setUser(session?.user ?? null)
   }
 
   useEffect(() => {
@@ -28,8 +34,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Get initial session
     const getInitialSession = async () => {
-      const session = await clientAuth.getSession()
-      setUser(session.user)
+      const { data: { session } } = await supabase.auth.getSession()
+      setUser(session?.user ?? null)
       setLoading(false)
     }
 
@@ -48,7 +54,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []) // Empty dependency array - only run once on mount
 
   const signOut = async () => {
-    await clientAuth.signOut()
+    const supabase = createClient()
+    await supabase.auth.signOut()
     setUser(null)
   }
 

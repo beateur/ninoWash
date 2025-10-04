@@ -12,7 +12,7 @@ const nextConfig = {
     formats: ['image/webp', 'image/avif'],
   },
   experimental: {
-    optimizeCss: true,
+    // optimizeCss: true, // Désactivé temporairement - nécessite le package 'critters'
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
   async headers() {

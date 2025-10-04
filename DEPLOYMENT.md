@@ -1,6 +1,15 @@
 # Guide de Déploiement - Nino Wash
 
+> 📚 **Voir aussi :** [`docs/architecture.md`](docs/architecture.md) pour l'architecture complète
+
+---
+
 ## 🚀 Déploiement sur Vercel
+
+### Prérequis
+- Repository GitHub connecté
+- Compte Vercel
+- Variables d'environnement configurées (voir ci-dessous)
 
 ### Configuration Initiale
 
@@ -10,7 +19,7 @@
    - Configurer les variables d'environnement
 
 2. **Variables d'environnement requises**
-\`\`\`env
+```env
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
@@ -23,14 +32,25 @@ STRIPE_WEBHOOK_SECRET=
 
 # App
 NEXT_PUBLIC_APP_URL=https://votre-domaine.com
-\`\`\`
+```
 
 ### Déploiement Automatique
 
-Le déploiement est automatisé via GitHub Actions :
+Le déploiement est automatisé via GitHub :
 
 - **Staging** : Déploiement automatique sur push vers `develop`
 - **Production** : Déploiement automatique sur push vers `main`
+
+### ⚠️ Note sur l'Architecture
+
+Ce projet utilise **Next.js 14 App Router** avec Server et Client Components.
+
+**Important pour le déploiement :**
+- Server Components utilisent `@/lib/supabase/server`
+- Client Components utilisent `@/lib/supabase/client`
+- Les variables `SUPABASE_SERVICE_ROLE_KEY` ne sont jamais exposées au client
+
+📖 **Plus de détails :** [`docs/architecture.md`](docs/architecture.md)
 
 ### Configuration DNS
 
@@ -62,10 +82,11 @@ Le déploiement est automatisé via GitHub Actions :
 \`\`\`
 
 2. **Exécution des migrations**
-\`\`\`bash
-# Via l'interface Supabase ou scripts
-npm run db:migrate
-\`\`\`
+```bash
+# Via l'interface Supabase SQL Editor
+# Ou utiliser pnpm pour les scripts automatisés
+pnpm db:migrate
+```
 
 ### Monitoring Base de Données
 
@@ -73,32 +94,17 @@ npm run db:migrate
 - **Alertes** : Configuration via Supabase
 - **Backup** : Automatique quotidien
 
-## 📧 Configuration Email
-
-### Resend Setup
-
-1. **Domaine vérifié**
-   - Ajouter le domaine dans Resend
-   - Configurer les enregistrements DNS :
-     \`\`\`
-     Type: TXT
-     Name: _resend
-     Value: [clé fournie par Resend]
-     \`\`\`
-
-2. **Templates email**
-   - Templates stockés dans `/lib/email-templates/`
-   - Personnalisation via variables
+---
 
 ## 💳 Configuration Stripe
 
 ### Webhooks Production
 
 1. **Endpoint webhook**
-   \`\`\`
+   ```
    URL: https://votre-domaine.com/api/webhooks/stripe
    Events: payment_intent.succeeded, subscription.updated, etc.
-   \`\`\`
+   ```
 
 2. **Clés API**
    - Utiliser les clés de production Stripe
@@ -184,18 +190,20 @@ Endpoints de vérification :
 ### Tests de Fumée
 
 Tests automatiques post-déploiement :
-\`\`\`bash
+```bash
 # Tests critiques uniquement
-npm run test:smoke
-\`\`\`
+pnpm test:smoke
+```
+
+---
 
 ## 📈 Optimisations Performance
 
 ### CDN Configuration
 
 - Assets statiques via Vercel CDN
-- Images optimisées automatiquement
-- Compression gzip/brotli
+- Images optimisées automatiquement (Next.js Image)
+- Compression gzip/brotli automatique
 
 ### Cache Strategy
 
@@ -203,15 +211,25 @@ npm run test:smoke
 - API responses : Cache court terme
 - Images : Cache très long terme
 
+### SSR et Hydration
+
+- Server Components pour performances optimales
+- Client Components uniquement où nécessaire
+- Architecture hybride pour pages admin
+
+📖 **Plus de détails :** [`docs/architecture.md`](docs/architecture.md) - Section "Performance"
+
+---
+
 ## 🆘 Procédures d'Urgence
 
 ### Maintenance Mode
 
 1. **Activer le mode maintenance**
-\`\`\`bash
-# Déployer une page de maintenance
+```bash
+# Déployer une page de maintenance via Vercel
 vercel --prod --env MAINTENANCE_MODE=true
-\`\`\`
+```
 
 2. **Communication**
    - Status page (à configurer)
@@ -228,4 +246,14 @@ vercel --prod --env MAINTENANCE_MODE=true
 
 ---
 
+## 📚 Ressources Supplémentaires
+
+- [`docs/architecture.md`](docs/architecture.md) - Architecture complète
+- [`docs/SECURITY_P0_CHECKLIST.md`](docs/SECURITY_P0_CHECKLIST.md) - Sécurité
+- [`SETUP_LOCAL.md`](SETUP_LOCAL.md) - Setup local
+
+---
+
 **⚠️ Important** : Toujours tester les déploiements sur staging avant production !
+
+**Dernière mise à jour :** 3 octobre 2025

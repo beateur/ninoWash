@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { LogOut } from "lucide-react"
-import { clientAuth } from "@/lib/services/auth.service"
+import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
@@ -13,13 +13,14 @@ export function LogoutButton() {
   const handleLogout = async () => {
     setIsLoading(true)
     try {
-      const result = await clientAuth.signOut()
+      const supabase = createClient()
+      const { error } = await supabase.auth.signOut()
 
-      if (result.success) {
+      if (!error) {
         router.push("/auth/signin")
         router.refresh()
       } else {
-        console.error("Logout failed:", result.error)
+        console.error("Logout failed:", error)
       }
     } catch (error) {
       console.error("Logout error:", error)
