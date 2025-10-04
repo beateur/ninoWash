@@ -16,6 +16,8 @@ Modern home laundry service platform (pressing à domicile) built with Next.js 1
    - Check existing similar features for consistency
 
 2. **📋 Create Complete PRD (BEFORE coding)**
+   - **File Location**: All PRDs must be saved in `docs/PRD/` directory
+   - **Naming Convention**: `PRD_FEATURE_NAME.md` (e.g., `PRD_BOOKING_CANCELLATION.md`)
    - **Context**: Why? Which user journey?
    - **Goals**: Success criteria (what must work end-to-end)
    - **Scope**: 
