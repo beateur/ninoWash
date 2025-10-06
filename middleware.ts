@@ -5,7 +5,8 @@ import { getCorsHeaders } from "@/lib/config/cors"
 // Define protected routes and their requirements
 const PROTECTED_ROUTES = {
   // Routes requiring authentication
-  auth: ["/dashboard", "/profile", "/bookings", "/reservation", "/subscription/manage"],
+  auth: ["/dashboard", "/profile", "/reservation", "/subscription/manage"],
+  // Note: /bookings removed - obsolete page deleted, booking list now in /dashboard
   // Routes requiring admin role
   admin: ["/admin"],
   // Routes requiring guest (not authenticated)

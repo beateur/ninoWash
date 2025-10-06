@@ -1,8 +1,19 @@
 import type React from "react"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
-import { BottomNav } from "@/components/mobile/bottom-nav"
 
+/**
+ * Main Layout (Marketing + Public Pages)
+ * 
+ * Layout pour les pages publiques (domaine www) :
+ * - / (landing page)
+ * - /services
+ * - /a-propos
+ * - /comment-ca-marche
+ * - /contact
+ * 
+ * Navigation Mobile : MobileNav (dans Header)
+ */
 export default function MainLayout({
   children,
 }: {
@@ -11,9 +22,8 @@ export default function MainLayout({
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1 pb-16 md:pb-0">{children}</main>
+      <main className="flex-1">{children}</main>
       <Footer />
-      <BottomNav />
     </div>
   )
 }

@@ -70,6 +70,7 @@ Guide de navigation dans la documentation du projet Nino Wash.
 | Document | Public | Description |
 |----------|--------|-------------|
 | **[DEPLOYMENT.md](../DEPLOYMENT.md)** | DevOps | Guide de déploiement complet |
+| **[CRON_JOB_DEPLOYMENT_GUIDE.md](CRON_JOB_DEPLOYMENT_GUIDE.md)** | DevOps/Dev | Déploiement Edge Function + Cron Job crédits |
 | **[SUBSCRIPTION_RESOLUTION_LOG.md](SUBSCRIPTION_RESOLUTION_LOG.md)** | Support/Dev | Log résolution problèmes abonnements |
 
 ---
@@ -120,6 +121,12 @@ Guide de navigation dans la documentation du projet Nino Wash.
 - [api-integration-guide.md](api-integration-guide.md) - API `/api/bookings`
 
 ### Abonnements (Subscriptions)
+- **🎯 [TECHNICAL_SOLUTION_SUBSCRIPTION_CREDITS.md](TECHNICAL_SOLUTION_SUBSCRIPTION_CREDITS.md)** - **SOLUTION TECHNIQUE** - Système de crédits implémenté
+- **� [PRD/PRD_SUBSCRIPTION_CREDITS_SYSTEM.md](PRD/PRD_SUBSCRIPTION_CREDITS_SYSTEM.md)** - PRD complet du système de crédits
+- **�🚨 [EXECUTIVE_SUMMARY_SUBSCRIPTION_ISSUE.md](EXECUTIVE_SUMMARY_SUBSCRIPTION_ISSUE.md)** - Synthèse décision business (problème identifié)
+- **[QUICK_ANSWERS_SUBSCRIPTION_BOOKING.md](QUICK_ANSWERS_SUBSCRIPTION_BOOKING.md)** - Réponses rapides questions clés
+- **[SUBSCRIPTION_REALITY_CHECK.md](SUBSCRIPTION_REALITY_CHECK.md)** - État des lieux marketing vs implémentation
+- **[ANALYSIS_SUBSCRIPTION_BOOKING_RELATIONSHIP.md](ANALYSIS_SUBSCRIPTION_BOOKING_RELATIONSHIP.md)** - Analyse technique complète
 - [services-documentation.md](services-documentation.md) - Service abonnements
 - [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) - Tables `subscriptions`, `subscription_plans`
 - [SUBSCRIPTION_RESOLUTION_LOG.md](SUBSCRIPTION_RESOLUTION_LOG.md) - Troubleshooting
@@ -154,6 +161,9 @@ Guide de navigation dans la documentation du projet Nino Wash.
 **Dernière mise à jour générale :** 3 octobre 2025
 
 **Changements récents :**
+- ✅ Ajout `TECHNICAL_SOLUTION_SUBSCRIPTION_CREDITS.md` (solution complète système de crédits)
+- ✅ Ajout `PRD/PRD_SUBSCRIPTION_CREDITS_SYSTEM.md` (PRD complet avec implémentation)
+- ✅ Ajout analyse complète abonnements (4 documents : EXECUTIVE_SUMMARY, QUICK_ANSWERS, REALITY_CHECK, ANALYSIS)
 - ✅ Ajout `TECHNICAL_CHANGELOG.md` (migration client/server)
 - ✅ Ajout `QUICK_START.md` (guide démarrage rapide)
 - ✅ Ajout `DOCUMENTATION_AUDIT_REPORT.md` (audit complet)

@@ -177,18 +177,23 @@ if (error) return NextResponse.json({ error }, { status: 401 })
 
 ### 🔴 DOUBLONS CRITIQUES IDENTIFIÉS
 
-#### 1. **Pages de Réservation Dupliquées**
+#### 1. **Pages de Réservation Dupliquées** ✅ RÉSOLU
 
 **Problème**: Deux pages `/bookings` avec des fonctionnalités différentes
 
 | Fichier | Fonction | Statut |
 |---------|----------|--------|
-| `app/bookings/page.tsx` | Historique des réservations utilisateur | ✅ À CONSERVER |
-| `app/(main)/bookings/page.tsx` | Détails d'une réservation spécifique | ⚠️ DOUBLON |
+| `app/(main)/bookings/page.tsx` | Détails réservations (MOCK DATA) | ❌ SUPPRIMÉ (obsolète) |
+| `app/(authenticated)/dashboard/page.tsx` | Liste réservations (VRAIES DONNÉES) | ✅ EN PLACE |
 
-**Recommandation**: 
-- Renommer `app/(main)/bookings/page.tsx` en `app/bookings/[id]/page.tsx`
-- Supprimer le groupe de route `(main)/bookings`
+**Résolution (2025-01-XX)**: 
+- ✅ Supprimé `app/(main)/bookings/` (utilisait mock data)
+- ✅ Les réservations sont affichées dans `/dashboard` avec données Supabase réelles
+- ✅ Documentation mise à jour (`architecture.md`, `TECHNICAL_CHANGELOG.md`, etc.)
+- ✅ Lien "Voir tout" supprimé du dashboard
+- ✅ Route `/bookings` supprimée du middleware
+
+**Voir:** `docs/BOOKINGS_PAGE_DELETION_LOG.md` pour le détail complet de cette suppression.
 
 ---
 
@@ -409,7 +414,7 @@ export async function requireAdmin(options: RouteGuardOptions = {}) {
 
 1. **Supprimer les doublons critiques**
    - [ ] Supprimer `app/(main)/page.tsx`
-   - [ ] Renommer `app/(main)/bookings/page.tsx` en `app/bookings/[id]/page.tsx`
+   - [x] ~~Renommer `app/(main)/bookings/page.tsx` en `app/bookings/[id]/page.tsx`~~ ✅ SUPPRIMÉ (obsolète, utilisait mock data)
    - [ ] Supprimer `lib/auth/admin-guard.ts`
    - [ ] Mettre à jour les imports dans `app/admin/layout.tsx`
 

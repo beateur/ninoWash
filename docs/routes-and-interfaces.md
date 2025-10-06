@@ -49,11 +49,11 @@ Ces routes nécessitent une authentification. Redirection vers `/auth/signin` si
 
 | Route | Fichier | Protection | Description |
 |-------|---------|-----------|-------------|
-| `/dashboard` | `app/dashboard/page.tsx` | ✅ Server-side | Tableau de bord utilisateur avec statistiques |
-| `/bookings` | `app/bookings/page.tsx` | ✅ Server-side | Liste des réservations de l'utilisateur |
-| `/bookings/[id]` | `app/(main)/bookings/page.tsx` | ✅ Server-side | Détails d'une réservation spécifique |
+| `/dashboard` | `app/dashboard/page.tsx` | ✅ Server-side | Tableau de bord utilisateur avec statistiques + liste réservations |
 | `/profile` | `app/profile/page.tsx` | ✅ Server-side | Profil et paramètres utilisateur |
 | `/subscription` | `app/subscription/page.tsx` | ✅ Server-side | Gestion des abonnements |
+
+**Note:** La route `/bookings` a été supprimée. Les réservations sont désormais affichées dans `/dashboard`.
 
 **Méthode de protection :**
 \`\`\`typescript

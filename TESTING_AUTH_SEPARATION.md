@@ -31,9 +31,12 @@
 - `components/layout/mobile-nav.tsx` - Navigation mobile marketing
 
 #### Authentifié (Domaine App)
-- `components/layout/authenticated-header.tsx` - Header avec notifs + profil
-- `components/layout/mobile-auth-nav.tsx` - Navigation mobile authentifiée
-- `app/(authenticated)/layout.tsx` - Layout pour pages authentifiées
+- ❌ ~~`components/layout/authenticated-header.tsx`~~ - **SUPPRIMÉ** (dead code - jamais rendu)
+- ❌ ~~`components/layout/mobile-auth-nav.tsx`~~ - **SUPPRIMÉ** (intégré dans DashboardSidebar)
+- `components/layout/dashboard-sidebar.tsx` - **Navigation complète** (desktop + mobile) pour pages authentifiées
+- `app/(authenticated)/layout.tsx` - Layout pour pages authentifiées (NO header/footer)
+
+**🚨 Règle Architecture** : Les pages authentifiées n'ont **NI header NI footer**, uniquement DashboardSidebar
 
 ### Pages Réorganisées
 
@@ -223,10 +226,14 @@ Avant de merger dans `dev`:
 - Règle: **ZÉRO** accès auth
 
 **Domaine Authentifié (app):**
-- Layout: `app/(authenticated)/layout.tsx`
-- Header: `components/layout/authenticated-header.tsx` (avec auth)
-- Mobile Nav: `components/layout/mobile-auth-nav.tsx` (avec auth)
+- Layout: `app/(authenticated)/layout.tsx` (NO header/footer)
+- Navigation: `components/layout/dashboard-sidebar.tsx` (desktop + mobile overlay)
 - Règle: **TOUJOURS** vérifier auth
+- Architecture: DashboardSidebar gère TOUTE la navigation (pas de header séparé)
+
+**🚨 Composants Supprimés (Dead Code)** :
+- ❌ `components/layout/authenticated-header.tsx` (jamais rendu dans layout JSX)
+- ❌ `components/layout/mobile-auth-nav.tsx` (logique intégrée dans DashboardSidebar)
 
 ### Règles de Séparation
 

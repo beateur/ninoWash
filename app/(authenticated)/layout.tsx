@@ -1,7 +1,6 @@
-import type React from "react"
-import { AuthenticatedHeader } from "@/components/layout/authenticated-header"
-import { Footer } from "@/components/layout/footer"
-import { BottomNav } from "@/components/mobile/bottom-nav"
+import type { ReactNode } from "react"
+import { DashboardSidebar } from "@/components/layout/dashboard-sidebar"
+import { requireAuth } from "@/lib/auth/route-guards"
 
 /**
  * Authenticated Layout
@@ -12,15 +11,19 @@ import { BottomNav } from "@/components/mobile/bottom-nav"
  * - /bookings
  * - /subscription
  * 
- * Utilise AuthenticatedHeader qui affiche :
- * - Notifications
- * - Avatar utilisateur
- * - Navigation utilisateur
+ * 🚨 RÈGLE ARCHITECTURE : Pas de Header/Footer dans les pages authentifiées
+ * 
+ * Navigation :
+ * - Desktop : DashboardSidebar fixe (w-64) avec toggle plier/déplier
+ * - Mobile : DashboardSidebar en overlay (Sheet) déclenché par bouton hamburger
+ * 
+ * Le DashboardSidebar gère :
+ * - Logo + Branding
+ * - Avatar utilisateur + dropdown
+ * - Navigation (Dashboard, Réservations, Abonnement, Profil, Adresses, Paiements)
+ * - CTA "Nouvelle réservation"
+ * - Bouton Déconnexion
  */
-import { ReactNode } from "react"
-import { DashboardSidebar } from "@/components/layout/dashboard-sidebar"
-import { MobileAuthNav } from "@/components/layout/mobile-auth-nav"
-import { requireAuth } from "@/lib/auth/route-guards"
 
 export default async function AuthenticatedLayout({
   children,
@@ -38,21 +41,14 @@ export default async function AuthenticatedLayout({
     .maybeSingle()
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* Desktop Sidebar */}
-      <div className="hidden md:block">
-        <DashboardSidebar user={user} hasActiveSubscription={!!subscription} />
-      </div>
+    <>
+      {/* DashboardSidebar - Gère Desktop (fixed) + Mobile (hamburger + sheet) */}
+      <DashboardSidebar user={user} hasActiveSubscription={!!subscription} />
 
-      {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto bg-background">
+      {/* Main Content Area - Décalé sur desktop pour laisser place à la sidebar */}
+      <main className="min-h-screen overflow-y-auto bg-background md:ml-64 transition-all duration-300">
         {children}
       </main>
-
-      {/* Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
-        <MobileAuthNav />
-      </div>
-    </div>
+    </>
   )
 }

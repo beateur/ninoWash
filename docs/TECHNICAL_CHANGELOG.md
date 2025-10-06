@@ -4,6 +4,99 @@ Ce document trace les changements architecturaux et techniques majeurs du projet
 
 ---
 
+## 2025-01-XX - Suppression Page Bookings Obsolète
+
+### 🗑️ Nettoyage Architecture : Suppression `/bookings` avec Mock Data
+
+**Problème identifié :**
+- Page `app/(main)/bookings/page.tsx` utilisait du **mock data** au lieu de données Supabase réelles
+- Pattern obsolète : Client Component avec `useAuth()` au lieu de Server Component
+- **Duplication** : Le dashboard (`/dashboard`) affichait déjà correctement les réservations avec données réelles
+
+**Impact :**
+- Confusion entre deux pages affichant des réservations (l'une avec vraies données, l'autre avec fausses)
+- Architecture incohérente (ne suivait pas le pattern Server Component → Client Component)
+- Risque que les utilisateurs voient des réservations fictives
+
+---
+
+### ✅ Changements Appliqués
+
+#### 1. **Fichiers Supprimés**
+- ❌ `app/(main)/bookings/page.tsx` (Client Component avec mock data)
+- ❌ `app/(main)/bookings/BookingCard.tsx` (duplicata, le vrai est dans `@/components/booking/booking-card`)
+
+#### 2. **Composant Dashboard Mis à Jour**
+**Fichier modifié :** `components/dashboard/dashboard-client.tsx`
+
+```diff
+- {bookings.length > 5 && (
+-   <Button variant="link" asChild>
+-     <Link href="/bookings">Voir tout</Link>
+-   </Button>
+- )}
++ {/* Note: All bookings are displayed here. "Voir tout" link removed as obsolete /bookings page was deleted */}
+```
+
+**Raison :** Le lien "Voir tout" pointait vers la page obsolète `/bookings`.
+
+#### 3. **Documentation Mise à Jour**
+**Fichier modifié :** `docs/architecture.md`
+
+- Ajout de `/bookings` dans la liste des composants obsolètes supprimés
+- Mise à jour des diagrammes de structure de routes
+- Suppression de `/bookings/:path*` du middleware matcher
+- Ajout de notes explicatives sur l'emplacement actuel de la liste des réservations
+
+---
+
+### 📊 Architecture Correcte pour les Réservations
+
+**Pattern Actuel (✅ Correct) :**
+```
+app/(authenticated)/dashboard/page.tsx (Server Component)
+  ↓ Fetch bookings from Supabase
+  ↓ Pass data as props
+components/dashboard/dashboard-client.tsx (Client Component)
+  ↓ Display bookings with interactivity
+components/booking/booking-card.tsx (Presentation)
+```
+
+**Flux de données :**
+1. **Server Component** (`dashboard/page.tsx`) : 
+   - Authentification via `requireAuth()`
+   - Query Supabase avec `createClient()` from `@/lib/supabase/server`
+   - Fetch réel des réservations depuis la table `bookings`
+   
+2. **Client Component** (`dashboard-client.tsx`) :
+   - Reçoit les données en props
+   - Affiche KPIs (réservations actives, prochaine collecte, etc.)
+   - Gère l'interactivité (expansion des cartes, détails, etc.)
+
+**Avantages :**
+- ✅ SSR : Données chargées côté serveur (SEO, performance)
+- ✅ Données réelles : Aucun mock data
+- ✅ Type-safe : TypeScript strict avec Zod validation
+- ✅ Sécurité : RLS Policies Supabase + route guards serveur
+
+---
+
+### 🔍 Migration Notes
+
+**Si besoin d'une page dédiée `/bookings` dans le futur :**
+1. Créer `app/(authenticated)/bookings/page.tsx` en **Server Component**
+2. Suivre le même pattern que `dashboard/page.tsx`
+3. Réutiliser `@/components/booking/booking-card` (ne pas dupliquer)
+4. Ajouter filtrage/tri/pagination si besoin
+5. Mettre à jour middleware matcher
+
+**Ne jamais :**
+- ❌ Utiliser mock data dans les pages de production
+- ❌ Dupliquer les composants de présentation
+- ❌ Mélanger Server/Client imports (`next/headers` dans Client Component)
+
+---
+
 ## 2025-10-03 - Migration Architecture Client/Server
 
 ### 🔧 Correctifs Critiques : Séparation Client/Server Components

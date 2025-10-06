@@ -3,6 +3,7 @@ import { apiRequireAuth } from "@/lib/auth/api-guards"
 import { createClient } from "@/lib/supabase/server"
 import { createBookingSchema } from "@/lib/validations/booking"
 import { z } from "zod"
+import { canUseCredit, consumeCredit } from "@/lib/services/subscription-credits"
 
 export async function GET(request: NextRequest) {
   const { user, supabase, error } = await apiRequireAuth(request)
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Erreur lors de la récupération des services" }, { status: 500 })
     }
 
-    // Calculate total
+    // Calculate standard total (before credit discount)
     for (const item of validatedData.items) {
       const service = services.find((s) => s.id === item.serviceId)
       if (service) {
@@ -84,8 +85,42 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    let pickupAddressId = validatedData.pickupAddressId
-    let deliveryAddressId = validatedData.deliveryAddressId
+    // Check for active subscription and available credits
+    let subscriptionId: string | null = null
+    let usedCredit = false
+    let creditDiscountAmount = 0
+    let bookingWeightKg = 0 // TODO: Get from form or calculate from items
+
+    if (user) {
+      const { data: subscription } = await supabase
+        .from("subscriptions")
+        .select("id, plan_id")
+        .eq("user_id", user.id)
+        .in("status", ["active", "trialing"])
+        .maybeSingle()
+
+      if (subscription) {
+        subscriptionId = subscription.id
+
+        // For now, use default weight of 10kg (TODO: get from form)
+        bookingWeightKg = 10
+
+        // Check if user can use a credit
+        const creditCheck = await canUseCredit(user.id, bookingWeightKg)
+
+        if (creditCheck.canUse) {
+          // Apply credit discount
+          totalAmount = creditCheck.totalAmount
+          creditDiscountAmount = creditCheck.discountAmount
+          usedCredit = true
+
+          console.log(`[v0] Credit applied: ${creditDiscountAmount}€ saved, new total: ${totalAmount}€`)
+        }
+      }
+    }
+
+    let pickupAddressId: string | null = validatedData.pickupAddressId ?? null
+    let deliveryAddressId: string | null = validatedData.deliveryAddressId ?? null
     let bookingMetadata: any = {}
 
     if (isGuestBooking) {
@@ -114,13 +149,18 @@ export async function POST(request: NextRequest) {
         booking_number: generateBookingNumber(),
         user_id: user?.id || null,
         service_id: primaryServiceId,
+        subscription_id: subscriptionId,
         pickup_address_id: pickupAddressId,
         delivery_address_id: deliveryAddressId,
         pickup_date: validatedData.pickupDate,
         pickup_time_slot: validatedData.pickupTimeSlot,
         special_instructions: validatedData.specialInstructions,
         total_amount: totalAmount,
+        booking_weight_kg: bookingWeightKg > 0 ? bookingWeightKg : null,
+        used_subscription_credit: usedCredit,
+        credit_discount_amount: creditDiscountAmount,
         status: "pending",
+        payment_status: totalAmount > 0 ? "pending" : "paid",
         metadata: Object.keys(bookingMetadata).length > 0 ? bookingMetadata : null,
       })
       .select()
@@ -129,6 +169,17 @@ export async function POST(request: NextRequest) {
     if (bookingError) {
       console.error("[v0] Booking creation error:", bookingError)
       return NextResponse.json({ error: "Erreur lors de la création de la réservation" }, { status: 500 })
+    }
+
+    // Consume credit if used
+    if (usedCredit && user && subscriptionId) {
+      const consumeResult = await consumeCredit(user.id, subscriptionId, booking.id, bookingWeightKg)
+      if (!consumeResult.success) {
+        console.error("[v0] Credit consumption failed:", consumeResult.message)
+        // Note: Booking is already created, log error but continue
+      } else {
+        console.log(`[v0] Credit consumed successfully for booking ${booking.id}`)
+      }
     }
 
     // Create booking items

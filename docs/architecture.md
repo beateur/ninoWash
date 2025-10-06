@@ -130,6 +130,98 @@ L'application utilise le nouveau App Router de Next.js avec les conventions suiv
 - `admin` : Routes protégées avec layout admin (sidebar + header)
 
 #### Layouts Imbriqués
+```
+app/layout.tsx (Root)
+├── app/(main)/layout.tsx (Public)
+│   └── app/(main)/page.tsx (Accueil)
+├── app/(authenticated)/layout.tsx (Authentifié - NO HEADER/FOOTER)
+│   ├── app/(authenticated)/dashboard/page.tsx (Liste réservations + KPIs)
+│   ├── app/(authenticated)/profile/page.tsx
+│   └── app/(authenticated)/subscription/page.tsx
+└── app/admin/layout.tsx (Admin)
+    ├── app/admin/page.tsx (Dashboard)
+    └── app/admin/bookings/page.tsx (Gestion)
+```
+
+**Note:** La page `/bookings` obsolète a été supprimée. La liste des réservations utilisateur est désormais affichée dans le dashboard authentifié (`/dashboard`).
+
+#### 🚨 Règle Architecture Layouts : "No Header/Footer When Authenticated"
+
+**Principe fondamental :**
+- **Pages publiques** (`(main)`) : Header + Footer complets (logo, navigation, CTA)
+- **Pages authentifiées** (`(authenticated)`) : **PAS de Header ni Footer** - uniquement DashboardSidebar
+- **Pages admin** : Sidebar admin spécifique + header admin
+
+**Rationale :**
+1. **Expérience immersive** : Une fois connecté, l'utilisateur est dans son espace privé (comme Gmail, Notion, ChatGPT)
+2. **Navigation dédiée** : DashboardSidebar gère toute la navigation (pas besoin de header)
+3. **Gain d'espace vertical** : Maximise l'espace pour le contenu utilisateur
+4. **Cohérence UX** : Pattern standard des applications SaaS modernes
+
+**Implémentation :**
+```typescript
+// ✅ app/(authenticated)/layout.tsx
+export default async function AuthenticatedLayout({ children }) {
+  return (
+    <div className="flex h-screen overflow-hidden">
+      {/* Desktop Sidebar (hidden on mobile) */}
+      <div className="hidden md:block">
+        <DashboardSidebar />
+      </div>
+      
+      {/* Main Content (no header/footer) */}
+      <main className="flex-1 overflow-y-auto">
+        {children}
+      </main>
+      
+      {/* Mobile: Sidebar as overlay (Sheet) */}
+    </div>
+  )
+}
+
+// ❌ À NE PAS FAIRE :
+export default function BadAuthenticatedLayout({ children }) {
+  return (
+    <>
+      <Header /> {/* ❌ Pas de header dans authenticated */}
+      <div className="flex">
+        <Sidebar />
+        <main>{children}</main>
+      </div>
+      <Footer /> {/* ❌ Pas de footer dans authenticated */}
+    </>
+  )
+}
+```
+
+**Navigation dans les pages authentifiées :**
+- **Desktop** : DashboardSidebar fixe (w-64) avec toggle plier/déplier
+- **Mobile** : DashboardSidebar en overlay (Sheet component) déclenché par bouton hamburger
+- **Contenu** : Logo, avatar utilisateur + dropdown, navigation complète, CTA "Nouvelle réservation", déconnexion
+
+**Composants obsolètes supprimés :**
+- ❌ `components/layout/authenticated-header.tsx` (supprimé - dead code)
+- ❌ `components/layout/mobile-auth-nav.tsx` (supprimé - logique intégrée dans DashboardSidebar)
+- ❌ `components/mobile/bottom-nav.tsx` (supprimé - pattern obsolète)
+- ❌ `app/(main)/bookings/page.tsx` (supprimé - utilisait mock data au lieu de Supabase, duplicata du dashboard)
+- ❌ `app/(main)/bookings/BookingCard.tsx` (supprimé - duplicata, le vrai composant est dans `@/components/booking/booking-card`)
+```
+app/layout.tsx (Root)
+├── app/(main)/layout.tsx (Public)
+│   └── app/(main)/page.tsx (Accueil)
+├── app/(authenticated)/layout.tsx (Authentifié - NO HEADER/FOOTER)
+│   ├── app/(authenticated)/dashboard/page.tsx (Liste réservations + KPIs)
+│   └── ... autres pages authentifiées
+└── app/admin/layout.tsx (Admin)
+    ├── app/admin/page.tsx (Dashboard)
+    └── app/admin/bookings/page.tsx (Gestion)
+```
+
+**Note:** Toutes les réservations utilisateur sont affichées dans `/dashboard` (Server Component → Client Component avec données réelles Supabase).
+
+#### Server Components par Défaut
+- Tous les composants sont Server Components sauf indication contraire (`"use client"`)
+- Les Server Components sont utilisés pour :
 \`\`\`
 app/layout.tsx (Root)
 ├── app/(main)/layout.tsx (Public)
@@ -283,8 +375,10 @@ export async function middleware(request: NextRequest) {
 
 // Matcher pour routes protégées
 export const config = {
-  matcher: ['/dashboard/:path*', '/admin/:path*', '/profile/:path*', '/bookings/:path*']
+  matcher: ['/dashboard/:path*', '/admin/:path*', '/profile/:path*', '/subscription/:path*']
+  // Note: /bookings removed (obsolete page deleted, booking list now in /dashboard)
 }
+```
 \`\`\`
 
 ### 3. Gestion d'État

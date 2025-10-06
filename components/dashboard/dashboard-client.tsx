@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Calendar, MapPin, Package, Plus } from "lucide-react"
 import Link from "next/link"
 import { BookingCard, BookingDetailPanel } from "@/components/booking/booking-card"
+import { CreditsDisplay } from "@/components/subscription/credits-display"
+import { DevCreditReset } from "@/components/subscription/dev-credit-reset"
 import type { User } from "@supabase/supabase-js"
 
 interface BookingWithAddresses {
@@ -45,7 +47,7 @@ export function DashboardClient({
   const router = useRouter()
 
   const activeBookings = bookings.filter(
-    (b) => ["confirmed", "picked_up", "in_progress", "ready"].includes(b.status)
+    (b) => ["confirmed", "picked_up", "in_progress", "ready", "pending"].includes(b.status)
   )
 
   const nextPickup = bookings.find((b) => b.status === "confirmed")
@@ -121,15 +123,19 @@ export function DashboardClient({
             </Card>
           </div>
 
+          {/* Credits Display (for subscribers only) */}
+          {hasActiveSubscription && (
+            <CreditsDisplay userId={user.id} compact={false} />
+          )}
+
+          {/* Dev Tool: Manual Credit Reset */}
+          <DevCreditReset userId={user.id} />
+
           {/* Bookings List */}
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold">Mes réservations</h2>
-              {bookings.length > 5 && (
-                <Button variant="link" asChild>
-                  <Link href="/bookings">Voir tout</Link>
-                </Button>
-              )}
+              {/* Note: All bookings are displayed here. "Voir tout" link removed as obsolete /bookings page was deleted */}
             </div>
 
             {bookings.length === 0 ? (
