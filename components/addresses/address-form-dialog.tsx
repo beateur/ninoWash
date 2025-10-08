@@ -34,11 +34,10 @@ interface Address {
   type: "home" | "work" | "other"
   label: string
   street_address: string
-  apartment?: string
+  building_info?: string
   city: string
   postal_code: string
-  delivery_instructions?: string
-  access_code?: string
+  access_instructions?: string
   is_default: boolean
 }
 
@@ -62,25 +61,23 @@ export function AddressFormDialog({
   // Convert snake_case to camelCase for form
   const defaultValues: AddressInput = address
     ? {
-        type: address.type,
+        type: address.type || "home",
         label: address.label,
         streetAddress: address.street_address,
-        apartment: address.apartment || "",
+        buildingInfo: address.building_info || "",
         city: address.city,
         postalCode: address.postal_code,
-        deliveryInstructions: address.delivery_instructions || "",
-        accessCode: address.access_code || "",
-        isDefault: address.is_default,
+        accessInstructions: address.access_instructions || "",
+        isDefault: address.is_default || false,
       }
     : {
         type: "home",
         label: "",
         streetAddress: "",
-        apartment: "",
+        buildingInfo: "",
         city: "",
         postalCode: "",
-        deliveryInstructions: "",
-        accessCode: "",
+        accessInstructions: "",
         isDefault: false,
       }
 
@@ -234,16 +231,16 @@ export function AddressFormDialog({
               />
 
               {/* Apartment */}
-              <FormField
+                            <FormField
                 control={form.control}
-                name="apartment"
+                name="buildingInfo"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Complément (optionnel)</FormLabel>
+                    <FormLabel>Appartement / Étage (optionnel)</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Appartement, bâtiment, étage..."
                         {...field}
+                        placeholder="Ex: Apt 3B, 2ème étage"
                       />
                     </FormControl>
                     <FormMessage />
@@ -282,36 +279,18 @@ export function AddressFormDialog({
                 />
               </div>
 
-              {/* Delivery Instructions */}
+              {/* Access Instructions */}
               <FormField
                 control={form.control}
-                name="deliveryInstructions"
+                name="accessInstructions"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Instructions de livraison (optionnel)</FormLabel>
+                    <FormLabel>Instructions d'accès (optionnel)</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Sonner 2 fois, laisser devant la porte..."
+                        placeholder="Sonner 2 fois, code A1234, laisser devant la porte..."
                         className="resize-none"
                         rows={3}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Access Code */}
-              <FormField
-                control={form.control}
-                name="accessCode"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Code d'accès (optionnel)</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Digicode, badge, code portail..."
                         {...field}
                       />
                     </FormControl>

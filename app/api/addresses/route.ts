@@ -52,10 +52,10 @@ export async function POST(request: NextRequest) {
         user_id: user.id,
         label: validatedData.label,
         street_address: validatedData.streetAddress,
-        building_info: validatedData.apartment,
+        building_info: validatedData.buildingInfo || null,
         city: validatedData.city,
         postal_code: validatedData.postalCode,
-        access_instructions: validatedData.deliveryInstructions,
+        access_instructions: validatedData.accessInstructions || null,
         is_default: validatedData.isDefault,
       })
       .select()

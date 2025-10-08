@@ -33,8 +33,30 @@ export default async function AuthCallbackPage({
     if (error) {
       redirect("/auth/signin?error=" + encodeURIComponent(error.message))
     }
+
+    // Get user to check role for subdomain routing
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (user) {
+      const isAdmin = user.user_metadata?.role === "admin" || user.app_metadata?.role === "admin"
+
+      // Redirect based on role and environment
+      if (isAdmin && process.env.NEXT_PUBLIC_ADMIN_URL) {
+        // Admin user → redirect to admin subdomain
+        const adminUrl = new URL(process.env.NEXT_PUBLIC_ADMIN_URL)
+        adminUrl.pathname = "/admin"
+        redirect(adminUrl.toString())
+      } else if (!isAdmin && process.env.NEXT_PUBLIC_APP_URL) {
+        // Regular user → redirect to app subdomain
+        const appUrl = new URL(process.env.NEXT_PUBLIC_APP_URL)
+        appUrl.pathname = "/dashboard"
+        redirect(appUrl.toString())
+      }
+    }
   }
 
-  // Successful authentication, redirect to dashboard
+  // Fallback to dashboard if env vars not set (local dev)
   redirect("/dashboard")
 }

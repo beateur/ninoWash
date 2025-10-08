@@ -26,9 +26,10 @@ interface ServicesStepProps {
   items: BookingItem[]
   onUpdate: (data: { items: BookingItem[] }) => void
   serviceType?: string
+  readOnly?: boolean
 }
 
-export function ServicesStep({ items, onUpdate, serviceType = "classic" }: ServicesStepProps) {
+export function ServicesStep({ items, onUpdate, serviceType = "classic", readOnly = false }: ServicesStepProps) {
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -98,6 +99,15 @@ export function ServicesStep({ items, onUpdate, serviceType = "classic" }: Servi
 
   return (
     <div className="space-y-8">
+      {readOnly && (
+        <Alert className="bg-blue-50 border-blue-200">
+          <Info className="h-4 w-4 text-blue-600" />
+          <AlertDescription className="text-blue-900">
+            <strong>Mode modification :</strong> Les services ne peuvent pas être modifiés. Seules les adresses et la date peuvent être changées.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {serviceType !== "classic" && (
         <Alert>
           <Info className="h-4 w-4" />
@@ -124,15 +134,18 @@ export function ServicesStep({ items, onUpdate, serviceType = "classic" }: Servi
       )}
 
       <div>
-        <h3 className="text-lg font-semibold mb-4">Tous les services disponibles</h3>
+        <h3 className="text-lg font-semibold mb-4">
+          {readOnly ? "Services sélectionnés (lecture seule)" : "Tous les services disponibles"}
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {services.map((service) => (
+          {(readOnly ? services.filter((s) => getItemQuantity(s.id) > 0) : services).map((service) => (
             <ServiceCard
               key={service.id}
               service={service}
               quantity={getItemQuantity(service.id)}
               onQuantityChange={handleQuantityChange}
               serviceType={serviceType}
+              readOnly={readOnly}
             />
           ))}
         </div>

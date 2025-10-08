@@ -174,47 +174,18 @@ export default async function SubscriptionPage() {
             Économisez avec nos formules d'abonnement et profitez d'un service de pressing régulier et de qualité
           </p>
         </div>
-
-        {/* Current Subscription Card */}
-        {currentSubscription && (
-          <Card className="mb-8 border-primary bg-gradient-to-r from-primary/5 to-primary/10">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    {getPlanIcon(currentSubscription.subscription_plans.plan_type)}
-                    Votre abonnement actuel
-                  </CardTitle>
-                  <CardDescription>{currentSubscription.subscription_plans.name}</CardDescription>
-                </div>
-                <Badge variant="secondary" className="bg-primary text-primary">
-                  {currentSubscription.status === "active" ? "Actif" : currentSubscription.status}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold">
-                    {currentSubscription.subscription_plans.price_amount}
-                    {currentSubscription.subscription_plans.currency === "EUR"
-                      ? "€"
-                      : currentSubscription.subscription_plans.currency}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    par {getBillingLabel(currentSubscription.subscription_plans.billing_interval)}
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold">
-                    {new Date(currentSubscription.current_period_end).toLocaleDateString("fr-FR")}
-                  </div>
-                  <div className="text-sm text-muted-foreground">Prochaine facturation</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        
+        {/* Current Subscription - Next Billing */}
+          {currentSubscription && (
+            <div className="text-center mb-8">
+              <p className="text-sm text-muted-foreground">
+                Prochaine facturation le{" "}
+                <span className="font-semibold text-foreground">
+            {new Date(currentSubscription.current_period_end).toLocaleDateString("fr-FR")}
+                </span>
+              </p>
+            </div>
+          )}
 
         {/* Plans Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-16">

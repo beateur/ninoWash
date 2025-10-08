@@ -14,11 +14,10 @@ interface Address {
   type: "home" | "work" | "other"
   label: string
   street_address: string
-  apartment?: string
+  building_info?: string
   city: string
   postal_code: string
-  delivery_instructions?: string
-  access_code?: string
+  access_instructions?: string
   is_default: boolean
 }
 
@@ -69,34 +68,6 @@ export function AddressesSection() {
     setIsFormOpen(true)
   }
 
-  // Set default address
-  const handleSetDefault = async (id: string) => {
-    try {
-      const response = await fetch(`/api/addresses/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ is_default: true }),
-      })
-
-      if (!response.ok) throw new Error("Failed to set default")
-
-      // Update local state
-      setAddresses((prev) =>
-        prev.map((addr) => ({
-          ...addr,
-          is_default: addr.id === id,
-        }))
-      )
-
-      toast({
-        title: "Succès",
-        description: "Adresse par défaut mise à jour",
-      })
-    } catch (error) {
-      throw error
-    }
-  }
-
   // Delete address
   const handleDeleteClick = (address: Address) => {
     setDeleteConfirm({ open: true, address })
@@ -127,7 +98,27 @@ export function AddressesSection() {
 
       setDeleteConfirm({ open: false, address: null })
     } catch (error) {
-      throw error
+      console.error("[v0] Delete address error:", error)
+      
+      // Message d'erreur plus explicite selon le cas
+      let errorMessage = "Impossible de supprimer cette adresse"
+      
+      if (error instanceof Error) {
+        if (error.message.includes("réservation")) {
+          // Erreur déjà explicite venant de l'API
+          errorMessage = error.message
+        } else {
+          errorMessage = error.message
+        }
+      }
+      
+      toast({
+        title: "Suppression impossible",
+        description: errorMessage,
+        variant: "destructive",
+        duration: 6000, // Durée plus longue pour lire le message
+      })
+      setDeleteConfirm({ open: false, address: null })
     }
   }
 
@@ -206,7 +197,6 @@ export function AddressesSection() {
               <AddressCard
                 address={address}
                 onEdit={handleEdit}
-                onSetDefault={handleSetDefault}
                 onDelete={handleDeleteClick}
               />
             </motion.div>

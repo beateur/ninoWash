@@ -1,6 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ProfileForm } from "@/components/forms/profile-form"
-import { AddressesSection } from "@/components/profile/addresses-section"
 import { requireAuth } from "@/lib/auth/route-guards"
 
 export default async function ProfilePage() {
@@ -28,11 +27,6 @@ export default async function ProfilePage() {
               <ProfileForm user={user} profile={profile} />
             </CardContent>
           </Card>
-
-          {/* Addresses Section */}
-          <div className="pt-4">
-            <AddressesSection />
-          </div>
         </div>
       </div>
     </div>

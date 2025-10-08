@@ -14,7 +14,7 @@ interface Address {
   type: string
   label: string
   street_address: string
-  apartment?: string
+  building_info?: string
   city: string
   postal_code: string
   is_default: boolean
@@ -177,7 +177,7 @@ export function AddressStep({
                       </div>
                       <p className="text-sm text-muted-foreground">
                         {address.street_address}
-                        {address.apartment && `, ${address.apartment}`}
+                        {address.building_info && `, ${address.building_info}`}
                       </p>
                       <p className="text-sm text-muted-foreground">
                         {address.postal_code} {address.city}
@@ -216,7 +216,7 @@ export function AddressStep({
                       </div>
                       <p className="text-sm text-muted-foreground">
                         {address.street_address}
-                        {address.apartment && `, ${address.apartment}`}
+                        {address.building_info && `, ${address.building_info}`}
                       </p>
                       <p className="text-sm text-muted-foreground">
                         {address.postal_code} {address.city}

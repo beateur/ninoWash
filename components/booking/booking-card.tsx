@@ -155,7 +155,6 @@ interface BookingDetailPanelProps {
 
 export function BookingDetailPanel({ booking, onClose, onBookingUpdated }: BookingDetailPanelProps) {
   const [showProblemForm, setShowProblemForm] = useState(false)
-  const [showModifyForm, setShowModifyForm] = useState(false)
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)
   const { toast } = useToast()
 
@@ -314,10 +313,12 @@ export function BookingDetailPanel({ booking, onClose, onBookingUpdated }: Booki
               <Button
                 variant="outline"
                 className="w-full justify-start"
-                onClick={() => setShowModifyForm(true)}
+                asChild
               >
-                <Edit className="mr-2 h-4 w-4" />
-                Modifier la réservation
+                <Link href={`/reservation?modify=${booking.id}`}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Modifier la réservation
+                </Link>
               </Button>
             )}
 
@@ -343,19 +344,6 @@ export function BookingDetailPanel({ booking, onClose, onBookingUpdated }: Booki
                 onSuccess={handleReportSuccess}
                 onCancel={() => setShowProblemForm(false)}
               />
-            </div>
-          )}
-
-          {/* Modify form placeholder */}
-          {showModifyForm && (
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm font-medium mb-2">Modifier la réservation</p>
-              <p className="text-sm text-muted-foreground mb-3">
-                Formulaire de modification en développement...
-              </p>
-              <Button variant="outline" size="sm" onClick={() => setShowModifyForm(false)}>
-                Fermer
-              </Button>
             </div>
           )}
 

@@ -1,7 +1,7 @@
 import { headers } from "next/headers"
 import { NextResponse } from "next/server"
 import type Stripe from "stripe"
-import { stripe, validateWebhookSignature, STRIPE_WEBHOOK_CONFIG } from "@/lib/stripe"
+import { stripe, validateWebhookSignature, STRIPE_WEBHOOK_CONFIG } from "@/lib/stripe/index"
 import { createAdminClient } from "@/lib/supabase/admin"
 
 export async function POST(req: Request) {
@@ -61,6 +61,31 @@ export async function POST(req: Request) {
           customerId: subscription.customer,
         })
 
+        // Check if user has an existing subscription (for subscription changes)
+        const { data: existingSubscriptions } = await supabase
+          .from("subscriptions")
+          .select("id, stripe_subscription_id")
+          .eq("user_id", userId)
+          .neq("stripe_subscription_id", subscriptionId) // Exclude the new one
+          .eq("cancelled", false) // Only active subscriptions
+
+        // If there are existing active subscriptions, mark them as cancelled (soft delete)
+        if (existingSubscriptions && existingSubscriptions.length > 0) {
+          console.log("[v0] Found existing subscriptions to mark as cancelled:", existingSubscriptions.length)
+          
+          for (const oldSub of existingSubscriptions) {
+            await supabase
+              .from("subscriptions")
+              .update({
+                cancelled: true,
+                status: "canceled",
+                canceled_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              })
+              .eq("id", oldSub.id)
+          }
+        }
+
         const { error: subscriptionError } = await supabase.from("subscriptions").upsert(
           {
             user_id: userId,
@@ -68,11 +93,14 @@ export async function POST(req: Request) {
             stripe_subscription_id: subscriptionId,
             stripe_customer_id: session.customer as string,
             status: subscription.status,
+            // @ts-expect-error - Stripe types don't include these properties but they exist
             current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
+            // @ts-expect-error - Stripe types don't include these properties but they exist
             current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
             cancel_at_period_end: subscription.cancel_at_period_end,
             trial_start: subscription.trial_start ? new Date(subscription.trial_start * 1000).toISOString() : null,
             trial_end: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null,
+            cancelled: false, // New subscription is active by default
           },
           {
             onConflict: "stripe_subscription_id",
@@ -95,7 +123,9 @@ export async function POST(req: Request) {
           .from("subscriptions")
           .update({
             status: subscription.status,
+            // @ts-expect-error - Stripe types don't include these properties but they exist
             current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
+            // @ts-expect-error - Stripe types don't include these properties but they exist
             current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
             cancel_at_period_end: subscription.cancel_at_period_end,
             canceled_at: subscription.canceled_at ? new Date(subscription.canceled_at * 1000).toISOString() : null,
@@ -116,21 +146,23 @@ export async function POST(req: Request) {
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription
 
-        // Mark subscription as canceled in database
+        // Mark subscription as cancelled in database (soft delete - keeps history)
         const { error: deleteError } = await supabase
           .from("subscriptions")
           .update({
+            cancelled: true,
             status: "canceled",
             canceled_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
           })
           .eq("stripe_subscription_id", subscription.id)
 
         if (deleteError) {
-          console.error("[v0] Error canceling subscription:", deleteError)
+          console.error("[v0] Error marking subscription as cancelled:", deleteError)
           break
         }
 
-        console.log("[v0] Subscription canceled:", subscription.id)
+        console.log("[v0] Subscription marked as cancelled:", subscription.id)
         break
       }
 
@@ -140,6 +172,7 @@ export async function POST(req: Request) {
         const { data: subscription } = await supabase
           .from("subscriptions")
           .select("id, user_id")
+          // @ts-expect-error - Stripe types don't include subscription property but it exists
           .eq("stripe_subscription_id", invoice.subscription as string)
           .single()
 
@@ -179,6 +212,7 @@ export async function POST(req: Request) {
         const { data: subscription } = await supabase
           .from("subscriptions")
           .select("id, user_id")
+          // @ts-expect-error - Stripe types don't include subscription property but it exists
           .eq("stripe_subscription_id", invoice.subscription as string)
           .single()
 

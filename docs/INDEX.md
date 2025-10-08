@@ -132,6 +132,9 @@ Guide de navigation dans la documentation du projet Nino Wash.
 - [SUBSCRIPTION_RESOLUTION_LOG.md](SUBSCRIPTION_RESOLUTION_LOG.md) - Troubleshooting
 
 ### Paiements (Stripe)
+- **[MIGRATION_PAYMENT_METHODS.md](MIGRATION_PAYMENT_METHODS.md)** - Migration `/profile#payment-methods` → `/payment-methods` (log complet)
+- **[SUMMARY_MIGRATION_PAYMENT_METHODS.md](SUMMARY_MIGRATION_PAYMENT_METHODS.md)** - Résumé exécutif de la migration
+- **[PRD/PRD_PAYMENT_METHODS_PAGE.md](PRD/PRD_PAYMENT_METHODS_PAGE.md)** - PRD complet de la page moyens de paiement
 - [api-integration-guide.md](api-integration-guide.md) - Intégration Stripe
 - [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) - Tables `payments`, `payment_methods`
 - [services-documentation.md](services-documentation.md) - Service paiements
@@ -158,9 +161,10 @@ Guide de navigation dans la documentation du projet Nino Wash.
 
 ## 🔄 Mise à Jour de la Documentation
 
-**Dernière mise à jour générale :** 3 octobre 2025
+**Dernière mise à jour générale :** 6 octobre 2025
 
 **Changements récents :**
+- ✅ Ajout migration moyens de paiement (3 documents : MIGRATION, SUMMARY, PRD)
 - ✅ Ajout `TECHNICAL_SOLUTION_SUBSCRIPTION_CREDITS.md` (solution complète système de crédits)
 - ✅ Ajout `PRD/PRD_SUBSCRIPTION_CREDITS_SYSTEM.md` (PRD complet avec implémentation)
 - ✅ Ajout analyse complète abonnements (4 documents : EXECUTIVE_SUMMARY, QUICK_ANSWERS, REALITY_CHECK, ANALYSIS)

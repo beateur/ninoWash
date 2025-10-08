@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { apiRequireAuth } from "@/lib/auth/api-guards"
 import { paymentMethodSchema } from "@/lib/validations/payment"
+import { stripe } from "@/lib/stripe"
 
 export async function GET(request: NextRequest) {
   const { user, supabase, error } = await apiRequireAuth(request)
@@ -40,7 +41,31 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    const validatedData = paymentMethodSchema.parse(body)
+    
+    // If payment method details are not provided, fetch them from Stripe
+    let paymentMethodData = body
+    
+    if (body.providerPaymentMethodId && body.provider === "stripe" && (!body.lastFour || !body.brand)) {
+      try {
+        const stripePaymentMethod = await stripe.paymentMethods.retrieve(body.providerPaymentMethodId)
+        
+        if (stripePaymentMethod.card) {
+          paymentMethodData = {
+            ...body,
+            type: "card",
+            lastFour: stripePaymentMethod.card.last4,
+            brand: stripePaymentMethod.card.brand,
+            expMonth: stripePaymentMethod.card.exp_month,
+            expYear: stripePaymentMethod.card.exp_year,
+          }
+        }
+      } catch (stripeError) {
+        console.error("[v0] Error fetching payment method from Stripe:", stripeError)
+        // Continue with provided data if Stripe fetch fails
+      }
+    }
+    
+    const validatedData = paymentMethodSchema.parse(paymentMethodData)
 
     // If this is set as default, unset other default methods
     if (validatedData.isDefault) {
@@ -55,10 +80,10 @@ export async function POST(request: NextRequest) {
         type: validatedData.type,
         provider: validatedData.provider,
         provider_payment_method_id: validatedData.providerPaymentMethodId,
-        last_four: validatedData.lastFour,
-        brand: validatedData.brand,
-        exp_month: validatedData.expMonth,
-        exp_year: validatedData.expYear,
+        card_last4: validatedData.lastFour,
+        card_brand: validatedData.brand,
+        card_exp_month: validatedData.expMonth,
+        card_exp_year: validatedData.expYear,
         is_default: validatedData.isDefault,
       })
       .select()

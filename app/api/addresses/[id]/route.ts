@@ -30,27 +30,16 @@ export async function PUT(
       return NextResponse.json({ error: "Adresse non trouvée" }, { status: 404 })
     }
 
-    // If this is set as default, unset other default addresses
-    if (validatedData.isDefault) {
-      await supabase
-        .from("user_addresses")
-        .update({ is_default: false })
-        .eq("user_id", user.id)
-        .neq("id", addressId)
-    }
-
     const { data: address, error: updateError } = await supabase
       .from("user_addresses")
       .update({
         label: validatedData.label,
         type: validatedData.type,
         street_address: validatedData.streetAddress,
-        apartment: validatedData.apartment,
+        building_info: validatedData.buildingInfo || null,
         city: validatedData.city,
         postal_code: validatedData.postalCode,
-        delivery_instructions: validatedData.deliveryInstructions,
-        access_code: validatedData.accessCode,
-        is_default: validatedData.isDefault,
+        access_instructions: validatedData.accessInstructions || null,
         updated_at: new Date().toISOString(),
       })
       .eq("id", addressId)
@@ -107,15 +96,6 @@ export async function PATCH(
       return NextResponse.json({ error: "Adresse non trouvée" }, { status: 404 })
     }
 
-    // If setting as default, unset other default addresses
-    if (body.is_default === true) {
-      await supabase
-        .from("user_addresses")
-        .update({ is_default: false })
-        .eq("user_id", user.id)
-        .neq("id", addressId)
-    }
-
     const { data: address, error: updateError } = await supabase
       .from("user_addresses")
       .update({ ...body, updated_at: new Date().toISOString() })
@@ -152,7 +132,7 @@ export async function DELETE(
   try {
     const addressId = params.id
 
-    // Verify ownership and check if default
+    // Verify ownership
     const { data: existingAddress, error: fetchError } = await supabase
       .from("user_addresses")
       .select("*")
@@ -164,14 +144,42 @@ export async function DELETE(
       return NextResponse.json({ error: "Adresse non trouvée" }, { status: 404 })
     }
 
-    if (existingAddress.is_default) {
-      return NextResponse.json(
-        {
-          error:
-            "Cette adresse est votre adresse par défaut. Veuillez d'abord en définir une autre.",
-        },
-        { status: 400 }
+    // Check if address is used in any bookings
+    const { data: bookingsWithAddress, error: bookingCheckError } = await supabase
+      .from("bookings")
+      .select("id, status")
+      .or(`pickup_address_id.eq.${addressId},delivery_address_id.eq.${addressId}`)
+      .limit(1)
+
+    if (bookingCheckError) {
+      console.error("[API] Error checking bookings:", bookingCheckError)
+    }
+
+    console.log("[API] Bookings check for address", addressId, ":", bookingsWithAddress)
+
+    if (bookingsWithAddress && bookingsWithAddress.length > 0) {
+      // Compter les réservations actives (pending, confirmed, in_progress)
+      const activeStatuses = ['pending', 'confirmed', 'in_progress']
+      const activeBookings = bookingsWithAddress.filter((b: { id: string; status: string }) => 
+        activeStatuses.includes(b.status)
       )
+      
+      if (activeBookings.length > 0) {
+        return NextResponse.json(
+          {
+            error: "Cette adresse ne peut pas être supprimée car elle est utilisée dans une ou plusieurs réservations en cours. Vous devez d'abord annuler ou terminer ces réservations.",
+          },
+          { status: 400 }
+        )
+      } else {
+        // Réservations passées (completed, cancelled)
+        return NextResponse.json(
+          {
+            error: "Cette adresse ne peut pas être supprimée car elle est liée à votre historique de réservations. Vous pouvez la modifier si vous le souhaitez.",
+          },
+          { status: 400 }
+        )
+      }
     }
 
     const { error: deleteError } = await supabase
@@ -182,6 +190,18 @@ export async function DELETE(
 
     if (deleteError) {
       console.error("[API] Address deletion error:", deleteError)
+      
+      // Check if it's a foreign key constraint error
+      if (deleteError.code === "23503") {
+        return NextResponse.json(
+          {
+            error:
+              "Cette adresse ne peut pas être supprimée car elle est liée à des réservations existantes. Pour protéger votre historique, veuillez plutôt modifier l'adresse si nécessaire.",
+          },
+          { status: 400 }
+        )
+      }
+      
       return NextResponse.json(
         { error: "Erreur lors de la suppression de l'adresse" },
         { status: 500 }

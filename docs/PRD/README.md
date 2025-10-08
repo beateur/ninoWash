@@ -12,8 +12,10 @@ docs/PRD/
 │
 ├── ✅ ACTIFS - Features à implémenter
 │   ├── PRD_BOOKING_CANCELLATION.md
+│   ├── PRD_BOOKING_MODIFICATION.md (NOUVEAU)
 │   ├── PRD_PROFILE_ADDRESSES.md
-│   └── PRD_PROFILE_PAYMENT_METHODS.md
+│   ├── PRD_PROFILE_PAYMENT_METHODS.md
+│   └── PRD_SUBSCRIPTION_CREDITS_SYSTEM.md
 │
 ├── ❌ DEPRECATED - Composants jamais rendus (dead code)
 │   ├── AUDIT_MOBILE_NAVIGATION_REDESIGN.md
@@ -31,23 +33,48 @@ docs/PRD/
 
 ### 1. PRD_BOOKING_CANCELLATION.md
 
-**Status** : 🟡 85% implémenté - Database migration manquante
+**Status** : ✅ Implémenté (annulation + signalement)
 
-**Feature** : Annulation, modification, signalement de problème sur réservations
+**Feature** : Annulation et signalement de problème sur réservations
 
 **Implémentation** :
-- ✅ API Routes : POST /api/bookings/[id]/cancel, /modify, /report
-- ✅ Validation : Zod schemas (cancelBookingSchema, modifyBookingSchema)
-- ✅ Frontend : Composants (CancelDialog, ModifyDialog, ReportDialog)
-- ❌ Database : Migration SQL créée mais **pas appliquée**
+- ✅ API Routes : POST /api/bookings/[id]/cancel, /report
+- ✅ Validation : Zod schemas (cancelBookingSchema, reportProblemSchema)
+- ✅ Frontend : Composants (CancelBookingForm, ReportProblemForm)
+- ✅ Database : Migration appliquée
+- ✅ Integration dans booking-card.tsx
 
-**Blocker** : Exécuter migration `supabase/migrations/YYYYMMDDHHMMSS_add_booking_cancellation.sql`
-
-**Estimation restante** : 15 minutes (appliquer migration)
+**Note** : La partie "modification" a été extraite dans un PRD séparé (voir PRD_BOOKING_MODIFICATION.md)
 
 ---
 
-### 2. PRD_PROFILE_ADDRESSES.md
+### 2. PRD_BOOKING_MODIFICATION.md ⭐ NOUVEAU
+
+**Status** : ⏳ 10% implémenté - Bouton seulement
+
+**Feature** : Modification de réservations futures (date, créneau, adresses)
+
+**Implémentation Actuelle** :
+- ✅ Bouton "Modifier" dans booking-card.tsx
+- ✅ Redirection vers `/reservation?modify={bookingId}`
+- ✅ Règles métier: canModify (date future + statut pending/confirmed)
+- ❌ Parcours de modification (préchargement formulaire)
+- ❌ API route PATCH /api/bookings/[id]
+- ❌ Validation côté serveur
+
+**Stratégie** : Réutiliser le parcours de réservation existant en mode "modification"
+- Server Component détecte `?modify=` et précharge les données
+- Client Component reçoit `existingBooking` en props
+- Services en read-only (non modifiables)
+- PATCH API au lieu de POST
+
+**Estimation** : 3-4 jours développement + 1 jour tests
+
+**Priorité** : 🟡 MEDIUM (améliore UX, évite annulation+recréation)
+
+---
+
+### 3. PRD_PROFILE_ADDRESSES.md
 
 **Status** : 📋 Prêt à implémenter
 
@@ -65,7 +92,7 @@ docs/PRD/
 
 ---
 
-### 3. PRD_PROFILE_PAYMENT_METHODS.md
+### 4. PRD_PROFILE_PAYMENT_METHODS.md
 
 **Status** : 📋 Prêt à implémenter
 

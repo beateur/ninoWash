@@ -30,8 +30,9 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
 
-# App
-NEXT_PUBLIC_APP_URL=https://votre-domaine.com
+# Application URLs (Subdomain Routing)
+NEXT_PUBLIC_APP_URL=https://app.ninowash.com
+NEXT_PUBLIC_ADMIN_URL=https://gestion.ninowash.com
 ```
 
 ### Déploiement Automatique
@@ -49,27 +50,77 @@ Ce projet utilise **Next.js 14 App Router** avec Server et Client Components.
 - Server Components utilisent `@/lib/supabase/server`
 - Client Components utilisent `@/lib/supabase/client`
 - Les variables `SUPABASE_SERVICE_ROLE_KEY` ne sont jamais exposées au client
+- **Subdomain Routing**: Admin users → `gestion.domain`, Regular users → `app.domain`
 
 📖 **Plus de détails :** [`docs/architecture.md`](docs/architecture.md)
 
-### Configuration DNS
+### Configuration DNS (Subdomain Routing)
 
-1. **Domaine personnalisé**
-   - Ajouter le domaine dans Vercel
-   - Configurer les enregistrements DNS :
-     \`\`\`
-     Type: CNAME
-     Name: www
-     Value: cname.vercel-dns.com
-     
-     Type: A
-     Name: @
-     Value: 76.76.19.61
-     \`\`\`
+1. **Domaine principal et sous-domaines**
+   
+   Configure les enregistrements DNS pour les sous-domaines :
+   
+   **Pour app.ninowash.com (utilisateurs):**
+   ```
+   Type: CNAME
+   Name: app
+   Value: cname.vercel-dns.com
+   TTL: 3600
+   ```
+   
+   **Pour gestion.ninowash.com (admin):**
+   ```
+   Type: CNAME
+   Name: gestion
+   Value: cname.vercel-dns.com
+   TTL: 3600
+   ```
+   
+   **Pour le domaine racine (redirection):**
+   ```
+   Type: A
+   Name: @
+   Value: 76.76.19.61
+   TTL: 3600
+   ```
 
-2. **SSL/TLS**
-   - Certificat automatique via Let's Encrypt
+2. **Configuration Vercel**
+   - Ajouter les deux sous-domaines dans Vercel Project Settings
+   - Dashboard → Project → Settings → Domains
+   - Ajouter `app.ninowash.com`
+   - Ajouter `gestion.ninowash.com`
+   - Vérifier que les deux domaines pointent vers le même projet
+
+3. **SSL/TLS**
+   - Certificat automatique via Let's Encrypt pour chaque sous-domaine
    - Redirection HTTPS forcée
+   - Cookies partagés entre sous-domaines (`.ninowash.com`)
+
+4. **Test de configuration**
+   ```bash
+   # Tester résolution DNS
+   nslookup app.ninowash.com
+   nslookup gestion.ninowash.com
+   
+   # Tester HTTPS
+   curl -I https://app.ninowash.com
+   curl -I https://gestion.ninowash.com
+   ```
+
+### Configuration Supabase Auth (OAuth Redirect URLs)
+
+Dans Supabase Dashboard → Authentication → URL Configuration :
+
+**Redirect URLs (Production):**
+```
+https://app.ninowash.com/auth/callback
+https://gestion.ninowash.com/auth/callback
+```
+
+**Site URL:**
+```
+https://app.ninowash.com
+```
 
 ## 🗄️ Base de Données
 

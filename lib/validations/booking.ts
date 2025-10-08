@@ -1,15 +1,14 @@
 import { z } from "zod"
 
 export const addressSchema = z.object({
-  type: z.enum(["home", "work", "other"]).default("home"),
+  type: z.enum(["home", "work", "other"]),
   label: z.string().min(1, "Libellé requis"),
   streetAddress: z.string().min(5, "Adresse complète requise"),
-  apartment: z.string().optional(),
+  buildingInfo: z.string().optional(),
   city: z.string().min(2, "Ville requise"),
   postalCode: z.string().regex(/^\d{5}$/, "Code postal invalide"),
-  deliveryInstructions: z.string().optional(),
-  accessCode: z.string().optional(),
-  isDefault: z.boolean().default(false),
+  accessInstructions: z.string().optional(),
+  isDefault: z.boolean(),
 })
 
 export const guestAddressSchema = z.object({
@@ -91,6 +90,7 @@ export const modifyBookingSchema = z
     deliveryAddressId: z.string().uuid("Adresse de livraison invalide").optional(),
     deliveryDate: z.string().optional(),
     deliveryTimeSlot: z.enum(["09:00-12:00", "14:00-17:00", "18:00-21:00"]).optional(),
+    specialInstructions: z.string().optional(),
   })
   .refine(
     (data) => {

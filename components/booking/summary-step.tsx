@@ -25,10 +25,17 @@ interface BookingData {
 
 interface SummaryStepProps {
   bookingData: BookingData
-  serviceType?: string // Added service type prop
+  serviceType?: string
+  isModification?: boolean
+  bookingId?: string
 }
 
-export function SummaryStep({ bookingData, serviceType = "classic" }: SummaryStepProps) {
+export function SummaryStep({
+  bookingData,
+  serviceType = "classic",
+  isModification = false,
+  bookingId,
+}: SummaryStepProps) {
   const [addresses, setAddresses] = useState<any[]>([])
   const [services, setServices] = useState<any[]>([])
   const [specialInstructions, setSpecialInstructions] = useState(bookingData.specialInstructions || "")
@@ -155,6 +162,37 @@ export function SummaryStep({ bookingData, serviceType = "classic" }: SummarySte
     setError(null)
 
     try {
+      // Mode modification: PATCH request
+      if (isModification && bookingId) {
+        const modificationPayload = {
+          pickupDate: bookingData.pickupDate,
+          pickupTimeSlot: bookingData.pickupTimeSlot,
+          pickupAddressId: bookingData.pickupAddressId,
+          deliveryAddressId: bookingData.deliveryAddressId,
+          specialInstructions,
+        }
+
+        console.log("[v0] Sending PATCH to /api/bookings - Payload:", modificationPayload)
+
+        const response = await fetch(`/api/bookings/${bookingId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(modificationPayload),
+        })
+
+        const result = await response.json()
+
+        console.log("[v0] PATCH response:", { ok: response.ok, status: response.status, result })
+
+        if (!response.ok) {
+          throw new Error(result.error || "Erreur lors de la modification")
+        }
+
+        router.push(`/dashboard?success=modification`)
+        return
+      }
+
+      // Mode nouvelle réservation: POST request
       const bookingPayload = {
         pickupDate: bookingData.pickupDate,
         pickupTimeSlot: bookingData.pickupTimeSlot,
@@ -176,14 +214,16 @@ export function SummaryStep({ bookingData, serviceType = "classic" }: SummarySte
             street_address: bookingData.pickupAddress?.street_address,
             city: bookingData.pickupAddress?.city,
             postal_code: bookingData.pickupAddress?.postal_code,
-            building_info: bookingData.pickupAddress?.apartment,
+            building_info: bookingData.pickupAddress?.buildingInfo || bookingData.pickupAddress?.building_info,
+            access_instructions: bookingData.pickupAddress?.accessInstructions || bookingData.pickupAddress?.access_instructions,
             label: bookingData.pickupAddress?.label,
           },
           guestDeliveryAddress: {
             street_address: bookingData.deliveryAddress?.street_address,
             city: bookingData.deliveryAddress?.city,
             postal_code: bookingData.deliveryAddress?.postal_code,
-            building_info: bookingData.deliveryAddress?.apartment,
+            building_info: bookingData.deliveryAddress?.buildingInfo || bookingData.deliveryAddress?.building_info,
+            access_instructions: bookingData.deliveryAddress?.accessInstructions || bookingData.deliveryAddress?.access_instructions,
             label: bookingData.deliveryAddress?.label,
           },
           guestContact: {
@@ -256,7 +296,7 @@ export function SummaryStep({ bookingData, serviceType = "classic" }: SummarySte
                   <p className="font-medium">{pickupAddress.label}</p>
                   <p className="text-sm text-muted-foreground">
                     {pickupAddress.street_address}
-                    {pickupAddress.apartment && `, ${pickupAddress.apartment}`}
+                    {(pickupAddress.buildingInfo || pickupAddress.building_info) && `, ${pickupAddress.buildingInfo || pickupAddress.building_info}`}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     {pickupAddress.postal_code} {pickupAddress.city}
@@ -274,7 +314,7 @@ export function SummaryStep({ bookingData, serviceType = "classic" }: SummarySte
                   <p className="font-medium">{deliveryAddress.label}</p>
                   <p className="text-sm text-muted-foreground">
                     {deliveryAddress.street_address}
-                    {deliveryAddress.apartment && `, ${deliveryAddress.apartment}`}
+                    {(deliveryAddress.buildingInfo || deliveryAddress.building_info) && `, ${deliveryAddress.buildingInfo || deliveryAddress.building_info}`}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     {deliveryAddress.postal_code} {deliveryAddress.city}
@@ -399,7 +439,7 @@ export function SummaryStep({ bookingData, serviceType = "classic" }: SummarySte
       <div className="flex justify-center pt-4">
         <Button onClick={handleSubmit} disabled={isSubmitting} size="lg" className="min-w-48">
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Confirmer la réservation
+          {isModification ? "Enregistrer les modifications" : "Confirmer la réservation"}
         </Button>
       </div>
     </div>

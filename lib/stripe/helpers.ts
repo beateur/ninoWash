@@ -1,5 +1,6 @@
 import type Stripe from "stripe"
 import { stripe } from "./config"
+import { createClient } from "@/lib/supabase/server"
 
 /**
  * Stripe helper functions for common operations
@@ -7,6 +8,9 @@ import { stripe } from "./config"
 
 /**
  * Get or create a Stripe customer for a user
+ * ✅ FIX: Search existing customers by metadata.user_id BEFORE creating new
+ * This prevents creating duplicate customers when changing subscriptions
+ * NOTE: stripe_customer_id is stored in subscriptions table, not users table
  */
 export async function getOrCreateStripeCustomer(params: {
   userId: string
@@ -15,26 +19,73 @@ export async function getOrCreateStripeCustomer(params: {
   metadata?: Record<string, string>
 }): Promise<string> {
   try {
-    // Try to find existing customer
-    const customers = await stripe.customers.list({
-      email: params.email,
-      limit: 1,
-    })
+    console.log("[v0] getOrCreateStripeCustomer called for user:", params.userId)
+    
+    const supabase = await createClient()
 
-    if (customers.data.length > 0) {
-      return customers.data[0].id
+    // 1. Check if user already has an active subscription with a Stripe customer ID
+    const { data: existingSubscription, error: subError } = await supabase
+      .from("subscriptions")
+      .select("stripe_customer_id")
+      .eq("user_id", params.userId)
+      .in("status", ["active", "trialing", "past_due"])
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (subError) {
+      console.error("[v0] Error fetching existing subscription:", subError)
+      // Continue anyway - we'll search Stripe directly
     }
 
-    // Create new customer
+    // 2. If customer ID exists in DB, verify it exists in Stripe
+    if (existingSubscription?.stripe_customer_id) {
+      try {
+        const customer = await stripe.customers.retrieve(existingSubscription.stripe_customer_id)
+        if (!customer.deleted) {
+          console.log("[v0] Using existing Stripe customer from subscription:", existingSubscription.stripe_customer_id)
+          return existingSubscription.stripe_customer_id
+        } else {
+          console.log("[v0] Customer deleted in Stripe, will search for another or create new")
+        }
+      } catch (error) {
+        console.error("[v0] Error retrieving Stripe customer from subscription:", error)
+        // Customer doesn't exist in Stripe, continue to search/create
+      }
+    }
+
+    // 3. Search for existing Stripe customers with this user_id in metadata
+    console.log("[v0] Searching for existing Stripe customer by email and metadata.user_id:", params.userId)
+    const existingCustomers = await stripe.customers.list({
+      email: params.email,
+      limit: 10,
+    })
+
+    // Find customer with matching metadata.user_id or supabase_user_id
+    const matchingCustomer = existingCustomers.data.find(
+      (customer) => 
+        customer.metadata?.user_id === params.userId ||
+        customer.metadata?.supabase_user_id === params.userId
+    )
+
+    if (matchingCustomer) {
+      console.log("[v0] Found existing Stripe customer by metadata:", matchingCustomer.id)
+      return matchingCustomer.id
+    }
+
+    // 4. No existing customer found, create a new one
+    console.log("[v0] Creating new Stripe customer for user:", params.userId)
     const customer = await stripe.customers.create({
       email: params.email,
       name: params.name,
       metadata: {
-        supabase_user_id: params.userId,
+        user_id: params.userId,
+        supabase_user_id: params.userId, // Keep both for backwards compatibility
         ...params.metadata,
       },
     })
 
+    console.log("[v0] New Stripe customer created:", customer.id)
     return customer.id
   } catch (error) {
     console.error("[v0] Error getting/creating Stripe customer:", error)

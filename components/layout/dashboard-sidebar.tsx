@@ -242,13 +242,13 @@ function SidebarContent({ user, hasActiveSubscription, isCollapsed = false, onNa
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href="/profile#payment-methods" className="cursor-pointer" onClick={handleNavClick}>
+              <Link href="/payment-methods" className="cursor-pointer" onClick={handleNavClick}>
                 <CreditCard className="mr-2 h-4 w-4" />
                 Modes de paiement
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href="/profile#addresses" className="cursor-pointer" onClick={handleNavClick}>
+              <Link href="/addresses" className="cursor-pointer" onClick={handleNavClick}>
                 <MapPin className="mr-2 h-4 w-4" />
                 Mes adresses
               </Link>
@@ -532,13 +532,13 @@ export function DashboardSidebar({ user, hasActiveSubscription }: DashboardSideb
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/profile#payment-methods" className="cursor-pointer">
+                <Link href="/payment-methods" className="cursor-pointer">
                   <CreditCard className="mr-2 h-4 w-4" />
                   Modes de paiement
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/profile#addresses" className="cursor-pointer">
+                <Link href="/addresses" className="cursor-pointer">
                   <MapPin className="mr-2 h-4 w-4" />
                   Mes adresses
                 </Link>

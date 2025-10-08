@@ -22,6 +22,7 @@ interface ServiceCardProps {
   quantity?: number
   onQuantityChange?: (serviceId: string, quantity: number) => void
   serviceType?: string
+  readOnly?: boolean
 }
 
 export function ServiceCard({
@@ -31,6 +32,7 @@ export function ServiceCard({
   quantity = 0,
   onQuantityChange,
   serviceType = "classic",
+  readOnly = false,
 }: ServiceCardProps) {
   const isExpress = service.category === "Service Express"
 
@@ -66,7 +68,7 @@ export function ServiceCard({
           Délai: {service.processing_time_hours}h
         </div>
 
-        {onQuantityChange && (
+        {onQuantityChange && !readOnly && (
           <div className="flex items-center justify-between pt-2">
             <Button
               variant={quantity > 0 ? "default" : "outline"}
@@ -92,6 +94,14 @@ export function ServiceCard({
                 </Button>
               </div>
             )}
+          </div>
+        )}
+
+        {readOnly && quantity > 0 && (
+          <div className="pt-2">
+            <Badge variant="secondary" className="w-full justify-center">
+              Quantité: {quantity}
+            </Badge>
           </div>
         )}
       </CardContent>
