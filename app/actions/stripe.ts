@@ -199,8 +199,8 @@ export async function createCheckoutSession(planId: string) {
       successUrl: `${origin}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${origin}/subscription`,
       metadata: {
-        plan_id: planId,
-        user_id: user.id,
+        planId,
+        userId: user.id,
       },
       trialDays: plan.trial_days || undefined,
     })
