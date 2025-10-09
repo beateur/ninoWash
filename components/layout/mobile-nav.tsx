@@ -83,7 +83,7 @@ export function MobileNav() {
           <Link href="/auth/signup" onClick={() => setIsOpen(false)}>
             <Button className="w-full">S'inscrire</Button>
           </Link>
-          <Link href="/reservation" onClick={() => setIsOpen(false)}>
+          <Link href="/reservation/guest" onClick={() => setIsOpen(false)}>
             <Button variant="secondary" className="w-full">
               Réserver maintenant
             </Button>

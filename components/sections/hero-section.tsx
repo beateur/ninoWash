@@ -25,7 +25,7 @@ export function HeroSection() {
             style={{ animationDelay: "0.2s" }}
           >
             <Button size="lg" asChild className="text-base px-8">
-              <Link href="/reservation">
+              <Link href="/reservation/guest">
                 Réserver maintenant
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>

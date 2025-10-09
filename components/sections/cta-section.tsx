@@ -15,7 +15,7 @@ export function CTASection() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" variant="secondary" asChild className="text-base px-8">
-              <Link href="/reservation">
+              <Link href="/reservation/guest">
                 Réserver maintenant
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>

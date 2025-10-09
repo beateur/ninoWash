@@ -14,7 +14,7 @@ export default function ServicesPage() {
             service ponctuel aux abonnements avantageux, trouvez la solution qui vous convient.
           </p>
           <Button asChild size="lg">
-            <Link href="/reservation">Réserver maintenant</Link>
+            <Link href="/reservation/guest">Réserver maintenant</Link>
           </Button>
         </div>
       </section>

@@ -52,7 +52,7 @@ export function Header() {
               <Link href="/auth/signup">S'inscrire</Link>
             </Button>
             <Button asChild variant="secondary">
-              <Link href="/reservation">Réserver maintenant</Link>
+              <Link href="/reservation/guest">Réserver maintenant</Link>
             </Button>
           </div>
 

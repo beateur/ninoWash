@@ -14,7 +14,7 @@ export default function CommentCaMarchePage() {
             seulement 3 étapes, vos vêtements sont collectés, nettoyés et livrés.
           </p>
           <Button asChild size="lg">
-            <Link href="/reservation">Réserver maintenant</Link>
+            <Link href="/reservation/guest">Réserver maintenant</Link>
           </Button>
         </div>
       </section>
@@ -30,7 +30,7 @@ export default function CommentCaMarchePage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild size="lg">
-              <Link href="/reservation">Réserver maintenant</Link>
+              <Link href="/reservation/guest">Réserver maintenant</Link>
             </Button>
             <Button asChild variant="outline" size="lg">
               <Link href="/services">Voir nos services</Link>
