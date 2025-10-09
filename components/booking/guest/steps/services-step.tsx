@@ -7,7 +7,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -17,7 +16,6 @@ import { Loader2, ShoppingCart, Info } from "lucide-react"
 import { toast } from "sonner"
 import type { GuestBookingItem } from "@/lib/validations/guest-booking"
 import { ServicesSkeleton } from "./service-card-skeleton"
-import { handleSupabaseError } from "../error-boundary"
 
 interface Service {
   id: string
@@ -50,25 +48,27 @@ export function ServicesStep({ initialItems, onComplete }: ServicesStepProps) {
 
   const fetchServices = async () => {
     try {
-      const supabase = createClient()
-      const { data, error } = await supabase
-        .from("services")
-        .select("*")
-        .eq("is_active", true)
-        .order("category", { ascending: true })
-
-      if (error) throw error
-
+      // Use API route instead of direct Supabase call (consistent with authenticated flow)
+      const response = await fetch("/api/services")
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      
+      // Extract all services from grouped response
+      const allServices = Object.values(data.services || {}).flat() as Service[]
+      
       // Filter out subscriptions (guest can only book classic services)
-      const classicServices = data?.filter(
-        (service) => !service.category?.toLowerCase().includes("abonnement")
-      ) || []
+      const classicServices = allServices.filter(
+        (service) => service.category && !service.category.toLowerCase().includes("abonnement")
+      )
 
       setServices(classicServices)
     } catch (error) {
       console.error("[v0] Failed to fetch services:", error)
-      const errorMessage = handleSupabaseError(error)
-      toast.error(errorMessage)
+      toast.error("Impossible de charger les services. Veuillez réessayer.")
     } finally {
       setLoading(false)
     }
