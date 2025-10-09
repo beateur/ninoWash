@@ -19,6 +19,7 @@ import { SummaryStep } from "./steps/summary-step"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { AlertCircle } from "lucide-react"
+import { GuestBookingErrorBoundary } from "./error-boundary"
 
 const STEP_TITLES = [
   "Vos informations",
@@ -94,57 +95,59 @@ export function GuestBookingContainer() {
 
       {/* Step Content */}
       <div className="bg-card rounded-lg border p-6 min-h-[500px]">
-        {state.currentStep === 0 && (
-          <ContactStep
-            initialData={state.contact}
-            onComplete={(data: GuestContact) => {
-              updateContact(data)
-              handleNext()
-            }}
-          />
-        )}
+        <GuestBookingErrorBoundary onReset={() => window.location.reload()}>
+          {state.currentStep === 0 && (
+            <ContactStep
+              initialData={state.contact}
+              onComplete={(data: GuestContact) => {
+                updateContact(data)
+                handleNext()
+              }}
+            />
+          )}
 
-        {state.currentStep === 1 && (
-          <AddressesStep
-            initialPickupAddress={state.pickupAddress}
-            initialDeliveryAddress={state.deliveryAddress}
-            onComplete={(pickup: GuestAddress, delivery: GuestAddress) => {
-              updateAddresses(pickup, delivery)
-              handleNext()
-            }}
-          />
-        )}
+          {state.currentStep === 1 && (
+            <AddressesStep
+              initialPickupAddress={state.pickupAddress}
+              initialDeliveryAddress={state.deliveryAddress}
+              onComplete={(pickup: GuestAddress, delivery: GuestAddress) => {
+                updateAddresses(pickup, delivery)
+                handleNext()
+              }}
+            />
+          )}
 
-        {state.currentStep === 2 && (
-          <ServicesStep
-            initialItems={state.items}
-            onComplete={(items: GuestBookingItem[], totalAmount: number) => {
-              updateServices(items, totalAmount)
-              handleNext()
-            }}
-          />
-        )}
+          {state.currentStep === 2 && (
+            <ServicesStep
+              initialItems={state.items}
+              onComplete={(items: GuestBookingItem[], totalAmount: number) => {
+                updateServices(items, totalAmount)
+                handleNext()
+              }}
+            />
+          )}
 
-        {state.currentStep === 3 && (
-          <DateTimeStep
-            initialPickupDate={state.pickupDate}
-            initialPickupTimeSlot={state.pickupTimeSlot}
-            onComplete={(pickupDate: string, pickupTimeSlot: string) => {
-              updateDateTime(pickupDate, pickupTimeSlot)
-              handleNext()
-            }}
-          />
-        )}
+          {state.currentStep === 3 && (
+            <DateTimeStep
+              initialPickupDate={state.pickupDate}
+              initialPickupTimeSlot={state.pickupTimeSlot}
+              onComplete={(pickupDate: string, pickupTimeSlot: string) => {
+                updateDateTime(pickupDate, pickupTimeSlot)
+                handleNext()
+              }}
+            />
+          )}
 
-        {state.currentStep === 4 && (
-          <SummaryStep
-            bookingData={state}
-            onComplete={() => {
-              // Phase 2: This will trigger Stripe payment
-              console.log("[v0] Summary complete, ready for payment (Phase 2)")
-            }}
-          />
-        )}
+          {state.currentStep === 4 && (
+            <SummaryStep
+              bookingData={state}
+              onComplete={() => {
+                // Phase 2: This will trigger Stripe payment
+                console.log("[v0] Summary complete, ready for payment (Phase 2)")
+              }}
+            />
+          )}
+        </GuestBookingErrorBoundary>
       </div>
 
       {/* Navigation Buttons */}

@@ -16,6 +16,8 @@ import { Badge } from "@/components/ui/badge"
 import { Loader2, ShoppingCart, Info } from "lucide-react"
 import { toast } from "sonner"
 import type { GuestBookingItem } from "@/lib/validations/guest-booking"
+import { ServicesSkeleton } from "./service-card-skeleton"
+import { handleSupabaseError } from "../error-boundary"
 
 interface Service {
   id: string
@@ -65,7 +67,8 @@ export function ServicesStep({ initialItems, onComplete }: ServicesStepProps) {
       setServices(classicServices)
     } catch (error) {
       console.error("[v0] Failed to fetch services:", error)
-      toast.error("Erreur lors du chargement des services")
+      const errorMessage = handleSupabaseError(error)
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -118,11 +121,7 @@ export function ServicesStep({ initialItems, onComplete }: ServicesStepProps) {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    )
+    return <ServicesSkeleton />
   }
 
   if (services.length === 0) {
