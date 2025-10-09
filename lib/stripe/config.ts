@@ -6,7 +6,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
 
 // Stripe configuration with retry and timeout settings
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2024-12-18.acacia",
+  apiVersion: "2025-09-30.clover",
   typescript: true,
   maxNetworkRetries: 3,
   timeout: 30000, // 30 seconds

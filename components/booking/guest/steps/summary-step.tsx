@@ -1,17 +1,20 @@
 /**
- * Step 4: Summary & Payment Preview
- * Displays complete booking summary
- * Payment integration will be added in Phase 2
+ * Step 4: Summary & Payment
+ * Displays complete booking summary + Stripe payment
  */
 
 "use client"
 
+import { useState, useEffect } from "react"
+import { createClient } from "@/lib/supabase/client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { User, MapPin, Package, Home, Calendar, Clock, ShoppingCart, CreditCard } from "lucide-react"
+import { User, MapPin, Package, Home, Calendar, Clock, ShoppingCart, CreditCard, Loader2 } from "lucide-react"
 import type { GuestBookingState } from "@/lib/hooks/use-guest-booking"
+import { StripePayment } from "../stripe-payment"
+import { toast } from "sonner"
 
 interface SummaryStepProps {
   bookingData: GuestBookingState
@@ -25,6 +28,40 @@ const TIME_SLOTS = [
 ]
 
 export function SummaryStep({ bookingData, onComplete }: SummaryStepProps) {
+  const [showPayment, setShowPayment] = useState(false)
+  const [paymentError, setPaymentError] = useState<string | null>(null)
+  const [services, setServices] = useState<Array<{ id: string; name: string; base_price: number }>>([])
+  const [loadingServices, setLoadingServices] = useState(true)
+
+  // Fetch services details for items
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const supabase = createClient()
+        const serviceIds = bookingData.items.map((item) => item.serviceId)
+        
+        const { data, error } = await supabase
+          .from("services")
+          .select("id, name, base_price")
+          .in("id", serviceIds)
+
+        if (error) throw error
+        setServices(data || [])
+      } catch (error) {
+        console.error("[v0] Failed to fetch services:", error)
+        toast.error("Erreur lors du chargement des services")
+      } finally {
+        setLoadingServices(false)
+      }
+    }
+
+    if (bookingData.items.length > 0) {
+      fetchServices()
+    } else {
+      setLoadingServices(false)
+    }
+  }, [bookingData.items])
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleDateString("fr-FR", {
@@ -240,21 +277,88 @@ export function SummaryStep({ bookingData, onComplete }: SummaryStepProps) {
       </Card>
 
       {/* Payment Button (Placeholder for Phase 2) */}
-      <Card className="border-dashed">
-        <CardContent className="p-6 text-center">
-          <CreditCard className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
-          <h3 className="font-semibold mb-2">Paiement Stripe</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            L&apos;intégration du paiement Stripe sera disponible en Phase 2
-          </p>
-          <Button size="lg" disabled className="w-full">
-            Payer {bookingData.totalAmount.toFixed(2)} € (Phase 2)
-          </Button>
-          <p className="text-xs text-muted-foreground mt-3">
-            🚧 En développement - Stripe Payment Intent + Elements
-          </p>
-        </CardContent>
-      </Card>
+      {!showPayment ? (
+        <Card className="border-primary">
+          <CardContent className="p-6">
+            <Button
+              size="lg"
+              className="w-full"
+              onClick={() => setShowPayment(true)}
+              disabled={loadingServices}
+            >
+              {loadingServices ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Chargement...
+                </>
+              ) : (
+                <>
+                  <CreditCard className="mr-2 h-5 w-5" />
+                  Procéder au paiement
+                </>
+              )}
+            </Button>
+            {paymentError && (
+              <p className="text-sm text-destructive mt-3 text-center">
+                {paymentError}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5" />
+              Paiement sécurisé
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loadingServices ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <span className="ml-2">Chargement...</span>
+              </div>
+            ) : (
+              <StripePayment
+                bookingData={{
+                  contact: {
+                    fullName: bookingData.contact
+                      ? `${bookingData.contact.firstName} ${bookingData.contact.lastName}`
+                      : "",
+                    email: bookingData.contact?.email || "",
+                    phone: bookingData.contact?.phone || "",
+                  },
+                  pickupAddress: {
+                    street_address: bookingData.pickupAddress?.street_address || "",
+                    city: bookingData.pickupAddress?.city || "",
+                    postal_code: bookingData.pickupAddress?.postal_code || "",
+                  },
+                  deliveryAddress: {
+                    street_address: bookingData.deliveryAddress?.street_address || "",
+                    city: bookingData.deliveryAddress?.city || "",
+                    postal_code: bookingData.deliveryAddress?.postal_code || "",
+                  },
+                  items: bookingData.items,
+                  services,
+                  pickupDate: bookingData.pickupDate || "",
+                  pickupTimeSlot: bookingData.pickupTimeSlot || "",
+                  totalAmount: bookingData.totalAmount || 0,
+                }}
+                onSuccess={(paymentIntentId) => {
+                  console.log("[v0] Payment success:", paymentIntentId)
+                  onComplete()
+                }}
+                onError={(error) => {
+                  console.error("[v0] Payment error:", error)
+                  setPaymentError(error)
+                  setShowPayment(false)
+                }}
+              />
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Test Button (Development only) */}
       {process.env.NODE_ENV === "development" && (
