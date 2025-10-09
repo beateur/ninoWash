@@ -250,11 +250,13 @@ export function SummaryStep({
         throw new Error(result.error || "Une erreur est survenue")
       }
 
-      if (user) {
-        router.push(`/dashboard?success=true`)
+      // Redirect to confirmation page with booking number
+      const bookingNumber = result.booking?.booking_number
+      if (bookingNumber) {
+        router.push(`/reservation/success?number=${bookingNumber}`)
       } else {
-        // Guest users go to homepage with success message
-        router.push(`/?booking_success=true&booking_number=${result.booking.booking_number}`)
+        // Fallback if no booking number (shouldn't happen)
+        router.push(user ? "/dashboard?success=true" : "/?booking_success=true")
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Une erreur est survenue")

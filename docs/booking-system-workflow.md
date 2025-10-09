@@ -192,6 +192,23 @@ pickupTimeSlot: z.enum(["09:00-12:00", "14:00-17:00", "18:00-21:00"])
 - Bouton "Confirmer la réservation"
 - Acceptation des conditions générales (checkbox)
 
+#### Après Confirmation
+Une fois la réservation créée avec succès :
+1. L'utilisateur est redirigé vers `/reservation/success?number=BOOK-XXXXX`
+2. Une page de confirmation affiche :
+   - Message "Réservation en attente de validation"
+   - Numéro de réservation
+   - 4 points clés sur les prochaines étapes :
+     - Validation en cours par l'équipe
+     - Lien de paiement envoyé par email
+     - Email récapitulatif
+     - Notification en cas de refus
+3. Boutons CTA :
+   - Utilisateurs authentifiés : "Accéder au tableau de bord" + "Voir mes réservations"
+   - Invités : "Retour à l'accueil" + "Découvrir nos services"
+
+**Page de confirmation** : `app/reservation/success/page.tsx`
+
 ## Traitement Backend
 
 ### API Endpoint : POST /api/bookings

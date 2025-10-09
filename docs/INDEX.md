@@ -117,6 +117,9 @@ Guide de navigation dans la documentation du projet Nino Wash.
 
 ### Réservations (Bookings)
 - [booking-system-workflow.md](booking-system-workflow.md) - Workflow complet
+- **🆕 [PRD/PRD_BOOKING_CONFIRMATION_PAGE.md](PRD/PRD_BOOKING_CONFIRMATION_PAGE.md)** - PRD page de confirmation (Jan 2025)
+- **🆕 [SUMMARY_BOOKING_CONFIRMATION.md](SUMMARY_BOOKING_CONFIRMATION.md)** - Récapitulatif implémentation page confirmation
+- **🆕 [TESTING_BOOKING_CONFIRMATION.md](TESTING_BOOKING_CONFIRMATION.md)** - Guide de test page confirmation (9 tests)
 - [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) - Tables `bookings`, `booking_items`
 - [api-integration-guide.md](api-integration-guide.md) - API `/api/bookings`
 
