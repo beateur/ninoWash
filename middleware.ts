@@ -16,12 +16,17 @@ function extractRootDomain(hostname: string): string {
 // Define protected routes and their requirements
 const PROTECTED_ROUTES = {
   // Routes requiring authentication
-  auth: ["/dashboard", "/profile", "/addresses", "/payment-methods", "/reservation", "/subscription/manage"],
+  auth: ["/dashboard", "/profile", "/addresses", "/payment-methods", "/subscription/manage"],
   // Note: /bookings removed - obsolete page deleted, booking list now in /dashboard
+  // Note: /reservation removed - now only authenticated route is /reservation (not /reservation/guest)
+  // Authenticated booking flow
+  authenticatedBooking: ["/reservation"],
   // Routes requiring admin role
   admin: ["/admin"],
   // Routes requiring guest (not authenticated)
   guest: ["/auth/signin", "/auth/signup"],
+  // Guest booking flow (no auth required)
+  guestBooking: ["/reservation/guest"],
 }
 
 export async function middleware(request: NextRequest) {
@@ -121,6 +126,29 @@ export async function middleware(request: NextRequest) {
 
     if (!isAdmin) {
       return NextResponse.redirect(new URL("/", request.url))
+    }
+  }
+
+  // Check guest booking routes FIRST (before authenticated booking check)
+  // /reservation/guest should be accessible to everyone (no auth required)
+  if (PROTECTED_ROUTES.guestBooking.some((route) => pathname.startsWith(route))) {
+    // Allow access to everyone (logged in or not)
+    // If user is logged in and tries to access guest flow, allow it
+    // (they might want to create a booking for someone else)
+    console.log("[v0] Guest booking route accessed:", pathname, "User:", user ? "logged in" : "anonymous")
+  }
+
+  // Check authenticated booking routes
+  // /reservation (without /guest) requires authentication
+  if (
+    PROTECTED_ROUTES.authenticatedBooking.some((route) => pathname === route || pathname.startsWith(route + "/")) &&
+    !PROTECTED_ROUTES.guestBooking.some((route) => pathname.startsWith(route))
+  ) {
+    if (!user) {
+      const redirectUrl = new URL("/auth/signin", request.url)
+      redirectUrl.searchParams.set("redirect", pathname)
+      console.log("[v0] Authenticated booking route requires auth:", pathname)
+      return NextResponse.redirect(redirectUrl)
     }
   }
 
