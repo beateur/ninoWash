@@ -7,6 +7,158 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Phase 2 Day 1-2] - 2025-01-13 ✅ COMPLETED
+
+### ✅ Added - Stripe Payment Integration (496 lines)
+
+#### Payment Intent API (`create-payment-intent/route.ts` - 157 lines)
+- **POST endpoint**: `/api/bookings/guest/create-payment-intent`
+- **Zod validation**: Contact, services, addresses, datetime
+- **Amount calculation**: `sum(quantity × basePrice)` → cents for Stripe
+- **Stripe Payment Intent**: 
+  - Currency: EUR
+  - Automatic payment methods enabled
+  - Metadata storage: Full booking data (guest info, services, addresses, dates)
+  - Return: `clientSecret` to frontend
+- **Error handling**: StripeCardError, StripeInvalidRequestError, generic errors
+- **Security**: Server-only STRIPE_SECRET_KEY usage
+- **Logging**: `[v0]` prefix for debugging
+
+#### Stripe Payment Component (`stripe-payment.tsx` - 295 lines)
+- **StripePayment wrapper**: 
+  - loadStripe with `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+  - Elements wrapper with French locale (`locale: "fr"`)
+  - Auto-create Payment Intent on mount
+  - Loading state (Loader2 spinner)
+  
+- **PaymentForm component**:
+  - Stripe Elements integration (PaymentElement)
+  - `stripe.confirmPayment()` with `redirect: "if_required"`
+  - Success callback: `onSuccess(paymentIntentId)`
+  - Error callback: `onError(errorMessage)`
+  - Processing state (button disabled during payment)
+  
+- **UX Features**:
+  - French error messages
+  - Loading states (intent creation + payment processing)
+  - Icons: CreditCard, Lock (security)
+  - Toast notifications integration
+
+#### Summary Step Integration (`summary-step.tsx` - +42 lines)
+- **Service fetch**: useEffect to fetch full service details from Supabase
+  - Extract serviceIds from `bookingData.items`
+  - Query: `supabase.from("services").select("id, name, base_price").in("id", serviceIds)`
+  - Store in local state: `services: Array<{id, name, base_price}>`
+  
+- **Data transformation**: GuestBookingState → StripePaymentProps format
+  - Contact: `firstName + lastName` → `fullName`
+  - Addresses: Map `pickupAddress` + `deliveryAddress`
+  - Items: Pass through
+  - Services: Enriched from Supabase fetch
+  
+- **Loading state**: Button disabled during service fetch
+  - Loader2 spinner + "Chargement..." text
+  - Stripe Elements rendered only when `!loadingServices`
+  
+- **Payment flow**:
+  - `showPayment = false` → Button "Procéder au paiement"
+  - `showPayment = true` → Stripe Elements modal
+  - `onSuccess` → Call `onComplete()` (next step)
+  - `onError` → Show error + reset to button
+
+#### Stripe API Version Fix
+- **Updated**: `lib/stripe.ts` → `apiVersion: "2025-09-30.clover"`
+- **Updated**: `lib/stripe/config.ts` → `apiVersion: "2025-09-30.clover"`
+- **Fixed**: TypeScript error (old version not assignable)
+
+### 🐛 Fixed
+- **TypeScript Error**: "Property 'services' missing in GuestBookingState"
+  - **Root Cause**: StripePayment expects `services: Array<{id, name, base_price}>` but GuestBookingState only has `items: Array<{serviceId, quantity}>`
+  - **Solution**: Fetch services from Supabase in Summary Step, transform data format
+  
+- **Stripe API Version Error**: "2024-12-18.acacia" not assignable to "2025-09-30.clover"
+  - **Solution**: Updated both `lib/stripe.ts` and `lib/stripe/config.ts`
+
+### 📝 Documentation
+- **Created**: `PHASE2_DAY1-2_COMPLETION.md` (comprehensive Phase 2 Day 1-2 summary)
+  - Technical implementation details
+  - API documentation
+  - Test scenarios (manual + curl)
+  - Security guidelines
+  - Known bugs & limitations
+  - Next steps roadmap
+
+### 🎯 Progress
+- **Phase 2 Completion**: 60% (Day 1-2 done)
+- **Remaining**:
+  - Day 3-4: Backend orchestration API + retry logic + SQL migration
+  - Day 5: Success page + email templates
+
+---
+
+## [Phase 1 Day 5] - 2025-01-12 ✅ COMPLETED
+
+### ✅ Added - Polish & Testing (624 lines)
+
+#### Loading Skeletons (`service-card-skeleton.tsx` - 78 lines)
+- **ServiceCardSkeleton**: Individual service card skeleton
+  - Mimics real card structure (header, description, price, quantity buttons)
+  - Shimmer animation using Shadcn Skeleton component
+  
+- **ServicesSkeleton**: Full page skeleton (4 cards grid)
+  - Header skeleton
+  - Instructions skeleton
+  - 4 service card skeletons (2x2 grid on desktop, 1 col mobile)
+  - Bottom bar skeleton (total amount placeholder)
+
+#### Error Boundaries (`error-boundary.tsx` - 146 lines)
+- **GuestBookingErrorBoundary**: React Error Boundary class component
+  - Catches errors in guest booking steps
+  - User-friendly error UI (AlertTriangle icon, message, actions)
+  - Retry button: Reloads window
+  - Home button: Redirects to `/`
+  - Contact email: Support link
+  
+- **handleSupabaseError()**: Error parser utility
+  - Parses Supabase errors → French messages
+  - Error types handled:
+    - Network errors: "Problème de connexion"
+    - Auth/JWT errors: "Session expirée"
+    - Permission errors: "Accès refusé"
+    - Database errors (PGRST codes): "Erreur serveur"
+  - Fallback: Generic error message
+
+#### Mobile Testing Guide (`MOBILE_TESTING_GUIDE.md` - 400+ lines)
+- **Test Devices**:
+  - iOS: iPhone 14 Pro Max, 14 Pro, SE, iPad Pro, iPad Air
+  - Android: Galaxy S23, Pixel 7, Galaxy A54, OnePlus 11
+  
+- **Test Checklist** (60+ test points):
+  - Layout: Responsive, scroll, safe areas
+  - Interactions: Touch targets, gestures, keyboard
+  - Validation: Error messages, toast notifications
+  - Navigation: Stepper, buttons, back button (Android)
+  - Persistance: SessionStorage, page reload
+  - Performance: Lighthouse, Core Web Vitals
+  
+- **iOS-specific tests**: Safari quirks, gestures, input zoom
+- **Android-specific tests**: Keyboard viewport, back button, touch ripple
+- **Tools**: Chrome DevTools, Safari iOS Simulator, ngrok, Lighthouse CLI
+- **Templates**: Test results, issues found, fixes applied
+
+### 🔧 Modified
+- **guest-booking-container.tsx**: Wrapped all 5 steps in `<GuestBookingErrorBoundary>`
+- **services-step.tsx**: 
+  - Replaced Loader2 spinner with `<ServicesSkeleton />`
+  - Added `handleSupabaseError()` for Supabase fetch failures
+  - Toast notifications for errors
+
+### 📝 Commit
+- **Hash**: 7ad7031
+- **Files**: 5 changed, 597 insertions, 57 deletions
+
+---
+
 ## [Phase 1 Day 3-4] - 2025-01-10
 
 ### ✅ Added - Steps 1-4 Complete (1057 lines)
@@ -45,8 +197,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Services list**: All selected items with quantities
 - **Date/Time display**: Pickup + delivery estimate
 - **Total amount**: Large display with itemized breakdown
-- **Stripe payment**: **PLACEHOLDER** (disabled button - Phase 2)
+- **Stripe payment**: ✅ **INTEGRATED** in Phase 2 Day 1-2
 - **Dev-only test button**: Simulates completion for testing
+
+```
 
 #### Container Integration (`guest-booking-container.tsx`)
 - **Step imports**: All 5 components imported
