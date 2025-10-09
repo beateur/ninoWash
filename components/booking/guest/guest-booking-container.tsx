@@ -9,12 +9,13 @@ import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useGuestBooking, hasAbandonedBooking } from "@/lib/hooks/use-guest-booking"
 import type { GuestContact } from "@/lib/validations/guest-contact"
+import type { GuestAddress, GuestBookingItem } from "@/lib/validations/guest-booking"
 import { GuestStepper } from "./guest-stepper"
 import { ContactStep } from "./steps/contact-step"
-// import { AddressesStep } from "./steps/addresses-step"
-// import { ServicesStep } from "./steps/services-step"
-// import { DateTimeStep } from "./steps/datetime-step"
-// import { SummaryStep } from "./steps/summary-step"
+import { AddressesStep } from "./steps/addresses-step"
+import { ServicesStep } from "./steps/services-step"
+import { DateTimeStep } from "./steps/datetime-step"
+import { SummaryStep } from "./steps/summary-step"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { AlertCircle } from "lucide-react"
@@ -104,31 +105,45 @@ export function GuestBookingContainer() {
         )}
 
         {state.currentStep === 1 && (
-          <div className="text-center py-12">
-            <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">Étape Adresses - En cours de développement</p>
-          </div>
+          <AddressesStep
+            initialPickupAddress={state.pickupAddress}
+            initialDeliveryAddress={state.deliveryAddress}
+            onComplete={(pickup: GuestAddress, delivery: GuestAddress) => {
+              updateAddresses(pickup, delivery)
+              handleNext()
+            }}
+          />
         )}
 
         {state.currentStep === 2 && (
-          <div className="text-center py-12">
-            <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">Étape Services - En cours de développement</p>
-          </div>
+          <ServicesStep
+            initialItems={state.items}
+            onComplete={(items: GuestBookingItem[], totalAmount: number) => {
+              updateServices(items, totalAmount)
+              handleNext()
+            }}
+          />
         )}
 
         {state.currentStep === 3 && (
-          <div className="text-center py-12">
-            <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">Étape Date & Heure - En cours de développement</p>
-          </div>
+          <DateTimeStep
+            initialPickupDate={state.pickupDate}
+            initialPickupTimeSlot={state.pickupTimeSlot}
+            onComplete={(pickupDate: string, pickupTimeSlot: string) => {
+              updateDateTime(pickupDate, pickupTimeSlot)
+              handleNext()
+            }}
+          />
         )}
 
         {state.currentStep === 4 && (
-          <div className="text-center py-12">
-            <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">Étape Paiement - En cours de développement</p>
-          </div>
+          <SummaryStep
+            bookingData={state}
+            onComplete={() => {
+              // Phase 2: This will trigger Stripe payment
+              console.log("[v0] Summary complete, ready for payment (Phase 2)")
+            }}
+          />
         )}
       </div>
 
