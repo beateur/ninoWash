@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from "lucide-react"
+import { Instagram, Mail, MapPin } from "lucide-react"
 
 export function Footer() {
   return (
@@ -19,16 +19,9 @@ export function Footer() {
             <p className="text-sm text-background/80 leading-relaxed">
               Votre pressing à domicile haut de gamme. Service professionnel, collecte et livraison incluses.
             </p>
-            <div className="flex space-x-4">
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-background/80 hover:text-background">
-                <Facebook className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-background/80 hover:text-background">
-                <Instagram className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-background/80 hover:text-background">
-                <Twitter className="h-4 w-4" />
-              </Button>
+            <div className="flex items-start gap-2">
+              <MapPin className="h-4 w-4 mt-0.5" />
+              <span>Paris et petite couronne</span>
             </div>
           </div>
 
@@ -64,16 +57,6 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-background transition-colors">
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <Link href="/faq" className="hover:text-background transition-colors">
-                  FAQ
-                </Link>
-              </li>
-              <li>
                 <Link href="/compte" className="hover:text-background transition-colors">
                   Mon compte
                 </Link>
@@ -86,17 +69,18 @@ export function Footer() {
             <h3 className="font-semibold">Contact</h3>
             <div className="space-y-3 text-sm text-background/80">
               <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4" />
-                <span>01 23 45 67 89</span>
-              </div>
-              <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
-                <span>contact@ninowash.fr</span>
+                <span>contact@ninowash.org</span>
               </div>
-              <div className="flex items-start gap-2">
-                <MapPin className="h-4 w-4 mt-0.5" />
-                <span>Paris et petite couronne</span>
-              </div>
+              <a
+                href="https://www.instagram.com/nino.wash?igsh=MXVvaDNwNmMxc3hnag%3D%3D&utm_source=qr"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 hover:text-background transition-colors"
+              >
+                <Instagram className="h-4 w-4" />
+                <span>Nino Wash</span>
+              </a>
             </div>
           </div>
         </div>

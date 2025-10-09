@@ -349,7 +349,7 @@ export function SummaryStep({
             <div className="bg-muted p-3 rounded-lg">
               <p className="text-sm text-muted-foreground">
                 <CheckCircle className="inline h-4 w-4 mr-1 text-green-600" />
-                Livraison estimée : 48h après collecte
+                Livraison estimée : 72h après collecte
               </p>
             </div>
           </CardContent>

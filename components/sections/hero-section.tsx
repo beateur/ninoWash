@@ -17,7 +17,7 @@ export function HeroSection() {
             style={{ animationDelay: "0.1s" }}
           >
             Confiez-nous vos vêtements et retrouvez-les impeccables. Collecte, nettoyage professionnel et livraison à
-            domicile en 48h.
+            domicile en 72h.
           </p>
 
           <div
@@ -44,7 +44,7 @@ export function HeroSection() {
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 mb-3">
                 <Clock className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="font-semibold text-sm">Livraison 48h</h3>
+              <h3 className="font-semibold text-sm">Livraison 72h</h3>
               <p className="text-xs text-muted-foreground">Garantie de délai</p>
             </div>
 

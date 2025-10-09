@@ -41,9 +41,6 @@ export function Header() {
             <Link href="/a-propos" className="text-sm font-medium hover:text-primary transition-colors">
               À propos
             </Link>
-            <Link href="/contact" className="text-sm font-medium hover:text-primary transition-colors">
-              Contact
-            </Link>
           </nav>
 
           {/* Desktop Actions - Marketing Only */}

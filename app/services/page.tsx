@@ -34,7 +34,7 @@ export default function ServicesPage() {
             <div>
               <h3 className="font-semibold text-lg mb-3">Livraison Rapide</h3>
               <p className="text-muted-foreground">
-                Collecte et livraison à domicile sous 48h pour le service classique.
+                Collecte et livraison à domicile sous 72h pour le service classique.
               </p>
             </div>
             <div>
@@ -56,7 +56,7 @@ export default function ServicesPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild size="lg">
-              <Link href="/contact">Nous contacter</Link>
+              <a href="mailto:contact@ninowash.org">Nous contacter par email</a>
             </Button>
             <Button asChild variant="outline" size="lg">
               <Link href="/comment-ca-marche">Comment ça marche</Link>

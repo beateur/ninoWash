@@ -62,7 +62,7 @@ export function HowItWorksSection() {
         <div className="text-center mt-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-sm font-medium text-primary">
             <Sparkles className="h-4 w-4" />
-            Livraison sous 48h garantie
+            Livraison sous 72h garantie
           </div>
         </div>
       </div>

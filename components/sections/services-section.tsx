@@ -14,7 +14,7 @@ const services = [
     features: [
       "Collecte et livraison à domicile",
       "Nettoyage professionnel",
-      "Livraison sous 48h",
+      "Livraison sous 72h",
       "Assurance incluse",
       "Accessible sans connexion",
     ],
@@ -119,7 +119,7 @@ export function ServicesSection() {
         <div className="text-center mt-12">
           <p className="text-sm text-muted-foreground mb-4">Besoin d'une solution sur mesure ?</p>
           <Button variant="outline" asChild>
-            <Link href="/contact">Contactez-nous</Link>
+            <a href="mailto:contact@ninowash.org">Contactez-nous par email</a>
           </Button>
         </div>
       </div>

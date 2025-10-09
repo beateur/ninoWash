@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Menu, X, Home, Wrench, HelpCircle, Info, Phone } from "lucide-react"
+import { Menu, X, Home, Wrench, HelpCircle, Info } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 /**
@@ -25,7 +25,6 @@ const publicNavigation = [
   { name: "Services", href: "/services", icon: Wrench },
   { name: "Comment ça marche", href: "/comment-ca-marche", icon: HelpCircle },
   { name: "À propos", href: "/a-propos", icon: Info },
-  { name: "Contact", href: "/contact", icon: Phone },
 ]
 
 export function MobileNav() {
