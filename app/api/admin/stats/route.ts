@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
       .eq("status", "succeeded")
       .gte("created_at", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
 
-    const monthlyRevenue = payments?.reduce((sum, payment) => sum + payment.amount, 0) || 0
+    const monthlyRevenue = payments?.reduce((sum: number, payment: any) => sum + payment.amount, 0) || 0
 
     const stats = {
       totalBookings: totalBookings || 0,

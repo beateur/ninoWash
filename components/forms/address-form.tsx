@@ -28,11 +28,10 @@ export function AddressForm({ onSuccess, isGuest = false }: AddressFormProps) {
       type: "home",
       label: "",
       streetAddress: "",
-      apartment: "",
+      buildingInfo: "",
       city: "",
       postalCode: "",
-      deliveryInstructions: "",
-      accessCode: "",
+      accessInstructions: "",
       isDefault: false,
     },
   })
@@ -48,11 +47,10 @@ export function AddressForm({ onSuccess, isGuest = false }: AddressFormProps) {
           type: data.type,
           label: data.label,
           street_address: data.streetAddress,
-          apartment: data.apartment,
+          building_info: data.buildingInfo,
           city: data.city,
           postal_code: data.postalCode,
-          access_instructions: data.deliveryInstructions,
-          access_code: data.accessCode,
+          access_instructions: data.accessInstructions,
           is_default: data.isDefault,
         }
 
@@ -134,8 +132,8 @@ export function AddressForm({ onSuccess, isGuest = false }: AddressFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="apartment">Appartement / Étage (optionnel)</Label>
-          <Input id="apartment" placeholder="Apt 4B, 3ème étage" {...form.register("apartment")} />
+          <Label htmlFor="buildingInfo">Appartement / Étage (optionnel)</Label>
+          <Input id="buildingInfo" placeholder="Apt 4B, 3ème étage" {...form.register("buildingInfo")} />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -155,16 +153,11 @@ export function AddressForm({ onSuccess, isGuest = false }: AddressFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="accessCode">Code d'accès (optionnel)</Label>
-          <Input id="accessCode" placeholder="A1234" {...form.register("accessCode")} />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="deliveryInstructions">Instructions de livraison (optionnel)</Label>
+          <Label htmlFor="accessInstructions">Instructions de livraison (optionnel)</Label>
           <Textarea
-            id="deliveryInstructions"
+            id="accessInstructions"
             placeholder="Sonner à l'interphone, laisser devant la porte..."
-            {...form.register("deliveryInstructions")}
+            {...form.register("accessInstructions")}
           />
         </div>
 

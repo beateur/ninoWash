@@ -116,8 +116,8 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
                     {...form.register("firstName" as keyof (SignUpInput | SignInInput))}
                   />
                 </div>
-                {form.formState.errors.firstName && (
-                  <p className="text-sm text-red-600">{form.formState.errors.firstName.message}</p>
+                {(form.formState.errors as any).firstName && (
+                  <p className="text-sm text-red-600">{(form.formState.errors as any).firstName.message}</p>
                 )}
               </div>
 
@@ -132,8 +132,8 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
                     {...form.register("lastName" as keyof (SignUpInput | SignInInput))}
                   />
                 </div>
-                {form.formState.errors.lastName && (
-                  <p className="text-sm text-red-600">{form.formState.errors.lastName.message}</p>
+                {(form.formState.errors as any).lastName && (
+                  <p className="text-sm text-red-600">{(form.formState.errors as any).lastName.message}</p>
                 )}
               </div>
             </div>
@@ -169,8 +169,8 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
                   {...form.register("phone" as keyof (SignUpInput | SignInInput))}
                 />
               </div>
-              {form.formState.errors.phone && (
-                <p className="text-sm text-red-600">{form.formState.errors.phone.message}</p>
+              {(form.formState.errors as any).phone && (
+                <p className="text-sm text-red-600">{(form.formState.errors as any).phone.message}</p>
               )}
             </div>
           )}

@@ -65,10 +65,10 @@ export function DateTimeStep({ pickupDate, pickupTimeSlot, onUpdate }: DateTimeS
             <Calendar
               mode="single"
               selected={selectedDate}
-              onSelect={handleDateSelect}
+              onSelect={handleDateSelect as any}
               disabled={isDateDisabled}
               className="rounded-md border"
-              locale="fr"
+              locale={"fr" as any}
             />
             <div className="mt-4 text-sm text-muted-foreground">
               <p>• Service disponible du lundi au samedi</p>
