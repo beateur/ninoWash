@@ -34,8 +34,8 @@ export class PerformanceMonitor {
 
   private sendToAnalytics(metric: PerformanceMetric) {
     // Send to Vercel Analytics or other monitoring service
-    if (typeof window !== "undefined" && window.gtag) {
-      window.gtag("event", "performance_metric", {
+    if (typeof window !== "undefined" && (window as any).gtag) {
+      (window as any).gtag("event", "performance_metric", {
         metric_name: metric.name,
         metric_value: metric.value,
         user_id: metric.userId,
