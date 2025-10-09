@@ -6,6 +6,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -28,6 +29,7 @@ const TIME_SLOTS = [
 ]
 
 export function SummaryStep({ bookingData, onComplete }: SummaryStepProps) {
+  const router = useRouter()
   const [showPayment, setShowPayment] = useState(false)
   const [paymentError, setPaymentError] = useState<string | null>(null)
   const [services, setServices] = useState<Array<{ id: string; name: string; base_price: number }>>([])
@@ -347,7 +349,12 @@ export function SummaryStep({ bookingData, onComplete }: SummaryStepProps) {
                 }}
                 onSuccess={(paymentIntentId) => {
                   console.log("[v0] Payment success:", paymentIntentId)
-                  onComplete()
+                  
+                  // Redirect to success page with booking details
+                  const email = bookingData.contact?.email || ""
+                  router.push(
+                    `/reservation/guest/success?bookingId=${paymentIntentId}&email=${encodeURIComponent(email)}`
+                  )
                 }}
                 onError={(error) => {
                   console.error("[v0] Payment error:", error)

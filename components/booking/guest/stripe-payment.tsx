@@ -102,7 +102,36 @@ function PaymentForm({
       } else if (paymentIntent && paymentIntent.status === "succeeded") {
         console.log("[v0] Payment succeeded:", paymentIntent.id)
         toast.success("Paiement réussi !")
-        onSuccess(paymentIntent.id)
+        
+        // Call orchestration API to create account + booking
+        console.log("[v0] Calling guest booking orchestration API...")
+        try {
+          const orchestrationResponse = await fetch("/api/bookings/guest", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              paymentIntentId: paymentIntent.id,
+            }),
+          })
+
+          if (!orchestrationResponse.ok) {
+            const errorData = await orchestrationResponse.json()
+            throw new Error(errorData.message || "Failed to create booking")
+          }
+
+          const orchestrationData = await orchestrationResponse.json()
+          console.log("[v0] Booking orchestration completed:", orchestrationData)
+          
+          onSuccess(paymentIntent.id)
+        } catch (orchestrationError: any) {
+          console.error("[v0] Orchestration error:", orchestrationError)
+          toast.error(
+            orchestrationError.message || 
+            "Le paiement a réussi mais nous rencontrons un problème technique. Notre équipe vous contactera sous 24h."
+          )
+          // Still call onSuccess because payment succeeded
+          onSuccess(paymentIntent.id)
+        }
       } else {
         console.log("[v0] Payment status:", paymentIntent?.status)
         toast.info("Paiement en cours de traitement...")
