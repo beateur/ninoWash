@@ -22,9 +22,14 @@ interface Service {
   name: string
   description: string
   base_price: number
-  unit: string
-  category: string
-  processing_time_hours: number
+  type: string // "one_time" | "subscription"
+  processing_days: number
+  metadata?: {
+    category?: string // "classic" | "express"
+    weight_kg?: number
+    delivery_time?: string
+    includes?: string[]
+  }
 }
 
 interface ServicesStepProps {
@@ -60,12 +65,8 @@ export function ServicesStep({ initialItems, onComplete }: ServicesStepProps) {
       // Extract all services from grouped response
       const allServices = Object.values(data.services || {}).flat() as Service[]
       
-      // Filter out subscriptions (guest can only book classic services)
-      const classicServices = allServices.filter(
-        (service) => service.category && !service.category.toLowerCase().includes("abonnement")
-      )
-
-      setServices(classicServices)
+      // All services are available for guest booking
+      setServices(allServices)
     } catch (error) {
       console.error("[v0] Failed to fetch services:", error)
       toast.error("Impossible de charger les services. Veuillez réessayer.")
@@ -165,9 +166,9 @@ export function ServicesStep({ initialItems, onComplete }: ServicesStepProps) {
                       {service.description}
                     </p>
                   </div>
-                  {service.category && (
+                  {service.metadata?.category && (
                     <Badge variant="secondary" className="ml-2">
-                      {service.category}
+                      {service.metadata.category === "classic" ? "Classique" : "Express"}
                     </Badge>
                   )}
                 </div>
@@ -178,11 +179,11 @@ export function ServicesStep({ initialItems, onComplete }: ServicesStepProps) {
                     {service.base_price.toFixed(2)} €
                     <span className="text-sm text-muted-foreground font-normal">
                       {" "}
-                      / {service.unit}
+                      / {service.metadata?.weight_kg || 7}kg
                     </span>
                   </span>
                   <span className="text-muted-foreground">
-                    {service.processing_time_hours}h
+                    {service.metadata?.delivery_time || `${service.processing_days}j`}
                   </span>
                 </div>
 
