@@ -17,9 +17,11 @@ import { clientAuth } from "@/lib/services/auth.service.client"
 interface AuthFormProps {
   mode: "signin" | "signup"
   onSuccess?: () => void
+  defaultEmail?: string
+  infoMessage?: string
 }
 
-export function AuthForm({ mode, onSuccess }: AuthFormProps) {
+export function AuthForm({ mode, onSuccess, defaultEmail, infoMessage }: AuthFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -32,7 +34,7 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
     resolver: zodResolver(schema),
     defaultValues: isSignUp
       ? {
-          email: "",
+          email: defaultEmail || "",
           password: "",
           firstName: "",
           lastName: "",
@@ -40,7 +42,7 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
           marketingConsent: false,
         }
       : {
-          email: "",
+          email: defaultEmail || "",
           password: "",
         },
   })
@@ -99,6 +101,12 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
         {success && (
           <Alert className="border-green-200 bg-green-50 text-green-800">
             <AlertDescription>{success}</AlertDescription>
+          </Alert>
+        )}
+
+        {infoMessage && (
+          <Alert className="border-blue-200 bg-blue-50 text-blue-800">
+            <AlertDescription>{infoMessage}</AlertDescription>
           </Alert>
         )}
 

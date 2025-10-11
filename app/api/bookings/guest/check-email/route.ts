@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { emailCheckSchema } from "@/lib/validations/guest-contact"
 
 export async function POST(request: NextRequest) {
@@ -26,7 +26,8 @@ export async function POST(request: NextRequest) {
     const { email } = validation.data
 
     // 2. Check if email exists in Supabase Auth
-    const supabase = await createClient()
+    // Use admin client with service_role_key to query auth.users
+    const supabase = createAdminClient()
 
     // Use admin client to query auth.users
     const { data: { users }, error } = await supabase.auth.admin.listUsers()

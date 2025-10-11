@@ -11,6 +11,7 @@ import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-
 import { Button } from "@/components/ui/button"
 import { Loader2, CreditCard, Lock } from "lucide-react"
 import { toast } from "sonner"
+import { createClient } from "@/lib/supabase/client"
 
 // Load Stripe publishable key
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
@@ -45,7 +46,7 @@ interface StripePaymentProps {
     pickupTimeSlot: string
     totalAmount: number
   }
-  onSuccess: (paymentIntentId: string) => void
+  onSuccess: (bookingId: string, email?: string) => void
   onError: (error: string) => void
 }
 
@@ -57,7 +58,7 @@ function PaymentForm({
 }: {
   clientSecret: string
   bookingData: StripePaymentProps["bookingData"]
-  onSuccess: (paymentIntentId: string) => void
+  onSuccess: (bookingId: string, email?: string) => void
   onError: (error: string) => void
 }) {
   const stripe = useStripe()
@@ -103,7 +104,7 @@ function PaymentForm({
         console.log("[v0] Payment succeeded:", paymentIntent.id)
         toast.success("Paiement réussi !")
         
-        // Call orchestration API to create account + booking
+        // Call orchestration API to create account + booking + session
         console.log("[v0] Calling guest booking orchestration API...")
         try {
           const orchestrationResponse = await fetch("/api/bookings/guest", {
@@ -114,22 +115,45 @@ function PaymentForm({
             }),
           })
 
+          const orchestrationData = await orchestrationResponse.json()
+
           if (!orchestrationResponse.ok) {
-            const errorData = await orchestrationResponse.json()
-            throw new Error(errorData.message || "Failed to create booking")
+            throw new Error(orchestrationData.message || "Failed to create booking")
           }
 
-          const orchestrationData = await orchestrationResponse.json()
           console.log("[v0] Booking orchestration completed:", orchestrationData)
           
-          onSuccess(paymentIntent.id)
+          // If session tokens are provided, set them for auto-login
+          if (orchestrationData.session?.access_token && orchestrationData.session?.refresh_token) {
+            console.log("[v0] Session tokens received, setting up auto-login...")
+            try {
+              const supabase = createClient()
+              const { error: sessionError } = await supabase.auth.setSession({
+                access_token: orchestrationData.session.access_token,
+                refresh_token: orchestrationData.session.refresh_token,
+              })
+              
+              if (sessionError) {
+                console.error("[v0] Failed to set session:", sessionError)
+                toast.warning("Connexion automatique échouée. Vous devrez vous connecter manuellement.")
+              } else {
+                console.log("[v0] User automatically logged in!")
+                toast.success("Connexion automatique réussie !")
+              }
+            } catch (setSessionError) {
+              console.error("[v0] Error setting session:", setSessionError)
+            }
+          }
+          
+          // Pass bookingId and email to success page
+          onSuccess(orchestrationData.bookingId, orchestrationData.email)
         } catch (orchestrationError: any) {
           console.error("[v0] Orchestration error:", orchestrationError)
           toast.error(
             orchestrationError.message || 
             "Le paiement a réussi mais nous rencontrons un problème technique. Notre équipe vous contactera sous 24h."
           )
-          // Still call onSuccess because payment succeeded
+          // Still call onSuccess because payment succeeded (with minimal data)
           onSuccess(paymentIntent.id)
         }
       } else {

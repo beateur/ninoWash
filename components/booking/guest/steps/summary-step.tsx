@@ -347,13 +347,14 @@ export function SummaryStep({ bookingData, onComplete }: SummaryStepProps) {
                   pickupTimeSlot: bookingData.pickupTimeSlot || "",
                   totalAmount: bookingData.totalAmount || 0,
                 }}
-                onSuccess={(paymentIntentId) => {
-                  console.log("[v0] Payment success:", paymentIntentId)
+                onSuccess={(bookingId, email) => {
+                  console.log("[v0] Payment success, redirecting to success page")
+                  console.log("[v0] BookingID:", bookingId, "Email:", email)
                   
                   // Redirect to success page with booking details
-                  const email = bookingData.contact?.email || ""
+                  const userEmail = email || bookingData.contact?.email || ""
                   router.push(
-                    `/reservation/guest/success?bookingId=${paymentIntentId}&email=${encodeURIComponent(email)}`
+                    `/reservation/guest/success?bookingId=${bookingId}&email=${encodeURIComponent(userEmail)}`
                   )
                 }}
                 onError={(error) => {

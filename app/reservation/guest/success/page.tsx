@@ -7,34 +7,17 @@
 
 "use client"
 
-import { useEffect, useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { CheckCircle2, Mail, Calendar, Package, ArrowRight } from "lucide-react"
 import Link from "next/link"
 
 export default function GuestBookingSuccessPage() {
-  const router = useRouter()
   const searchParams = useSearchParams()
-  const [countdown, setCountdown] = useState(10)
 
   const bookingId = searchParams.get("bookingId")
   const email = searchParams.get("email")
-
-  // Auto-redirect after 10 seconds
-  useEffect(() => {
-    if (countdown === 0) {
-      router.push("/auth/signin?newAccount=true")
-      return
-    }
-
-    const timer = setTimeout(() => {
-      setCountdown((prev) => prev - 1)
-    }, 1000)
-
-    return () => clearTimeout(timer)
-  }, [countdown, router])
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-2xl">
@@ -114,24 +97,13 @@ export default function GuestBookingSuccessPage() {
             </ol>
           </div>
 
-          {/* Auto-redirect notice */}
-          <div className="bg-muted rounded-lg p-4 text-center space-y-2">
-            <p className="text-sm text-muted-foreground">
-              Vous serez automatiquement redirigé vers la page de connexion dans
-            </p>
-            <p className="text-2xl font-bold text-primary">{countdown}s</p>
-          </div>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button asChild size="lg" className="flex-1">
-              <Link href="/auth/signin?newAccount=true">
+          {/* CTA Button */}
+          <div className="flex justify-center">
+            <Button asChild size="lg" className="w-full sm:w-auto min-w-[300px]">
+              <Link href="/dashboard">
                 <ArrowRight className="mr-2 h-4 w-4" />
-                Me connecter maintenant
+                Accéder à mon tableau de bord
               </Link>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="flex-1">
-              <Link href="/">Retour à l'accueil</Link>
             </Button>
           </div>
 
@@ -140,7 +112,7 @@ export default function GuestBookingSuccessPage() {
             <p className="text-xs text-muted-foreground">
               Vous avez une question ?{" "}
               <a
-                href="mailto:contact@ninowash.fr"
+                href="mailto:contact@ninowash.org"
                 className="text-primary hover:underline"
               >
                 Contactez-nous
