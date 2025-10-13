@@ -68,6 +68,23 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 
     const { pickupDate, pickupTimeSlot, pickupAddressId, deliveryAddressId, specialInstructions } = validation.data
 
+    if (!pickupDate) {
+      return NextResponse.json(
+        { error: "La date de collecte est requise" },
+        { status: 400 }
+      )
+    }
+
+    const newPickupDate = new Date(pickupDate)
+    if (Number.isNaN(newPickupDate.getTime())) {
+      return NextResponse.json(
+        { error: "La date de collecte doit être une date ISO valide" },
+        { status: 400 }
+      )
+    }
+
+    newPickupDate.setHours(0, 0, 0, 0)
+
     // 2. Fetch existing booking
     const { data: booking, error: fetchError } = await supabase
       .from("bookings")
@@ -119,9 +136,6 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     tomorrow.setDate(tomorrow.getDate() + 1)
     tomorrow.setHours(0, 0, 0, 0)
 
-    const newPickupDate = new Date(pickupDate)
-    newPickupDate.setHours(0, 0, 0, 0)
-
     console.log("[v0] Date validation:", {
       tomorrow: tomorrow.toISOString(),
       newPickupDate: newPickupDate.toISOString(),
@@ -167,7 +181,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     const { data: updatedBooking, error: updateError } = await supabase
       .from("bookings")
       .update({
-        pickup_date: pickupDate,
+        pickup_date: newPickupDate.toISOString(),
         pickup_time_slot: pickupTimeSlot,
         pickup_address_id: pickupAddressId,
         delivery_address_id: deliveryAddressId,
