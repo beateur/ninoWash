@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback } from "react"
 import type { GuestContact } from "@/lib/validations/guest-contact"
 import type { GuestAddress, GuestBookingItem } from "@/lib/validations/guest-booking"
+import type { LogisticSlot } from "@/lib/types/logistic-slots"
 
 const STORAGE_KEY = "ninowash_guest_booking"
 const STORAGE_EXPIRY_HOURS = 24
@@ -24,9 +25,11 @@ export interface GuestBookingState {
   items: GuestBookingItem[]
   totalAmount: number
 
-  // Step 3: Date & Time
+  // Step 3: Date & Time (UPDATED: Slot-based + legacy fallback)
   pickupDate: string | null
   pickupTimeSlot: string | null
+  pickupSlot: LogisticSlot | null
+  deliverySlot: LogisticSlot | null
 
   // Step 4: Payment
   paymentIntentId: string | null
@@ -49,6 +52,8 @@ const initialState: GuestBookingState = {
   totalAmount: 0,
   pickupDate: null,
   pickupTimeSlot: null,
+  pickupSlot: null,
+  deliverySlot: null,
   paymentIntentId: null,
   clientSecret: null,
   currentStep: 0,
@@ -138,16 +143,26 @@ export function useGuestBooking() {
     }))
   }, [])
 
-  // Update date & time (Step 3)
-  const updateDateTime = useCallback((pickupDate: string, pickupTimeSlot: string) => {
-    setState((prev) => ({
-      ...prev,
-      pickupDate,
-      pickupTimeSlot,
-      completedSteps: Array.from(new Set([...prev.completedSteps, 3])),
-      lastUpdated: new Date().toISOString(),
-    }))
-  }, [])
+  // Update date & time (Step 3) - UPDATED: Support slots
+  const updateDateTime = useCallback(
+    (
+      pickupDate: string,
+      pickupTimeSlot: string,
+      pickupSlot?: LogisticSlot,
+      deliverySlot?: LogisticSlot
+    ) => {
+      setState((prev) => ({
+        ...prev,
+        pickupDate,
+        pickupTimeSlot,
+        pickupSlot: pickupSlot || null,
+        deliverySlot: deliverySlot || null,
+        completedSteps: Array.from(new Set([...prev.completedSteps, 3])),
+        lastUpdated: new Date().toISOString(),
+      }))
+    },
+    []
+  )
 
   // Update payment info (Step 4)
   const updatePayment = useCallback((paymentIntentId: string, clientSecret: string) => {
@@ -195,7 +210,10 @@ export function useGuestBooking() {
       case 2:
         return state.items.length > 0
       case 3:
-        return state.pickupDate !== null && state.pickupTimeSlot !== null
+        // Support both legacy and slot-based scheduling
+        const hasLegacy = state.pickupDate !== null && state.pickupTimeSlot !== null
+        const hasSlots = state.pickupSlot !== null && state.deliverySlot !== null
+        return hasLegacy || hasSlots
       case 4:
         return state.paymentIntentId !== null
       default:

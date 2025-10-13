@@ -21,25 +21,18 @@ export default function GuestBookingSuccessPage() {
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-2xl">
-      {/* Success Icon */}
-      <div className="flex justify-center mb-6">
-        <div className="bg-green-100 dark:bg-green-900/20 rounded-full p-6">
-          <CheckCircle2 className="h-16 w-16 text-green-600 dark:text-green-400" />
-        </div>
-      </div>
-
       {/* Main Success Card */}
       <Card>
         <CardHeader>
           <CardTitle className="text-center text-2xl">
-            🎉 Réservation confirmée !
+            Réservation enregistrée 
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Success Message */}
           <p className="text-center text-muted-foreground">
-            Votre paiement a été traité avec succès et votre réservation est
-            confirmée.
+            Votre emprunte bancaire a été traité avec succès et votre réservation va 
+            être traitée par nos équipes.
           </p>
 
           {/* Booking ID */}
@@ -62,7 +55,7 @@ export default function GuestBookingSuccessPage() {
                   Vérifiez votre email
                 </p>
                 <p className="text-sm text-blue-700 dark:text-blue-300">
-                  Un email de confirmation a été envoyé à{" "}
+                  Un email va être envoyé à l'adresse suivante :{" "}
                   <span className="font-medium">{email || "votre adresse email"}</span>.
                   Vous y trouverez les détails de votre compte et un lien pour
                   définir votre mot de passe.
@@ -80,7 +73,7 @@ export default function GuestBookingSuccessPage() {
             <ol className="space-y-2 text-sm text-muted-foreground list-decimal list-inside">
               <li>
                 <strong>Vérifiez votre email</strong> pour les détails de votre
-                compte
+                réservation et les informations de votre compte
               </li>
               <li>
                 <strong>Définissez votre mot de passe</strong> en cliquant sur
@@ -89,10 +82,6 @@ export default function GuestBookingSuccessPage() {
               <li>
                 <strong>Connectez-vous</strong> pour suivre votre réservation en
                 temps réel
-              </li>
-              <li>
-                <strong>Nous viendrons chercher votre linge</strong> à la date
-                et l'heure convenues
               </li>
             </ol>
           </div>

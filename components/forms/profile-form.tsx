@@ -110,10 +110,9 @@ export function ProfileForm({ user, profile }: ProfileFormProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="firstName">Prénom</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input id="firstName" placeholder="Jean" className="pl-10" {...form.register("firstName")} />
-              </div>
+                <div className="relative">
+                <Input id="firstName" placeholder="Jean" {...form.register("firstName")} />
+                </div>
               {form.formState.errors.firstName && (
                 <p className="text-sm text-red-600">{form.formState.errors.firstName.message}</p>
               )}
@@ -122,8 +121,7 @@ export function ProfileForm({ user, profile }: ProfileFormProps) {
             <div className="space-y-2">
               <Label htmlFor="lastName">Nom</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input id="lastName" placeholder="Dupont" className="pl-10" {...form.register("lastName")} />
+                <Input id="lastName" placeholder="Dupont" {...form.register("lastName")} />
               </div>
               {form.formState.errors.lastName && (
                 <p className="text-sm text-red-600">{form.formState.errors.lastName.message}</p>

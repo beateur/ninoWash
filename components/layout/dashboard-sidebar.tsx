@@ -30,6 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
+import { BookingButton } from "@/components/ui/booking-button"
 import {
   Sheet,
   SheetContent,
@@ -109,11 +110,14 @@ function SidebarContent({ user, hasActiveSubscription, isCollapsed = false, onNa
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button asChild className="w-full justify-center mb-4" size="lg">
-                  <Link href="/reservation" onClick={handleNavClick}>
-                    <Plus className="h-5 w-5" />
-                  </Link>
-                </Button>
+                <BookingButton 
+                  className="w-full justify-center mb-4" 
+                  size="lg"
+                  href="/reservation"
+                  onClick={handleNavClick}
+                >
+                  <Plus className="h-5 w-5" />
+                </BookingButton>
               </TooltipTrigger>
               <TooltipContent side="right">
                 <p>Nouvelle réservation</p>
@@ -121,12 +125,15 @@ function SidebarContent({ user, hasActiveSubscription, isCollapsed = false, onNa
             </Tooltip>
           </TooltipProvider>
         ) : (
-          <Button asChild className="w-full justify-start mb-4" size="lg">
-            <Link href="/reservation" onClick={handleNavClick}>
-              <Plus className="mr-2 h-4 w-4" />
-              Nouvelle réservation
-            </Link>
-          </Button>
+          <BookingButton 
+            className="w-full justify-start mb-4" 
+            size="lg"
+            href="/reservation"
+            onClick={handleNavClick}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Nouvelle réservation
+          </BookingButton>
         )}
 
         {/* Menu items */}
@@ -235,18 +242,18 @@ function SidebarContent({ user, hasActiveSubscription, isCollapsed = false, onNa
                 Profil
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
+            {/* <DropdownMenuItem asChild>
               <Link href="/subscription/manage" className="cursor-pointer" onClick={handleNavClick}>
-                <Crown className="mr-2 h-4 w-4" />
-                Gérer l'abonnement
+              <Crown className="mr-2 h-4 w-4" />
+              Gérer l'abonnement
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href="/payment-methods" className="cursor-pointer" onClick={handleNavClick}>
-                <CreditCard className="mr-2 h-4 w-4" />
-                Modes de paiement
+              <CreditCard className="mr-2 h-4 w-4" />
+              Modes de paiement
               </Link>
-            </DropdownMenuItem>
+            </DropdownMenuItem> */}
             <DropdownMenuItem asChild>
               <Link href="/addresses" className="cursor-pointer" onClick={handleNavClick}>
                 <MapPin className="mr-2 h-4 w-4" />
@@ -400,11 +407,13 @@ export function DashboardSidebar({ user, hasActiveSubscription }: DashboardSideb
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button asChild className="w-full justify-center mb-4" size="lg">
-                    <Link href="/reservation">
-                      <Plus className="h-5 w-5" />
-                    </Link>
-                  </Button>
+                  <BookingButton 
+                    className="w-full justify-center mb-4" 
+                    size="lg"
+                    href="/reservation"
+                  >
+                    <Plus className="h-5 w-5" />
+                  </BookingButton>
                 </TooltipTrigger>
                 <TooltipContent side="right">
                   <p>Nouvelle réservation</p>
@@ -412,12 +421,14 @@ export function DashboardSidebar({ user, hasActiveSubscription }: DashboardSideb
               </Tooltip>
             </TooltipProvider>
           ) : (
-            <Button asChild className="w-full justify-center mb-4 h-12" size="lg">
-              <Link href="/reservation">
-                <Plus className="mr-2 h-5 w-5" />
-                Nouvelle réservation
-              </Link>
-            </Button>
+            <BookingButton 
+              className="w-full justify-center mb-4 h-12" 
+              size="lg"
+              href="/reservation"
+            >
+              <Plus className="mr-2 h-5 w-5" />
+              Nouvelle réservation
+            </BookingButton>
           )}
 
           {/* Navigation Items */}
@@ -525,18 +536,18 @@ export function DashboardSidebar({ user, hasActiveSubscription }: DashboardSideb
                   Profil
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
+                {/* <DropdownMenuItem asChild>
                 <Link href="/subscription/manage" className="cursor-pointer">
                   <Crown className="mr-2 h-4 w-4" />
                   Gérer l'abonnement
                 </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
                 <Link href="/payment-methods" className="cursor-pointer">
                   <CreditCard className="mr-2 h-4 w-4" />
                   Modes de paiement
                 </Link>
-              </DropdownMenuItem>
+                </DropdownMenuItem> */}
               <DropdownMenuItem asChild>
                 <Link href="/addresses" className="cursor-pointer">
                   <MapPin className="mr-2 h-4 w-4" />

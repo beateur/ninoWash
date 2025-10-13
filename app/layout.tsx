@@ -21,9 +21,9 @@ const playfair = Playfair_Display({
 })
 
 export const metadata: Metadata = {
-  title: "Nino Wash - Pressing à domicile haut de gamme",
+  title: "Nino Wash - Pressing à domicile",
   description:
-    "Service de pressing à domicile professionnel. Collecte, nettoyage et livraison de vos vêtements avec un service irréprochable.",
+    "Service de collecte, nettoyage, repassage et livraison de vos vêtements. Le pressing qui vient à vous.",
   generator: "Nino Wash",
   manifest: "/manifest.json",
   themeColor: "#000000",

@@ -17,7 +17,7 @@ import { ChevronLeft, ChevronRight, Info, Edit } from "lucide-react"
 const STEPS = [
   { id: 1, title: "Adresses", description: "Collecte et livraison" },
   { id: 2, title: "Services", description: "Sélection des articles" },
-  { id: 3, title: "Date & Heure", description: "Planification" },
+  { id: 3, title: "Collecte & Livraison", description: "Créneaux horaires" },
   { id: 4, title: "Récapitulatif", description: "Confirmation" },
 ]
 

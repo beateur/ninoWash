@@ -4,6 +4,13 @@ import { createClient } from "@/lib/supabase/server"
 import { createBookingSchema } from "@/lib/validations/booking"
 import { z } from "zod"
 import { canUseCredit, consumeCredit } from "@/lib/services/subscription-credits"
+import {
+  getSlotById,
+  validateSlotDelay,
+  generateLegacyDatesFromSlots,
+  createSlotRequest,
+} from "@/lib/services/logistic-slots"
+import type { ServiceType } from "@/lib/types/logistic-slots"
 
 export async function GET(request: NextRequest) {
   const { user, supabase, error } = await apiRequireAuth(request)
@@ -56,6 +63,95 @@ export async function POST(request: NextRequest) {
     } = await supabase.auth.getUser()
 
     const isGuestBooking = !user
+
+    // ========================================================================
+    // SLOT-BASED SCHEDULING LOGIC (NEW)
+    // ========================================================================
+    const usingSlotsScheduling =
+      !!validatedData.pickupSlotId && !!validatedData.deliverySlotId
+
+    let pickupDate = validatedData.pickupDate
+    let pickupTimeSlot = validatedData.pickupTimeSlot
+    let deliveryDate: string | undefined
+    let deliveryTimeSlot: string | undefined
+    let pickupSlotId: string | null = null
+    let deliverySlotId: string | null = null
+
+    if (usingSlotsScheduling) {
+      console.log(
+        "[v0] Using slot-based scheduling:",
+        validatedData.pickupSlotId,
+        validatedData.deliverySlotId
+      )
+
+      // Fetch slots from database
+      const pickupSlot = await getSlotById(validatedData.pickupSlotId!)
+      const deliverySlot = await getSlotById(validatedData.deliverySlotId!)
+
+      if (!pickupSlot || !deliverySlot) {
+        return NextResponse.json(
+          { error: "Un ou plusieurs créneaux sélectionnés sont introuvables" },
+          { status: 400 }
+        )
+      }
+
+      // Validate slot availability (is_open + future date)
+      const today = new Date().toISOString().split("T")[0]
+      if (!pickupSlot.is_open || pickupSlot.slot_date < today) {
+        return NextResponse.json(
+          { error: "Le créneau de collecte sélectionné n'est plus disponible" },
+          { status: 400 }
+        )
+      }
+      if (!deliverySlot.is_open || deliverySlot.slot_date < today) {
+        return NextResponse.json(
+          { error: "Le créneau de livraison sélectionné n'est plus disponible" },
+          { status: 400 }
+        )
+      }
+
+      // Determine service type from items (default to 'classic' if unknown)
+      const serviceType: ServiceType =
+        validatedData.serviceType === "express" ? "express" : "classic"
+
+      // Validate delay between pickup and delivery
+      const delayValidation = validateSlotDelay(
+        pickupSlot,
+        deliverySlot,
+        serviceType
+      )
+
+      if (!delayValidation.valid) {
+        console.error("[v0] Slot delay validation failed:", delayValidation.error)
+        return NextResponse.json(
+          { error: delayValidation.error },
+          { status: 400 }
+        )
+      }
+
+      console.log(
+        `[v0] Slot delay validated: ${delayValidation.actualHours}h (required: ${delayValidation.requiredHours}h)`
+      )
+
+      // Generate legacy dates/times for fallback
+      const legacyDates = generateLegacyDatesFromSlots(pickupSlot, deliverySlot)
+      pickupDate = legacyDates.pickup_date
+      pickupTimeSlot = legacyDates.pickup_time_slot as typeof pickupTimeSlot
+      deliveryDate = legacyDates.delivery_date
+      deliveryTimeSlot = legacyDates.delivery_time_slot
+
+      // Store slot IDs for FK persistence
+      pickupSlotId = pickupSlot.id
+      deliverySlotId = deliverySlot.id
+
+      console.log("[v0] Legacy dates generated from slots:", legacyDates)
+    } else {
+      console.log("[v0] Using legacy date/time scheduling")
+    }
+
+    // ========================================================================
+    // REST OF BOOKING LOGIC (UNCHANGED)
+    // ========================================================================
 
     const generateBookingNumber = () => {
       const date = new Date().toISOString().slice(0, 10).replace(/-/g, "")
@@ -152,8 +248,12 @@ export async function POST(request: NextRequest) {
         subscription_id: subscriptionId,
         pickup_address_id: pickupAddressId,
         delivery_address_id: deliveryAddressId,
-        pickup_date: validatedData.pickupDate,
-        pickup_time_slot: validatedData.pickupTimeSlot,
+        pickup_date: pickupDate!,
+        pickup_time_slot: pickupTimeSlot!,
+        delivery_date: deliveryDate,
+        delivery_time_slot: deliveryTimeSlot,
+        pickup_slot_id: pickupSlotId,
+        delivery_slot_id: deliverySlotId,
         special_instructions: validatedData.specialInstructions,
         total_amount: totalAmount,
         booking_weight_kg: bookingWeightKg > 0 ? bookingWeightKg : null,
@@ -169,6 +269,20 @@ export async function POST(request: NextRequest) {
     if (bookingError) {
       console.error("[v0] Booking creation error:", bookingError)
       return NextResponse.json({ error: "Erreur lors de la création de la réservation" }, { status: 500 })
+    }
+
+    console.log(`[v0] Booking created successfully: ${booking.id}`)
+
+    // ========================================================================
+    // CREATE SLOT REQUESTS (NEW - Tracking Analytics)
+    // ========================================================================
+    if (usingSlotsScheduling && pickupSlotId && deliverySlotId) {
+      console.log("[v0] Creating slot requests for tracking...")
+
+      await createSlotRequest(pickupSlotId, "pickup", booking.id, user?.id)
+      await createSlotRequest(deliverySlotId, "delivery", booking.id, user?.id)
+
+      console.log("[v0] Slot requests created successfully")
     }
 
     // Consume credit if used

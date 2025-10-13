@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { BookingButton } from "@/components/ui/booking-button"
 import { Calendar, MapPin, Package, Plus } from "lucide-react"
 import Link from "next/link"
 import { BookingCard, BookingDetailPanel } from "@/components/booking/booking-card"
@@ -69,12 +70,10 @@ export function DashboardClient({
 
           {/* Quick Actions */}
           <div className="flex gap-4">
-            <Button asChild size="lg">
-              <Link href="/reservation">
-                <Plus className="mr-2 h-4 w-4" />
-                Nouvelle réservation
-              </Link>
-            </Button>
+            <BookingButton size="lg" href="/reservation">
+              <Plus className="mr-2 h-4 w-4" />
+              Nouvelle réservation
+            </BookingButton>
           </div>
 
           {/* KPI Cards */}
@@ -146,12 +145,10 @@ export function DashboardClient({
                   <p className="text-muted-foreground text-center mb-4">
                     Vous n'avez pas encore de réservation. Créez votre première réservation pour commencer.
                   </p>
-                  <Button asChild>
-                    <Link href="/reservation">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Créer une réservation
-                    </Link>
-                  </Button>
+                  <BookingButton href="/reservation">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Créer une réservation
+                  </BookingButton>
                 </CardContent>
               </Card>
             ) : (

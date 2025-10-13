@@ -1,5 +1,6 @@
 import { ServicesSection } from "@/components/sections/services-section"
 import { Button } from "@/components/ui/button"
+import { BookingButton } from "@/components/ui/booking-button"
 import Link from "next/link"
 
 export default function ServicesPage() {
@@ -8,14 +9,14 @@ export default function ServicesPage() {
       {/* Hero Section */}
       <section className="py-16 bg-gradient-to-b from-primary/5 to-transparent">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="font-serif text-4xl sm:text-5xl font-bold text-foreground mb-6">Nos Services</h1>
+          <h1 className="font-serif text-4xl sm:text-5xl font-bold text-foreground mb-6">Le Pressing pensé pour vous</h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-            Découvrez nos différentes formules de pressing à domicile, conçues pour répondre à tous vos besoins. Du
-            service ponctuel aux abonnements avantageux, trouvez la solution qui vous convient.
+            Collecte, soin et livraison sans effort. Cinq minutes suffisent, on s’occupe du reste.
+            L’entretien du linge devient un plaisir discret.    
           </p>
-          <Button asChild size="lg">
-            <Link href="/reservation/guest">Réserver maintenant</Link>
-          </Button>
+          <BookingButton size="lg">
+            Réserver maintenant
+          </BookingButton>
         </div>
       </section>
 
@@ -26,9 +27,9 @@ export default function ServicesPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-center">
             <div>
-              <h3 className="font-semibold text-lg mb-3">Qualité Garantie</h3>
+              <h3 className="font-semibold text-lg mb-3">Savoir-Faire</h3>
               <p className="text-muted-foreground">
-                Nos professionnels utilisent des techniques de nettoyage respectueuses de vos vêtements.
+                Le soin de vos vêtements est notre priorité : exigence, précision et respect des matières.
               </p>
             </div>
             <div>
@@ -40,7 +41,7 @@ export default function ServicesPage() {
             <div>
               <h3 className="font-semibold text-lg mb-3">Assurance Incluse</h3>
               <p className="text-muted-foreground">
-                Tous nos services incluent une assurance pour votre tranquillité d'esprit.
+                Vos vêtements sont couverts à chaque étape : notre engagement, votre tranquillité.
               </p>
             </div>
           </div>
@@ -56,7 +57,7 @@ export default function ServicesPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild size="lg">
-              <a href="mailto:contact@ninowash.org">Nous contacter par email</a>
+              <a href="mailto:contact@ninowash.org">Nous contacter</a>
             </Button>
             <Button asChild variant="outline" size="lg">
               <Link href="/comment-ca-marche">Comment ça marche</Link>

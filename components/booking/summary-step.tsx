@@ -50,23 +50,11 @@ export function SummaryStep({
 
   const fetchData = async () => {
     try {
-      if (user) {
-        // Fetch addresses
-        const addressResponse = await fetch("/api/addresses")
-        const addressData = await addressResponse.json()
-        if (addressResponse.ok) {
-          setAddresses(addressData.addresses || [])
-        }
-      } else {
-        // For guests, use the addresses from booking data
-        const guestAddresses = []
-        if (bookingData.pickupAddress) {
-          guestAddresses.push(bookingData.pickupAddress)
-        }
-        if (bookingData.deliveryAddress && bookingData.deliveryAddress.id !== bookingData.pickupAddress?.id) {
-          guestAddresses.push(bookingData.deliveryAddress)
-        }
-        setAddresses(guestAddresses)
+      // Fetch addresses for authenticated users
+      const addressResponse = await fetch("/api/addresses")
+      const addressData = await addressResponse.json()
+      if (addressResponse.ok) {
+        setAddresses(addressData.addresses || [])
       }
 
       // Fetch services
@@ -81,13 +69,9 @@ export function SummaryStep({
     }
   }
 
-  const pickupAddress = user
-    ? addresses.find((addr) => addr.id === bookingData.pickupAddressId)
-    : bookingData.pickupAddress
+  const pickupAddress = addresses.find((addr) => addr.id === bookingData.pickupAddressId)
 
-  const deliveryAddress = user
-    ? addresses.find((addr) => addr.id === bookingData.deliveryAddressId)
-    : bookingData.deliveryAddress
+  const deliveryAddress = addresses.find((addr) => addr.id === bookingData.deliveryAddressId)
 
   const getServiceDetails = (serviceId: string) => {
     return services.find((service) => service.id === serviceId)
@@ -194,45 +178,13 @@ export function SummaryStep({
 
       // Mode nouvelle réservation: POST request
       const bookingPayload = {
+        pickupAddressId: bookingData.pickupAddressId,
+        deliveryAddressId: bookingData.deliveryAddressId,
         pickupDate: bookingData.pickupDate,
         pickupTimeSlot: bookingData.pickupTimeSlot,
         items: bookingData.items,
         specialInstructions,
         serviceType,
-      }
-
-      if (user) {
-        // For authenticated users, use address IDs
-        Object.assign(bookingPayload, {
-          pickupAddressId: bookingData.pickupAddressId,
-          deliveryAddressId: bookingData.deliveryAddressId,
-        })
-      } else {
-        // For guests, use address objects and add contact info
-        Object.assign(bookingPayload, {
-          guestPickupAddress: {
-            street_address: bookingData.pickupAddress?.street_address,
-            city: bookingData.pickupAddress?.city,
-            postal_code: bookingData.pickupAddress?.postal_code,
-            building_info: bookingData.pickupAddress?.buildingInfo || bookingData.pickupAddress?.building_info,
-            access_instructions: bookingData.pickupAddress?.accessInstructions || bookingData.pickupAddress?.access_instructions,
-            label: bookingData.pickupAddress?.label,
-          },
-          guestDeliveryAddress: {
-            street_address: bookingData.deliveryAddress?.street_address,
-            city: bookingData.deliveryAddress?.city,
-            postal_code: bookingData.deliveryAddress?.postal_code,
-            building_info: bookingData.deliveryAddress?.buildingInfo || bookingData.deliveryAddress?.building_info,
-            access_instructions: bookingData.deliveryAddress?.accessInstructions || bookingData.deliveryAddress?.access_instructions,
-            label: bookingData.deliveryAddress?.label,
-          },
-          guestContact: {
-            first_name: "Invité", // TODO: Get from form
-            last_name: "Client", // TODO: Get from form
-            email: "guest@example.com", // TODO: Get from form
-            phone: "0123456789", // TODO: Get from form
-          },
-        })
       }
 
       console.log("[v0] Booking payload:", bookingPayload)
@@ -256,7 +208,7 @@ export function SummaryStep({
         router.push(`/reservation/success?number=${bookingNumber}`)
       } else {
         // Fallback if no booking number (shouldn't happen)
-        router.push(user ? "/dashboard?success=true" : "/?booking_success=true")
+        router.push("/dashboard?success=true")
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Une erreur est survenue")

@@ -6,6 +6,58 @@ Collection de scripts utilitaires pour le développement et le testing.
 
 ## 📜 Scripts Disponibles
 
+### 🗓️ Gestion des Créneaux Logistiques
+
+#### `create-slots.ts` - Script TypeScript Interactif ⭐
+
+**Description** : Créer des créneaux de collecte et livraison via un script Node.js avec validation automatique.
+
+**Usage** :
+```bash
+pnpm slots:create
+# ou
+pnpm tsx scripts/create-slots.ts
+```
+
+**Configuration** : Modifier `SLOT_CONFIG` dans le fichier pour définir vos créneaux.
+
+**Avantages** :
+- ✅ Validation automatique des données
+- ✅ Affichage coloré et structuré
+- ✅ Comptage automatique des créneaux créés
+- ✅ Gestion d'erreurs robuste
+
+**Documentation complète** : 👉 `docs/GUIDE_CREATE_SLOTS.md`
+
+---
+
+#### `create-slots-simple.sql` - Script SQL Direct
+
+**Description** : Version simplifiée pour exécution directe dans Supabase SQL Editor.
+
+**Usage** :
+1. Ouvrir le fichier et modifier les `INSERT INTO`
+2. Copier tout le contenu
+3. Aller sur Supabase Dashboard > SQL Editor
+4. Coller et exécuter
+
+**Avantages** :
+- ✅ Pas besoin de dépendances Node.js
+- ✅ Simple à comprendre et modifier
+- ✅ Exécution rapide dans Supabase
+
+**Documentation complète** : 👉 `docs/GUIDE_CREATE_SLOTS.md`
+
+---
+
+#### `insert-test-slots.sql` - Données de Test (Legacy)
+
+**Description** : Créneaux de test historiques pour octobre 2025.
+
+**Statut** : Peut être remplacé par `create-slots-simple.sql` (plus flexible)
+
+---
+
 ### 1. `test-reset-credits.sh` ✅
 
 **Description** : Script de test automatisé pour la fonction Edge "reset-weekly-credits" (production)

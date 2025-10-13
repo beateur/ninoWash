@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 import { requireAuth } from "@/lib/auth/route-guards"
 import { createClient } from "@/lib/supabase/server"
+import { SUBSCRIPTIONS_ENABLED } from "@/lib/flags"
 import ReservationClient from "./reservation-client"
 
 interface PageProps {
@@ -14,6 +15,13 @@ export default async function ReservationPage({ searchParams }: PageProps) {
   const params = await searchParams
   const modifyBookingId = params.modify
   const serviceType = params.service || "classic"
+
+  // SERVER GUARD: Block subscription access if feature flag is OFF
+  const isSubscription = serviceType !== "classic"
+  if (isSubscription && !SUBSCRIPTIONS_ENABLED) {
+    console.log("[v0] Reservation page - subscription access blocked (flag OFF):", serviceType)
+    redirect("/pricing?locked=1")
+  }
 
   // Mode modification
   if (modifyBookingId) {

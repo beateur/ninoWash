@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button"
+import { BookingButton } from "@/components/ui/booking-button"
 import { ArrowRight, Clock, Shield, Truck } from "lucide-react"
 import Link from "next/link"
 
@@ -8,28 +9,24 @@ export function HeroSection() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
         <div className="mx-auto max-w-4xl text-center">
           <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground mb-6 animate-fade-in-up">
-            Pressing à domicile
-            <span className="block text-primary">haut de gamme</span>
+            L’élégance d’un linge parfait, sans contrainte
           </h1>
 
           <p
             className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-fade-in-up"
             style={{ animationDelay: "0.1s" }}
           >
-            Confiez-nous vos vêtements et retrouvez-les impeccables. Collecte, nettoyage professionnel et livraison à
-            domicile en 72h.
+            Un service sur mesure, éthique et discret, qui s’occupe de vos vêtements du ramassage à la livraison, avec le soin et la précision qu’exige votre quotidien
           </p>
 
           <div
             className="flex flex-col sm:flex-row gap-4 justify-center mb-12 animate-fade-in-up"
             style={{ animationDelay: "0.2s" }}
           >
-            <Button size="lg" asChild className="text-base px-8">
-              <Link href="/reservation/guest">
-                Réserver maintenant
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+            <BookingButton size="lg" className="text-base px-8">
+              Réserver maintenant
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </BookingButton>
             <Button variant="outline" size="lg" asChild className="text-base px-8 bg-transparent">
               <Link href="/comment-ca-marche">Comment ça marche</Link>
             </Button>
@@ -61,7 +58,7 @@ export function HeroSection() {
                 <Truck className="h-6 w-6 text-primary" />
               </div>
               <h3 className="font-semibold text-sm">Collecte gratuite</h3>
-              <p className="text-xs text-muted-foreground">À partir de 30€</p>
+              <p className="text-xs text-muted-foreground">Dès la première commande</p>
             </div>
           </div>
         </div>

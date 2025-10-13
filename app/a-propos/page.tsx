@@ -1,6 +1,7 @@
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { Button } from "@/components/ui/button"
+import { BookingButton } from "@/components/ui/booking-button"
 import { ArrowRight, Sparkles, Heart, Shield } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -187,12 +188,10 @@ export default function AboutPage() {
               <span className="block text-primary mt-2">Confiez-nous l'essentiel.</span>
             </h2>
 
-            <Button size="lg" asChild className="text-base px-8">
-              <Link href="/reservation/guest">
-                Réserver maintenant
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+            <BookingButton size="lg" className="text-base px-8">
+              Réserver maintenant
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </BookingButton>
           </div>
         </div>
       </section>

@@ -1,5 +1,6 @@
 import { HowItWorksSection } from "@/components/sections/how-it-works-section"
 import { Button } from "@/components/ui/button"
+import { BookingButton } from "@/components/ui/booking-button"
 import Link from "next/link"
 
 export default function CommentCaMarchePage() {
@@ -13,9 +14,9 @@ export default function CommentCaMarchePage() {
             Découvrez notre processus simple et transparent pour un service de pressing à domicile haut de gamme. En
             seulement 3 étapes, vos vêtements sont collectés, nettoyés et livrés.
           </p>
-          <Button asChild size="lg">
-            <Link href="/reservation/guest">Réserver maintenant</Link>
-          </Button>
+          <BookingButton size="lg">
+            Réserver maintenant
+          </BookingButton>
         </div>
       </section>
 
@@ -29,9 +30,9 @@ export default function CommentCaMarchePage() {
             Rejoignez des milliers de clients satisfaits qui nous font confiance pour l'entretien de leurs vêtements.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg">
-              <Link href="/reservation/guest">Réserver maintenant</Link>
-            </Button>
+            <BookingButton size="lg">
+              Réserver maintenant
+            </BookingButton>
             <Button asChild variant="outline" size="lg">
               <Link href="/services">Voir nos services</Link>
             </Button>

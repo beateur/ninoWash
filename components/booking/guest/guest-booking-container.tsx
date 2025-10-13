@@ -25,7 +25,7 @@ const STEP_TITLES = [
   "Vos informations",
   "Adresses",
   "Services",
-  "Date & heure",
+  "Collecte & Livraison",
   "Paiement",
 ]
 
@@ -129,12 +129,26 @@ export function GuestBookingContainer() {
 
           {state.currentStep === 3 && (
             <DateTimeStep
-              initialPickupDate={state.pickupDate}
-              initialPickupTimeSlot={state.pickupTimeSlot}
-              onComplete={(pickupDate: string, pickupTimeSlot: string) => {
-                updateDateTime(pickupDate, pickupTimeSlot)
-                handleNext()
+              pickupDate={state.pickupDate ? new Date(state.pickupDate) : null}
+              pickupTimeSlot={state.pickupTimeSlot}
+              deliveryDate={null}
+              updateDateTime={(
+                pickupDate: Date | null,
+                pickupTimeSlot: string | null,
+                pickupSlot,
+                deliverySlot
+              ) => {
+                // Convert Date to string format for the hook
+                const dateString = pickupDate ? pickupDate.toISOString() : new Date().toISOString()
+                const timeString = pickupTimeSlot || "09:00"
+                updateDateTime(
+                  dateString,
+                  timeString,
+                  pickupSlot || undefined,
+                  deliverySlot || undefined
+                )
               }}
+              onNext={handleNext}
             />
           )}
 

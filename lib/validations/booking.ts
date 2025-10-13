@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { optionalSlotSelectionSchema } from "./logistic-slots"
 
 export const addressSchema = z.object({
   type: z.enum(["home", "work", "other"]),
@@ -35,21 +36,25 @@ export const bookingItemSchema = z.object({
 
 export const createBookingSchema = z
   .object({
+    // Adresses
     pickupAddressId: z.string().uuid("Adresse de collecte requise").optional(),
     deliveryAddressId: z.string().uuid("Adresse de livraison requise").optional(),
-    pickupDate: z.string().refine((date) => {
-      const selectedDate = new Date(date)
-      const tomorrow = new Date()
-      tomorrow.setDate(tomorrow.getDate() + 1)
-      tomorrow.setHours(0, 0, 0, 0)
-      selectedDate.setHours(0, 0, 0, 0)
-      return selectedDate >= tomorrow
-    }, "La date de collecte doit être au minimum demain"),
-    pickupTimeSlot: z.enum(["09:00-12:00", "14:00-17:00", "18:00-21:00"]),
+    
+    // Legacy date/time fields (optional si slots fournis)
+    pickupDate: z.string().optional(),
+    pickupTimeSlot: z.enum(["09:00-12:00", "14:00-17:00", "18:00-21:00"]).optional(),
+    
+    // Nouveau: Slot-based scheduling
+    pickupSlotId: z.string().uuid("ID slot collecte invalide").optional(),
+    deliverySlotId: z.string().uuid("ID slot livraison invalide").optional(),
+    
+    // Items & options
     items: z.array(bookingItemSchema).min(1, "Au moins un article requis"),
     specialInstructions: z.string().optional(),
     subscriptionId: z.string().uuid().optional(),
     serviceType: z.string().optional(),
+    
+    // Guest fields
     guestPickupAddress: guestAddressSchema.optional(),
     guestDeliveryAddress: guestAddressSchema.optional(),
     guestContact: guestContactSchema.optional(),
@@ -65,6 +70,46 @@ export const createBookingSchema = z
       path: ["pickupAddressId"],
     },
   )
+  .refine(
+    (data) => {
+      // Si slots fournis, les deux doivent l'être
+      const hasPickupSlot = !!data.pickupSlotId
+      const hasDeliverySlot = !!data.deliverySlotId
+      if (hasPickupSlot !== hasDeliverySlot) {
+        return false
+      }
+      
+      // Si slots fournis, date/time legacy optionnels
+      // Si slots absents, date/time legacy requis
+      if (!hasPickupSlot && !hasDeliverySlot) {
+        return !!data.pickupDate && !!data.pickupTimeSlot
+      }
+      
+      return true
+    },
+    {
+      message: "Fournir soit les IDs de slots (collecte + livraison), soit la date et l'heure de collecte",
+      path: ["pickupDate"],
+    },
+  )
+  .refine(
+    (data) => {
+      // Validation date legacy uniquement si fournie
+      if (data.pickupDate) {
+        const selectedDate = new Date(data.pickupDate)
+        const tomorrow = new Date()
+        tomorrow.setDate(tomorrow.getDate() + 1)
+        tomorrow.setHours(0, 0, 0, 0)
+        selectedDate.setHours(0, 0, 0, 0)
+        return selectedDate >= tomorrow
+      }
+      return true
+    },
+    {
+      message: "La date de collecte doit être au minimum demain",
+      path: ["pickupDate"],
+    },
+  )
 
 // Booking cancellation schema
 export const cancelBookingSchema = z.object({
@@ -78,15 +123,15 @@ export const cancelBookingSchema = z.object({
 export const modifyBookingSchema = z
   .object({
     pickupAddressId: z.string().uuid("Adresse de collecte invalide"),
-    pickupDate: z.string().refine((date) => {
-      const selectedDate = new Date(date)
-      const tomorrow = new Date()
-      tomorrow.setDate(tomorrow.getDate() + 1)
-      tomorrow.setHours(0, 0, 0, 0)
-      selectedDate.setHours(0, 0, 0, 0)
-      return selectedDate >= tomorrow
-    }, "La date de collecte doit être au minimum demain"),
-    pickupTimeSlot: z.enum(["09:00-12:00", "14:00-17:00", "18:00-21:00"]),
+    
+    // Legacy fields (optional si slots fournis)
+    pickupDate: z.string().optional(),
+    pickupTimeSlot: z.enum(["09:00-12:00", "14:00-17:00", "18:00-21:00"]).optional(),
+    
+    // Nouveau: Slot-based scheduling
+    pickupSlotId: z.string().uuid("ID slot collecte invalide").optional(),
+    deliverySlotId: z.string().uuid("ID slot livraison invalide").optional(),
+    
     deliveryAddressId: z.string().uuid("Adresse de livraison invalide").optional(),
     deliveryDate: z.string().optional(),
     deliveryTimeSlot: z.enum(["09:00-12:00", "14:00-17:00", "18:00-21:00"]).optional(),
@@ -94,7 +139,46 @@ export const modifyBookingSchema = z
   })
   .refine(
     (data) => {
-      if (data.deliveryDate) {
+      // Si slots fournis, les deux doivent l'être
+      const hasPickupSlot = !!data.pickupSlotId
+      const hasDeliverySlot = !!data.deliverySlotId
+      if (hasPickupSlot !== hasDeliverySlot) {
+        return false
+      }
+      
+      // Si slots absents, date/time legacy requis
+      if (!hasPickupSlot && !hasDeliverySlot) {
+        return !!data.pickupDate && !!data.pickupTimeSlot
+      }
+      
+      return true
+    },
+    {
+      message: "Fournir soit les IDs de slots, soit la date et l'heure de collecte",
+      path: ["pickupDate"],
+    },
+  )
+  .refine(
+    (data) => {
+      // Validation date legacy uniquement si fournie
+      if (data.pickupDate) {
+        const selectedDate = new Date(data.pickupDate)
+        const tomorrow = new Date()
+        tomorrow.setDate(tomorrow.getDate() + 1)
+        tomorrow.setHours(0, 0, 0, 0)
+        selectedDate.setHours(0, 0, 0, 0)
+        return selectedDate >= tomorrow
+      }
+      return true
+    },
+    {
+      message: "La date de collecte doit être au minimum demain",
+      path: ["pickupDate"],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.deliveryDate && data.pickupDate) {
         const pickupDate = new Date(data.pickupDate)
         const deliveryDate = new Date(data.deliveryDate)
         return deliveryDate > pickupDate

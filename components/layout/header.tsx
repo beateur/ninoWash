@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { BookingButton } from "@/components/ui/booking-button"
 import { MobileNav } from "@/components/layout/mobile-nav"
 
 /**
@@ -48,12 +49,12 @@ export function Header() {
             <Link href="/auth/signin" className="text-sm font-medium hover:text-primary transition-colors">
               Se connecter
             </Link>
-            <Button asChild>
+            {/*<Button asChild>
               <Link href="/auth/signup">S'inscrire</Link>
-            </Button>
-            <Button asChild variant="secondary">
-              <Link href="/reservation/guest">Réserver maintenant</Link>
-            </Button>
+            </Button>*/}
+            <BookingButton variant="secondary">
+              Réserver maintenant
+            </BookingButton>
           </div>
 
           {/* Mobile Menu */}

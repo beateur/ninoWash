@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr"
 import { redirect } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { NewBookingButton } from "@/components/ui/booking-button-server"
 import { Badge } from "@/components/ui/badge"
 import { Package, MapPin, Calendar, Plus } from "lucide-react"
 import Link from "next/link"
@@ -80,12 +81,7 @@ export default async function BookingsPage() {
             <h1 className="text-3xl font-bold text-balance">Mes réservations</h1>
             <p className="text-muted-foreground mt-2">Suivez l'état de vos demandes de pressing</p>
           </div>
-          <Button asChild>
-            <Link href="/reservation">
-              <Plus className="mr-2 h-4 w-4" />
-              Nouvelle réservation
-            </Link>
-          </Button>
+          <NewBookingButton />
         </div>
 
         {bookings && bookings.length > 0 ? (
@@ -166,12 +162,7 @@ export default async function BookingsPage() {
               <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-xl font-medium mb-2">Aucune réservation</h3>
               <p className="text-muted-foreground mb-6">Vous n'avez pas encore effectué de réservation</p>
-              <Button asChild>
-                <Link href="/reservation">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Faire ma première réservation
-                </Link>
-              </Button>
+              <NewBookingButton label="Faire ma première réservation" />
             </CardContent>
           </Card>
         )}

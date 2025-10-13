@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { BookingButton } from "@/components/ui/booking-button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Menu, X, Home, Wrench, HelpCircle, Info } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -82,11 +83,9 @@ export function MobileNav() {
           {/*<Link href="/auth/signup" onClick={() => setIsOpen(false)} className="block">
             <Button className="w-full">S'inscrire</Button>
           </Link>*/}
-          <Link href="/reservation/guest" onClick={() => setIsOpen(false)} className="block">
-            <Button className="w-full">
-              Réserver maintenant
-            </Button>
-          </Link>
+          <BookingButton className="w-full" onClick={() => setIsOpen(false)}>
+            Réserver maintenant
+          </BookingButton>
         </div>
       </SheetContent>
     </Sheet>

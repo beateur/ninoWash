@@ -111,6 +111,7 @@
     "lint": "next lint",
     "performance:audit": "lighthouse http://localhost:3000 --output=html --output-path=./reports/lighthouse.html",
     "security:audit": "npm audit --audit-level moderate",
+    "slots:create": "tsx scripts/create-slots.ts",
     "start": "next start",
     "test": "vitest",
     "test:coverage": "vitest --coverage",

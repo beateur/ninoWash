@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button"
+import { BookingButton } from "@/components/ui/booking-button"
 import { ArrowRight } from "lucide-react"
 import Link from "next/link"
 
@@ -14,12 +15,10 @@ export function CTASection() {
             Rejoignez des milliers de clients satisfaits et profitez d'un service de pressing haut de gamme à domicile.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" variant="secondary" asChild className="text-base px-8">
-              <Link href="/reservation/guest">
-                Réserver maintenant
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+            <BookingButton size="lg" variant="secondary" className="text-base px-8">
+              Réserver maintenant
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </BookingButton>
             <Button
               size="lg"
               variant="outline"

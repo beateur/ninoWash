@@ -40,12 +40,22 @@ interface ServicesStepProps {
 export function ServicesStep({ initialItems, onComplete }: ServicesStepProps) {
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedItems, setSelectedItems] = useState<Map<string, GuestBookingItem>>(
-    new Map(initialItems.map((item) => [item.serviceId, item]))
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
+    initialItems[0]?.serviceId || null
   )
+  const [extraKg, setExtraKg] = useState(0) // Kilos supplémentaires (0 à 14)
   const [specialInstructions, setSpecialInstructions] = useState(
     initialItems[0]?.specialInstructions || ""
   )
+
+  // Grille tarifaire pour kg supplémentaires
+  const extraKgPricing = [
+    { kg: 2, price: 10 },   // +2kg = 10€ (total 9kg)
+    { kg: 5, price: 19 },   // +5kg = 20€ (total 12kg)
+    { kg: 8, price: 27 },   // +8kg = 28€ (total 15kg)
+    { kg: 11, price: 34 },  // +10kg = 35€ (total 17kg)
+    { kg: 14, price: 40 },  // +13kg = 40€ (total 20kg)
+  ]
 
   useEffect(() => {
     fetchServices()
@@ -75,49 +85,60 @@ export function ServicesStep({ initialItems, onComplete }: ServicesStepProps) {
     }
   }
 
-  const handleQuantityChange = (service: Service, quantity: number) => {
-    if (quantity <= 0) {
-      // Remove item
-      const newItems = new Map(selectedItems)
-      newItems.delete(service.id)
-      setSelectedItems(newItems)
-    } else {
-      // Add or update item
-      const newItems = new Map(selectedItems)
-      newItems.set(service.id, {
-        serviceId: service.id,
-        quantity,
-        specialInstructions,
-      })
-      setSelectedItems(newItems)
+  const getExtraKgPrice = (kg: number): number => {
+    for (const tier of extraKgPricing) {
+      if (kg <= tier.kg) {
+        return tier.price
+      }
     }
+    return extraKgPricing[extraKgPricing.length - 1].price
+  }
+
+  const handleServiceSelect = (serviceId: string) => {
+    setSelectedServiceId(serviceId)
+    setExtraKg(0) // Reset extra kg when changing service
+  }
+
+  const handleExtraKgChange = (kg: number) => {
+    if (kg < 0) kg = 0
+    if (kg > 14) kg = 14 // Max +14kg (total 21kg)
+    setExtraKg(kg)
   }
 
   const calculateTotal = (): number => {
-    let total = 0
-    selectedItems.forEach((item) => {
-      const service = services.find((s) => s.id === item.serviceId)
-      if (service) {
-        total += service.base_price * item.quantity
-      }
-    })
-    return total
+    if (!selectedServiceId) return 0
+    
+    const service = services.find((s) => s.id === selectedServiceId)
+    if (!service) return 0
+
+    const basePrice = service.base_price
+    const extraPrice = extraKg > 0 ? getExtraKgPrice(extraKg) : 0
+    
+    return basePrice + extraPrice
+  }
+
+  const getTotalWeight = (): number => {
+    if (!selectedServiceId) return 0
+    const service = services.find((s) => s.id === selectedServiceId)
+    const baseWeight = service?.metadata?.weight_kg || 7
+    return baseWeight + extraKg
   }
 
   const handleSubmit = () => {
-    if (selectedItems.size === 0) {
-      toast.error("Veuillez sélectionner au moins un service")
+    if (!selectedServiceId) {
+      toast.error("Veuillez sélectionner un service")
       return
     }
 
-    const items = Array.from(selectedItems.values()).map((item) => ({
-      ...item,
+    const items: GuestBookingItem[] = [{
+      serviceId: selectedServiceId,
+      quantity: 1,
       specialInstructions,
-    }))
+    }]
 
     const total = calculateTotal()
 
-    toast.success(`${items.length} service(s) sélectionné(s)`)
+    toast.success("Service sélectionné")
     onComplete(items, total)
   }
 
@@ -135,28 +156,31 @@ export function ServicesStep({ initialItems, onComplete }: ServicesStepProps) {
   }
 
   const totalAmount = calculateTotal()
-  const totalItems = Array.from(selectedItems.values()).reduce(
-    (sum, item) => sum + item.quantity,
-    0
-  )
+  const totalWeight = getTotalWeight()
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Sélectionnez vos services</h2>
+        <h2 className="text-2xl font-bold mb-2">Sélectionnez votre service</h2>
         <p className="text-muted-foreground">
-          Choisissez les articles que vous souhaitez faire nettoyer
+          Choisissez le service de pressing adapté à vos besoins
         </p>
       </div>
 
       {/* Services List */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {services.map((service) => {
-          const item = selectedItems.get(service.id)
-          const quantity = item?.quantity || 0
+          const isSelected = selectedServiceId === service.id
+          const baseWeight = service.metadata?.weight_kg || 7
 
           return (
-            <Card key={service.id} className="p-4">
+            <Card 
+              key={service.id} 
+              className={`p-4 cursor-pointer transition-all ${
+                isSelected ? "ring-2 ring-primary border-primary" : "hover:border-primary/50"
+              }`}
+              onClick={() => handleServiceSelect(service.id)}
+            >
               <div className="space-y-3">
                 {/* Service Header */}
                 <div className="flex items-start justify-between">
@@ -166,11 +190,16 @@ export function ServicesStep({ initialItems, onComplete }: ServicesStepProps) {
                       {service.description}
                     </p>
                   </div>
-                  {service.metadata?.category && (
-                    <Badge variant="secondary" className="ml-2">
-                      {service.metadata.category === "classic" ? "Classique" : "Express"}
-                    </Badge>
-                  )}
+                  <div className="flex flex-col items-end gap-2">
+                    {service.metadata?.category && (
+                      <Badge variant="secondary">
+                        {service.metadata.category === "classic" ? "Classique" : "Express"}
+                      </Badge>
+                    )}
+                    {isSelected && (
+                      <Badge variant="default">Sélectionné</Badge>
+                    )}
+                  </div>
                 </div>
 
                 {/* Price & Processing Time */}
@@ -179,44 +208,11 @@ export function ServicesStep({ initialItems, onComplete }: ServicesStepProps) {
                     {service.base_price.toFixed(2)} €
                     <span className="text-sm text-muted-foreground font-normal">
                       {" "}
-                      / {service.metadata?.weight_kg || 7}kg
+                      / {baseWeight}kg inclus
                     </span>
                   </span>
                   <span className="text-muted-foreground">
                     {service.metadata?.delivery_time || `${service.processing_days}j`}
-                  </span>
-                </div>
-
-                {/* Quantity Selector */}
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleQuantityChange(service, quantity - 1)}
-                    disabled={quantity === 0}
-                  >
-                    -
-                  </Button>
-                  <Input
-                    type="number"
-                    min="0"
-                    max="50"
-                    value={quantity}
-                    onChange={(e) => {
-                      const val = parseInt(e.target.value) || 0
-                      handleQuantityChange(service, val)
-                    }}
-                    className="w-20 text-center"
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleQuantityChange(service, quantity + 1)}
-                  >
-                    +
-                  </Button>
-                  <span className="ml-auto font-semibold">
-                    {(service.base_price * quantity).toFixed(2)} €
                   </span>
                 </div>
               </div>
@@ -224,6 +220,80 @@ export function ServicesStep({ initialItems, onComplete }: ServicesStepProps) {
           )
         })}
       </div>
+
+      {/* Extra Kg Selector (only if service selected) */}
+      {selectedServiceId && (
+        <Card className="p-4 bg-muted/30">
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold mb-2">Kilos supplémentaires (optionnel)</h3>
+              <p className="text-sm text-muted-foreground">
+                Ajoutez jusqu'à 14kg supplémentaires à votre commande
+              </p>
+            </div>
+
+            {/* Kg Options */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              <Button
+                variant={extraKg === 0 ? "default" : "outline"}
+                className="w-full"
+                onClick={() => handleExtraKgChange(0)}
+              >
+                <div className="text-center">
+                  <div className="font-semibold">Base</div>
+                  <div className="text-xs">7kg</div>
+                </div>
+              </Button>
+              {extraKgPricing.map((tier) => {
+                const totalKg = 7 + tier.kg
+                return (
+                  <Button
+                    key={tier.kg}
+                    variant={extraKg === tier.kg ? "default" : "outline"}
+                    className="w-full"
+                    onClick={() => handleExtraKgChange(tier.kg)}
+                  >
+                    <div className="text-center">
+                      <div className="font-semibold">+{tier.price}€</div>
+                      <div className="text-xs">{totalKg}kg</div>
+                    </div>
+                  </Button>
+                )
+              })}
+            </div>
+
+            {/* Custom Kg Slider */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span>Poids total :</span>
+                <span className="font-semibold">{totalWeight}kg</span>
+              </div>
+              <Input
+                type="range"
+                min="0"
+                max="14"
+                step="1"
+                value={extraKg}
+                onChange={(e) => handleExtraKgChange(parseInt(e.target.value))}
+                className="w-full"
+              />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>7kg (base)</span>
+                <span>21kg (max)</span>
+              </div>
+            </div>
+
+            {extraKg > 0 && (
+              <div className="p-3 bg-background rounded-lg border">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Supplément +{extraKg}kg :</span>
+                  <span className="font-semibold">+{getExtraKgPrice(extraKg)}€</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </Card>
+      )}
 
       {/* Special Instructions */}
       <Card className="p-4">
@@ -249,12 +319,20 @@ export function ServicesStep({ initialItems, onComplete }: ServicesStepProps) {
       <Card className="p-4 bg-muted/50">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-muted-foreground">
-              {totalItems} article{totalItems > 1 ? "s" : ""} sélectionné{totalItems > 1 ? "s" : ""}
-            </p>
-            <p className="text-2xl font-bold">{totalAmount.toFixed(2)} €</p>
+            {selectedServiceId ? (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  {totalWeight}kg sélectionné{extraKg > 0 ? ` (7kg + ${extraKg}kg)` : ""}
+                </p>
+                <p className="text-2xl font-bold">{totalAmount.toFixed(2)} €</p>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Sélectionnez un service pour continuer
+              </p>
+            )}
           </div>
-          <Button onClick={handleSubmit} size="lg" disabled={selectedItems.size === 0}>
+          <Button onClick={handleSubmit} size="lg" disabled={!selectedServiceId}>
             Continuer →
           </Button>
         </div>

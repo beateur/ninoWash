@@ -138,6 +138,25 @@ export async function middleware(request: NextRequest) {
     console.log("[v0] Guest booking route accessed:", pathname, "User:", user ? "logged in" : "anonymous")
   }
 
+  // FEATURE FLAG GUARD: Block subscription access if flag OFF
+  // Check for /reservation?service=monthly or /reservation?service=quarterly
+  if (
+    pathname.startsWith("/reservation") &&
+    !PROTECTED_ROUTES.guestBooking.some((route) => pathname.startsWith(route))
+  ) {
+    const searchParams = request.nextUrl.searchParams
+    const serviceType = searchParams.get("service")
+    const isSubscription = serviceType && serviceType !== "classic"
+    const subscriptionsEnabled = process.env.NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED === "true"
+
+    if (isSubscription && !subscriptionsEnabled) {
+      const redirectUrl = new URL("/pricing", request.url)
+      redirectUrl.searchParams.set("locked", "1")
+      console.log("[v0] Middleware - subscription access blocked (flag OFF):", serviceType)
+      return NextResponse.redirect(redirectUrl)
+    }
+  }
+
   // Check authenticated booking routes
   // /reservation (without /guest) requires authentication
   if (
