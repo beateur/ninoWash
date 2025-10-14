@@ -213,9 +213,24 @@ export default function ReservationClient({
               )}
               {currentStep === 3 && (
                 <DateTimeStep
-                  pickupDate={bookingData.pickupDate}
+                  pickupDate={bookingData.pickupDate ? new Date(bookingData.pickupDate) : null}
                   pickupTimeSlot={bookingData.pickupTimeSlot}
-                  onUpdate={updateBookingData}
+                  deliveryDate={null}
+                  updateDateTime={(
+                    pickupDate: Date | null,
+                    pickupTimeSlot: string | null,
+                    pickupSlot,
+                    deliverySlot
+                  ) => {
+                    // Convert Date to string format for the booking data
+                    const dateString = pickupDate ? pickupDate.toISOString().split("T")[0] : ""
+                    const timeString = pickupTimeSlot || ""
+                    updateBookingData({
+                      pickupDate: dateString,
+                      pickupTimeSlot: timeString,
+                    })
+                  }}
+                  onNext={handleNext}
                 />
               )}
               {currentStep === 4 && (
