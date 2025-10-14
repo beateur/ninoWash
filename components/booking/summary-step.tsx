@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { MapPin, Clock, Package, Euro, Loader2, CheckCircle, Info } from "lucide-react"
+import type { LogisticSlot } from "@/lib/types/logistic-slots"
 
 interface BookingData {
   pickupAddressId: string
@@ -20,6 +21,8 @@ interface BookingData {
   items: Array<{ serviceId: string; quantity: number; specialInstructions?: string }>
   pickupDate: string
   pickupTimeSlot: string
+  pickupSlot?: LogisticSlot | null
+  deliverySlot?: LogisticSlot | null
   specialInstructions: string
 }
 
@@ -182,6 +185,9 @@ export function SummaryStep({
         deliveryAddressId: bookingData.deliveryAddressId,
         pickupDate: bookingData.pickupDate,
         pickupTimeSlot: bookingData.pickupTimeSlot,
+        // Nouveau: Slot-based scheduling (prioritaire si présent)
+        pickupSlotId: bookingData.pickupSlot?.id,
+        deliverySlotId: bookingData.deliverySlot?.id,
         items: bookingData.items,
         specialInstructions,
         serviceType,

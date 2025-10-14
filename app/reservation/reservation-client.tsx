@@ -13,6 +13,7 @@ import { ServicesStep } from "@/components/booking/services-step"
 import { DateTimeStep } from "@/components/booking/datetime-step"
 import { SummaryStep } from "@/components/booking/summary-step"
 import { ChevronLeft, ChevronRight, Info, Edit } from "lucide-react"
+import type { LogisticSlot } from "@/lib/types/logistic-slots"
 
 const STEPS = [
   { id: 1, title: "Adresses", description: "Collecte et livraison" },
@@ -41,6 +42,8 @@ export default function ReservationClient({
     items: existingBooking?.booking_items || [],
     pickupDate: existingBooking?.pickup_date || "",
     pickupTimeSlot: existingBooking?.pickup_time_slot || "",
+    pickupSlot: null as LogisticSlot | null,
+    deliverySlot: null as LogisticSlot | null,
     specialInstructions: existingBooking?.special_instructions || "",
     serviceType: serviceType,
   })
@@ -228,6 +231,8 @@ export default function ReservationClient({
                     updateBookingData({
                       pickupDate: dateString,
                       pickupTimeSlot: timeString,
+                      pickupSlot,
+                      deliverySlot,
                     })
                   }}
                   onNext={handleNext}
