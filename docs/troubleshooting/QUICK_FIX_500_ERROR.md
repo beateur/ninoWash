@@ -1,9 +1,9 @@
 # 🚨 ERREUR 500 lors de l'annulation - SOLUTION RAPIDE
 
 ## Problème
-```
+\`\`\`
 Failed to load resource: the server responded with a status of 500 (Internal Server Error)
-```
+\`\`\`
 
 ## Cause
 ❌ **La migration SQL n'a pas encore été appliquée !**
@@ -21,27 +21,27 @@ Les colonnes `cancellation_reason`, `cancelled_at`, `cancelled_by` n'existent pa
 3. **Menu gauche** → **SQL Editor**
 4. **Cliquer** "New query"
 5. **Copier-Coller** tout le contenu de :
-   ```
+   \`\`\`
    supabase/migrations/20251004_booking_cancellation_and_reports.sql
-   ```
+   \`\`\`
 6. **Cliquer** "Run" (bouton vert en bas à droite)
 7. ✅ **Attendre** "Success"
 
 ### Vérification rapide
 Exécuter cette requête dans le même SQL Editor :
-```sql
+\`\`\`sql
 SELECT column_name 
 FROM information_schema.columns 
 WHERE table_name = 'bookings' 
 AND column_name IN ('cancellation_reason', 'cancelled_at', 'cancelled_by');
-```
+\`\`\`
 
 **Résultat attendu** : 3 lignes
-```
+\`\`\`
 cancellation_reason
 cancelled_at
 cancelled_by
-```
+\`\`\`
 
 ---
 
@@ -49,13 +49,13 @@ cancelled_by
 
 Si Supabase CLI est installé et configuré :
 
-```bash
+\`\`\`bash
 cd /Users/bilel/Documents/websites/ninoWebsite/ninoWash
 supabase db push
-```
+\`\`\`
 
 **Pas installé ?**
-```bash
+\`\`\`bash
 # Installation
 brew install supabase/tap/supabase
 
@@ -65,16 +65,16 @@ supabase link --project-ref YOUR_PROJECT_REF
 
 # Application
 supabase db push
-```
+\`\`\`
 
 ---
 
 ### Option 3️⃣ : Script automatique
 
-```bash
+\`\`\`bash
 cd /Users/bilel/Documents/websites/ninoWebsite/ninoWash
 ./scripts/apply-migration.sh
-```
+\`\`\`
 
 ---
 
@@ -94,10 +94,10 @@ cd /Users/bilel/Documents/websites/ninoWebsite/ninoWash
 
 ### ❌ Si encore erreur 500
 Vérifier les logs serveur :
-```bash
+\`\`\`bash
 # Dans le terminal où tourne pnpm dev
 # Chercher l'erreur PostgreSQL exacte
-```
+\`\`\`
 
 Ou ouvrir la console browser (F12) → onglet Network → cliquer sur la requête failed → onglet Response
 

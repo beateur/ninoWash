@@ -29,7 +29,7 @@
 **Erreur à éviter** : Modifier un composant qui n'est jamais rendu dans le JSX.
 
 **Actions** :
-```bash
+\`\`\`bash
 # Chercher où le composant est UTILISÉ (pas juste importé)
 grep -r "<ComponentName" app/ components/ --include="*.tsx"
 
@@ -37,7 +37,7 @@ grep -r "<ComponentName" app/ components/ --include="*.tsx"
 grep -r "<AuthenticatedHeader" app/ --include="*.tsx"
 # ✅ Doit retourner au moins 1 résultat avec le tag JSX
 # ❌ Si seulement des imports → Le composant n'est PAS utilisé !
-```
+\`\`\`
 
 **Questions à se poser** :
 - [ ] Le composant est-il **rendu** dans au moins un fichier ?
@@ -45,7 +45,7 @@ grep -r "<AuthenticatedHeader" app/ --include="*.tsx"
 - [ ] Les props sont-elles bien passées depuis le parent ?
 
 **Exemple d'erreur** :
-```tsx
+\`\`\`tsx
 // ❌ MAUVAIS : Import mais pas de rendu
 import { AuthenticatedHeader } from "@/components/layout/authenticated-header"
 
@@ -64,7 +64,7 @@ export default function Layout() {
     </div>
   )
 }
-```
+\`\`\`
 
 ---
 
@@ -74,20 +74,20 @@ export default function Layout() {
 
 **Actions** :
 1. Dessiner la hiérarchie complète sur papier/whiteboard :
-   ```
+   \`\`\`
    Layout
      └─> Header ?
           └─> MobileNav ? ← Je modifie ici
-   ```
+   \`\`\`
 
 2. Vérifier chaque niveau :
-   ```bash
+   \`\`\`bash
    # Niveau 1 : Layout utilise Header ?
    grep -A 20 "export default.*Layout" app/(authenticated)/layout.tsx | grep "Header"
    
    # Niveau 2 : Header utilise MobileNav ?
    grep -A 50 "export.*Header" components/layout/authenticated-header.tsx | grep "MobileNav"
-   ```
+   \`\`\`
 
 **Questions à se poser** :
 - [ ] Ai-je vérifié **chaque niveau** de la hiérarchie ?
@@ -102,10 +102,10 @@ export default function Layout() {
 
 **Actions** :
 1. **Avant de commencer** :
-   ```bash
+   \`\`\`bash
    pnpm dev
    # Ouvrir http://localhost:3000 dans le navigateur
-   ```
+   \`\`\`
 
 2. **Pendant le développement** (toutes les 15-20 min) :
    - [ ] Recharger la page
@@ -132,12 +132,12 @@ export default function Layout() {
 **Erreur à éviter** : Confondre "import existe" avec "composant utilisé".
 
 **Règle d'Or** :
-```
+\`\`\`
 Import ≠ Utilisation
-```
+\`\`\`
 
 **Actions** :
-```bash
+\`\`\`bash
 # Étape 1 : Lister tous les imports du fichier
 grep "^import.*from" app/(authenticated)/layout.tsx
 
@@ -147,7 +147,7 @@ grep -A 100 "return" app/(authenticated)/layout.tsx | grep "AuthenticatedHeader"
 
 # ✅ Si résultat → Utilisé
 # ❌ Si pas de résultat → Import inutile (dead code)
-```
+\`\`\`
 
 **Questions à se poser** :
 - [ ] Chaque import a-t-il un usage dans le `return ()` ?
@@ -162,15 +162,15 @@ grep -A 100 "return" app/(authenticated)/layout.tsx | grep "AuthenticatedHeader"
 
 **Actions** :
 1. **Lire les commentaires** :
-   ```tsx
+   \`\`\`tsx
    {/* Mobile Navigation: MobileAuthNav is triggered from AuthenticatedHeader */}
-   ```
+   \`\`\`
 
 2. **Vérifier le code réel** :
-   ```tsx
+   \`\`\`tsx
    // ❌ Le commentaire dit "MobileAuthNav triggered from AuthenticatedHeader"
    // ❌ MAIS AuthenticatedHeader n'est PAS rendu dans le JSX !
-   ```
+   \`\`\`
 
 3. **Mettre à jour les commentaires** si décalage détecté.
 
@@ -180,10 +180,10 @@ grep -A 100 "return" app/(authenticated)/layout.tsx | grep "AuthenticatedHeader"
 - [ ] Les commentaires de documentation (JSDoc) sont-ils à jour ?
 
 **Règle** :
-```
+\`\`\`
 Code > Commentaires > Documentation
 (Le code est la source de vérité absolue)
-```
+\`\`\`
 
 ---
 
@@ -198,11 +198,11 @@ Code > Commentaires > Documentation
    - Props définies mais jamais utilisées
 
 2. **Tester la suppression** :
-   ```bash
+   \`\`\`bash
    # Commenter temporairement le composant
    # Si aucune erreur TypeScript → Probablement du dead code
    pnpm tsc --noEmit
-   ```
+   \`\`\`
 
 3. **Supprimer ou corriger** :
    - Si vraiment inutile → Supprimer
@@ -220,7 +220,7 @@ Code > Commentaires > Documentation
 **Erreur à éviter** : Chercher l'usage uniquement au premier niveau.
 
 **Actions** :
-```bash
+\`\`\`bash
 # Niveau 1 : Où le composant est importé ?
 grep -r "from.*ComponentName" app/ components/ --include="*.tsx"
 
@@ -239,7 +239,7 @@ grep -r "<MobileAuthNav" app/ components/ --include="*.tsx"
 
 echo "=== Props passées ==="
 grep -r "MobileAuthNav.*hasActiveSubscription" app/ components/ --include="*.tsx"
-```
+\`\`\`
 
 **Questions à se poser** :
 - [ ] Ai-je cherché l'usage dans **tous les dossiers** (app/, components/, lib/) ?
@@ -254,11 +254,11 @@ grep -r "MobileAuthNav.*hasActiveSubscription" app/ components/ --include="*.tsx
 
 **Actions** :
 1. **Dessiner le flux complet** :
-   ```
+   \`\`\`
    User Action → Layout → Header → MobileNav → Sheet → Items
                    ↓
               Sidebar (desktop)
-   ```
+   \`\`\`
 
 2. **Vérifier chaque transition** :
    - Layout rend Header ? ✅/❌
@@ -266,12 +266,12 @@ grep -r "MobileAuthNav.*hasActiveSubscription" app/ components/ --include="*.tsx
    - MobileNav utilise Sheet ? ✅/❌
 
 3. **Documenter le flux réel** (pas le flux idéal) :
-   ```markdown
+   \`\`\`markdown
    ## Flux Actuel (État des Lieux)
    - Layout: ✅ Rend Sidebar
    - Layout: ❌ Ne rend PAS Header
    - Header: ✅ Contient MobileNav (mais jamais exécuté)
-   ```
+   \`\`\`
 
 **Questions à se poser** :
 - [ ] Ai-je une **vue d'ensemble** claire de l'architecture ?
@@ -286,7 +286,7 @@ grep -r "MobileAuthNav.*hasActiveSubscription" app/ components/ --include="*.tsx
 
 **Actions** :
 1. **Test de rendu basique** :
-   ```typescript
+   \`\`\`typescript
    // __tests__/layout.test.tsx
    import { render } from '@testing-library/react'
    import Layout from '@/app/(authenticated)/layout'
@@ -296,16 +296,16 @@ grep -r "MobileAuthNav.*hasActiveSubscription" app/ components/ --include="*.tsx
      const navButton = getByRole('button', { name: /menu/i })
      expect(navButton).toBeInTheDocument() // ← Aurait détecté l'erreur !
    })
-   ```
+   \`\`\`
 
 2. **Test de hiérarchie** :
-   ```typescript
+   \`\`\`typescript
    test('MobileAuthNav is child of AuthenticatedHeader', () => {
      const { container } = render(<AuthenticatedHeader />)
      const mobileNav = container.querySelector('[data-mobile-nav]')
      expect(mobileNav).toBeInTheDocument()
    })
-   ```
+   \`\`\`
 
 **Questions à se poser** :
 - [ ] Ai-je au moins **1 test** qui vérifie le rendu du composant critique ?

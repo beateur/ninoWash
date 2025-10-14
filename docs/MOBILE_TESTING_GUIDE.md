@@ -209,7 +209,7 @@
 
 ### Browser DevTools
 
-```bash
+\`\`\`bash
 # Chrome DevTools
 1. F12 → Toggle device toolbar (Cmd+Shift+M)
 2. Sélectionner device dans dropdown
@@ -220,24 +220,24 @@
 1. Ouvrir Xcode Simulator
 2. Safari → Develop → Simulator → iPhone X
 3. Inspector Web
-```
+\`\`\`
 
 ### Tests Réels
 
 **URL de test** :
-```
+\`\`\`
 http://localhost:3000/reservation/guest
-```
+\`\`\`
 
 **Tunnel ngrok (pour tests device physique)** :
-```bash
+\`\`\`bash
 ngrok http 3000
 # → https://xxxx.ngrok.io/reservation/guest
-```
+\`\`\`
 
 ### Lighthouse CLI
 
-```bash
+\`\`\`bash
 # Mobile audit
 npx lighthouse http://localhost:3000/reservation/guest \
   --preset=mobile \
@@ -249,7 +249,7 @@ npx lighthouse http://localhost:3000/reservation/guest \
   --preset=desktop \
   --output=html \
   --output-path=./lighthouse-desktop-report.html
-```
+\`\`\`
 
 ---
 
@@ -275,27 +275,27 @@ npx lighthouse http://localhost:3000/reservation/guest \
 
 **Symptôme** : Difficile de cliquer sur checkbox sur iPhone SE
 **Fix** :
-```css
+\`\`\`css
 /* Augmenter zone tactile */
 .rgpd-checkbox {
   min-width: 44px;
   min-height: 44px;
   padding: 8px;
 }
-```
+\`\`\`
 
 ### Issue 2: Barre total cachée par clavier Android
 
 **Symptôme** : Keyboard cache barre total sur Android Chrome
 **Fix** :
-```javascript
+\`\`\`javascript
 // Scroll to bottom bar when keyboard opens
 window.addEventListener('resize', () => {
   if (document.activeElement.tagName === 'TEXTAREA') {
     document.querySelector('.total-bar').scrollIntoView({ behavior: 'smooth' })
   }
 })
-```
+\`\`\`
 
 ---
 

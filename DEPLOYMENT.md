@@ -19,7 +19,7 @@
    - Configurer les variables d'environnement
 
 2. **Variables d'environnement requises**
-```env
+\`\`\`env
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
@@ -33,7 +33,7 @@ STRIPE_WEBHOOK_SECRET=
 # Application URLs (Subdomain Routing)
 NEXT_PUBLIC_APP_URL=https://app.ninowash.com
 NEXT_PUBLIC_ADMIN_URL=https://gestion.ninowash.com
-```
+\`\`\`
 
 ### Déploiement Automatique
 
@@ -61,28 +61,28 @@ Ce projet utilise **Next.js 14 App Router** avec Server et Client Components.
    Configure les enregistrements DNS pour les sous-domaines :
    
    **Pour app.ninowash.com (utilisateurs):**
-   ```
+   \`\`\`
    Type: CNAME
    Name: app
    Value: cname.vercel-dns.com
    TTL: 3600
-   ```
+   \`\`\`
    
    **Pour gestion.ninowash.com (admin):**
-   ```
+   \`\`\`
    Type: CNAME
    Name: gestion
    Value: cname.vercel-dns.com
    TTL: 3600
-   ```
+   \`\`\`
    
    **Pour le domaine racine (redirection):**
-   ```
+   \`\`\`
    Type: A
    Name: @
    Value: 76.76.19.61
    TTL: 3600
-   ```
+   \`\`\`
 
 2. **Configuration Vercel**
    - Ajouter les deux sous-domaines dans Vercel Project Settings
@@ -97,7 +97,7 @@ Ce projet utilise **Next.js 14 App Router** avec Server et Client Components.
    - Cookies partagés entre sous-domaines (`.ninowash.com`)
 
 4. **Test de configuration**
-   ```bash
+   \`\`\`bash
    # Tester résolution DNS
    nslookup app.ninowash.com
    nslookup gestion.ninowash.com
@@ -105,22 +105,22 @@ Ce projet utilise **Next.js 14 App Router** avec Server et Client Components.
    # Tester HTTPS
    curl -I https://app.ninowash.com
    curl -I https://gestion.ninowash.com
-   ```
+   \`\`\`
 
 ### Configuration Supabase Auth (OAuth Redirect URLs)
 
 Dans Supabase Dashboard → Authentication → URL Configuration :
 
 **Redirect URLs (Production):**
-```
+\`\`\`
 https://app.ninowash.com/auth/callback
 https://gestion.ninowash.com/auth/callback
-```
+\`\`\`
 
 **Site URL:**
-```
+\`\`\`
 https://app.ninowash.com
-```
+\`\`\`
 
 ## 🗄️ Base de Données
 
@@ -133,11 +133,11 @@ https://app.ninowash.com
 \`\`\`
 
 2. **Exécution des migrations**
-```bash
+\`\`\`bash
 # Via l'interface Supabase SQL Editor
 # Ou utiliser pnpm pour les scripts automatisés
 pnpm db:migrate
-```
+\`\`\`
 
 ### Monitoring Base de Données
 
@@ -152,10 +152,10 @@ pnpm db:migrate
 ### Webhooks Production
 
 1. **Endpoint webhook**
-   ```
+   \`\`\`
    URL: https://votre-domaine.com/api/webhooks/stripe
    Events: payment_intent.succeeded, subscription.updated, etc.
-   ```
+   \`\`\`
 
 2. **Clés API**
    - Utiliser les clés de production Stripe
@@ -241,10 +241,10 @@ Endpoints de vérification :
 ### Tests de Fumée
 
 Tests automatiques post-déploiement :
-```bash
+\`\`\`bash
 # Tests critiques uniquement
 pnpm test:smoke
-```
+\`\`\`
 
 ---
 
@@ -277,10 +277,10 @@ pnpm test:smoke
 ### Maintenance Mode
 
 1. **Activer le mode maintenance**
-```bash
+\`\`\`bash
 # Déployer une page de maintenance via Vercel
 vercel --prod --env MAINTENANCE_MODE=true
-```
+\`\`\`
 
 2. **Communication**
    - Status page (à configurer)

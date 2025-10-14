@@ -67,14 +67,14 @@ Clarifier le processus de validation de réservation pour :
 
 #### User Flows
 **Utilisateur authentifié** :
-```
+\`\`\`
 Clic "Confirmer" → API POST /api/bookings → Success → Redirect /reservation/success?number=XXX → Affiche page → Clic "Dashboard" → /dashboard
-```
+\`\`\`
 
 **Utilisateur invité** :
-```
+\`\`\`
 Clic "Confirmer" → API POST /api/bookings → Success → Redirect /reservation/success?number=XXX → Affiche page → Clic "Accueil" → /
-```
+\`\`\`
 
 #### Responsive Behavior
 - Desktop : Card max-width 2xl (768px)
@@ -176,7 +176,7 @@ Clic "Confirmer" → API POST /api/bookings → Success → Redirect /reservatio
 
 ## 5. Data Flow
 
-```
+\`\`\`
 [Client] Clic "Confirmer"
     ↓
 [Frontend] components/booking/summary-step.tsx → handleSubmit()
@@ -194,7 +194,7 @@ Clic "Confirmer" → API POST /api/bookings → Success → Redirect /reservatio
 [User Action] Clic "Dashboard" ou "Accueil"
     ↓
 [Redirect] /dashboard ou /
-```
+\`\`\`
 
 ## 6. Error Scenarios
 
@@ -219,12 +219,12 @@ Clic "Confirmer" → API POST /api/bookings → Success → Redirect /reservatio
 
 ### Integration Tests
 - **Vitest** : Tester le composant avec différents query params
-  ```typescript
+  \`\`\`typescript
   it('should display booking number when provided', () => {
     render(<Page />, { searchParams: { number: 'BOOK-123' } })
     expect(screen.getByText(/BOOK-123/)).toBeInTheDocument()
   })
-  ```
+  \`\`\`
 
 ### E2E Tests (Manual)
 - [ ] Créer réservation de bout en bout (Playwright / manuel)
@@ -298,7 +298,7 @@ Clic "Confirmer" → API POST /api/bookings → Success → Redirect /reservatio
 
 ## Wireframe ASCII
 
-```
+\`\`\`
 ┌────────────────────────────────────────────┐
 │          🕐 [Clock Icon - h-16]            │
 │                                            │
@@ -329,7 +329,7 @@ Clic "Confirmer" → API POST /api/bookings → Success → Redirect /reservatio
 
    [Accéder au tableau de bord]  [Retour...]
    (Button primary - lg)         (outline)
-```
+\`\`\`
 
 ---
 

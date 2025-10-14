@@ -22,7 +22,7 @@
 
 #### Test 1.1 : Vérifier les tables créées
 
-```sql
+\`\`\`sql
 -- Vérifier que les tables existent
 SELECT table_name, table_type 
 FROM information_schema.tables 
@@ -30,11 +30,11 @@ WHERE table_name IN ('subscription_credits', 'credit_usage_log')
   AND table_schema = 'public';
 
 -- Expected: 2 rows (subscription_credits, credit_usage_log)
-```
+\`\`\`
 
 #### Test 1.2 : Vérifier les fonctions PostgreSQL
 
-```sql
+\`\`\`sql
 -- Lister les fonctions de crédits
 SELECT 
   routine_name,
@@ -49,11 +49,11 @@ WHERE routine_name LIKE '%credit%'
 -- - consume_subscription_credit (function, boolean)
 -- - initialize_weekly_credits (function, uuid)
 -- - get_credits_from_plan (function, integer)
-```
+\`\`\`
 
 #### Test 1.3 : Tester la fonction `initialize_weekly_credits`
 
-```sql
+\`\`\`sql
 -- Créer un user de test (si pas déjà existant)
 DO $$
 DECLARE
@@ -81,11 +81,11 @@ WHERE created_at > NOW() - INTERVAL '1 minute'
 ORDER BY created_at DESC;
 
 -- Expected: 1 row avec credits_total = 2, credits_remaining = 2
-```
+\`\`\`
 
 #### Test 1.4 : Tester la fonction `consume_subscription_credit`
 
-```sql
+\`\`\`sql
 -- Consommer un crédit
 DO $$
 DECLARE
@@ -131,7 +131,7 @@ SELECT * FROM credit_usage_log
 WHERE used_at > NOW() - INTERVAL '1 minute';
 
 -- Expected: 1 row avec booking_weight_kg = 10.0, amount_saved = 35.70
-```
+\`\`\`
 
 ---
 
@@ -139,7 +139,7 @@ WHERE used_at > NOW() - INTERVAL '1 minute';
 
 #### Test 2.1 : GET /api/subscriptions/credits
 
-```bash
+\`\`\`bash
 # Via curl (remplacer YOUR_TOKEN)
 curl -X GET 'http://localhost:3000/api/subscriptions/credits' \
   -H 'Authorization: Bearer YOUR_TOKEN'
@@ -153,11 +153,11 @@ curl -X GET 'http://localhost:3000/api/subscriptions/credits' \
 #     "resetAt": "2025-10-12T00:00:00Z"
 #   }
 # }
-```
+\`\`\`
 
 #### Test 2.2 : GET /api/subscriptions/credits?stats=true
 
-```bash
+\`\`\`bash
 curl -X GET 'http://localhost:3000/api/subscriptions/credits?stats=true' \
   -H 'Authorization: Bearer YOUR_TOKEN'
 
@@ -170,11 +170,11 @@ curl -X GET 'http://localhost:3000/api/subscriptions/credits?stats=true' \
 #     "usageRate": 0.625
 #   }
 # }
-```
+\`\`\`
 
 #### Test 2.3 : GET /api/subscriptions/credits/history
 
-```bash
+\`\`\`bash
 curl -X GET 'http://localhost:3000/api/subscriptions/credits/history?limit=10' \
   -H 'Authorization: Bearer YOUR_TOKEN'
 
@@ -194,11 +194,11 @@ curl -X GET 'http://localhost:3000/api/subscriptions/credits/history?limit=10' \
 #   "totalSaved": 35.70,
 #   "count": 1
 # }
-```
+\`\`\`
 
 #### Test 2.4 : POST /api/subscriptions/credits/check
 
-```bash
+\`\`\`bash
 curl -X POST 'http://localhost:3000/api/subscriptions/credits/check' \
   -H 'Authorization: Bearer YOUR_TOKEN' \
   -H 'Content-Type: application/json' \
@@ -213,11 +213,11 @@ curl -X POST 'http://localhost:3000/api/subscriptions/credits/check' \
 #   "surplusAmount": 0,
 #   "message": "Réservation gratuite (crédit utilisé)"
 # }
-```
+\`\`\`
 
 #### Test 2.5 : POST /api/bookings (avec crédit)
 
-```bash
+\`\`\`bash
 curl -X POST 'http://localhost:3000/api/bookings' \
   -H 'Authorization: Bearer YOUR_TOKEN' \
   -H 'Content-Type: application/json' \
@@ -241,10 +241,10 @@ curl -X POST 'http://localhost:3000/api/bookings' \
 #   },
 #   "message": "Réservation créée avec succès"
 # }
-```
+\`\`\`
 
 Vérifier dans la DB :
-```sql
+\`\`\`sql
 SELECT 
   id,
   total_amount,
@@ -257,7 +257,7 @@ WHERE created_at > NOW() - INTERVAL '5 minutes'
 ORDER BY created_at DESC;
 
 -- Expected: total_amount = 0, used_subscription_credit = true
-```
+\`\`\`
 
 ---
 
@@ -281,9 +281,9 @@ ORDER BY created_at DESC;
 #### Test 3.2 : Composant CreditsDisplay (mode compact)
 
 **Test dans React DevTools** :
-```tsx
+\`\`\`tsx
 <CreditsDisplay userId="YOUR_USER_ID" compact={true} />
-```
+\`\`\`
 
 **Résultats attendus** :
 - ✅ Badge + Progress bar seulement (pas de card)
@@ -294,7 +294,7 @@ ORDER BY created_at DESC;
 **Note** : Ce composant n'est pas encore intégré dans `summary-step.tsx` (P4).
 
 **Test manuel possible** :
-```tsx
+\`\`\`tsx
 // Ajouter temporairement dans un composant page
 import { CreditUsageBadge } from "@/components/subscription/credit-usage-badge"
 
@@ -306,7 +306,7 @@ import { CreditUsageBadge } from "@/components/subscription/credit-usage-badge"
     console.log("Total amount:", totalAmount)
   }}
 />
-```
+\`\`\`
 
 **Résultats attendus** :
 - ✅ Badge vert avec "Réservation gratuite !" si crédit disponible
@@ -319,7 +319,7 @@ import { CreditUsageBadge } from "@/components/subscription/credit-usage-badge"
 
 #### Test 4.1 : Déployer la fonction (si pas déjà fait)
 
-```bash
+\`\`\`bash
 # Login Supabase
 supabase login
 
@@ -331,11 +331,11 @@ supabase functions deploy reset-weekly-credits
 
 # Vérifier
 supabase functions list
-```
+\`\`\`
 
 #### Test 4.2 : Test manuel de la fonction
 
-```bash
+\`\`\`bash
 # Option A : Via script
 export SUPABASE_PROJECT_REF=your-project-ref
 export SUPABASE_ANON_KEY=your-anon-key
@@ -345,10 +345,10 @@ export SUPABASE_ANON_KEY=your-anon-key
 curl -i --location --request POST \
   'https://YOUR_PROJECT_REF.supabase.co/functions/v1/reset-weekly-credits' \
   --header 'Authorization: Bearer YOUR_ANON_KEY'
-```
+\`\`\`
 
 **Résultat attendu** :
-```json
+\`\`\`json
 {
   "success": true,
   "totalProcessed": 5,
@@ -357,11 +357,11 @@ curl -i --location --request POST \
   "timestamp": "2025-10-05T12:34:56Z",
   "results": [...]
 }
-```
+\`\`\`
 
 #### Test 4.3 : Vérifier les crédits après reset
 
-```sql
+\`\`\`sql
 SELECT 
   sc.user_id,
   sc.credits_total,
@@ -377,13 +377,13 @@ WHERE sc.created_at > NOW() - INTERVAL '5 minutes'
 ORDER BY sc.created_at DESC;
 
 -- Expected: Nouveaux crédits avec week_start_date = lundi actuel
-```
+\`\`\`
 
 #### Test 4.4 : Configurer le cron job
 
 **Note** : Voir `docs/CRON_JOB_DEPLOYMENT_GUIDE.md` pour guide complet.
 
-```sql
+\`\`\`sql
 -- Vérifier pg_cron installé
 SELECT * FROM pg_extension WHERE extname = 'pg_cron';
 
@@ -408,7 +408,7 @@ SELECT cron.schedule(
 
 -- Vérifier le job créé
 SELECT * FROM cron.job WHERE jobname = 'reset-weekly-credits';
-```
+\`\`\`
 
 ---
 
@@ -449,31 +449,31 @@ SELECT * FROM cron.job WHERE jobname = 'reset-weekly-credits';
 
 ### Erreur : "credits_total must be 2 or 3"
 **Solution** : Le plan_id n'est pas reconnu. Vérifier :
-```sql
+\`\`\`sql
 SELECT DISTINCT plan_id FROM subscriptions;
 -- Doit contenir 'monthly' ou 'quarterly'
-```
+\`\`\`
 
 ### Erreur : "Permission denied for table subscription_credits"
 **Solution** : Vérifier les RLS policies :
-```sql
+\`\`\`sql
 SELECT * FROM pg_policies WHERE tablename = 'subscription_credits';
 -- Doit avoir au moins 1 policy pour SELECT
-```
+\`\`\`
 
 ### Erreur : "Function not found: initialize_weekly_credits"
 **Solution** : Fonction non créée. Appliquer migration :
-```bash
+\`\`\`bash
 supabase db push
 # Ou exécuter manuellement le SQL
-```
+\`\`\`
 
 ### Dashboard ne montre pas les crédits
 **Solution** : Vérifier `hasActiveSubscription` prop :
-```sql
+\`\`\`sql
 SELECT id, user_id, status FROM subscriptions WHERE user_id = 'YOUR_USER_ID';
 -- status doit être 'active' ou 'trialing'
-```
+\`\`\`
 
 ---
 

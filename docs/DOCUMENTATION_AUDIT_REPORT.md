@@ -268,7 +268,7 @@ Aucune (documentation globalement excellente)
 ### Format des Documents
 
 ✅ **Bon format actuel :**
-```markdown
+\`\`\`markdown
 # Titre Principal
 
 ## Section Principale
@@ -287,7 +287,7 @@ Code block
 
 - Liste à puces
 1. Liste numérotée
-```
+\`\`\`
 
 ### Nommage des Fichiers
 
@@ -299,7 +299,7 @@ Code block
 ### Structure des Documents
 
 ✅ **Template recommandé :**
-```markdown
+\`\`\`markdown
 # Titre du Document
 
 **Date :** [Date]
@@ -320,7 +320,7 @@ Code block
 
 **Dernière mise à jour :** [Date]
 **Contact :** [Équipe responsable]
-```
+\`\`\`
 
 ---
 

@@ -10,7 +10,7 @@
 
 Ajouter dans `.env.local` (créer le fichier si nécessaire) :
 
-```bash
+\`\`\`bash
 # Stripe Test Keys (Dashboard → Developers → API Keys)
 STRIPE_SECRET_KEY=sk_test_51... # ⚠️ SERVER-ONLY (never commit)
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_51... # ✅ Public (safe for client)
@@ -18,7 +18,7 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_51... # ✅ Public (safe for client)
 # Supabase (déjà configuré normalement)
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
+\`\`\`
 
 **Où trouver les clés Stripe** :
 1. Aller sur https://dashboard.stripe.com/test/apikeys
@@ -28,10 +28,10 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ### 2. Démarrer le serveur
 
-```bash
+\`\`\`bash
 cd /Users/bilel/Documents/websites/ninoWebsite/ninoWash
 pnpm dev
-```
+\`\`\`
 
 Le serveur démarre sur http://localhost:3000
 
@@ -171,7 +171,7 @@ Le serveur démarre sur http://localhost:3000
 
 ### Logs Backend (Terminal)
 
-```bash
+\`\`\`bash
 # Démarrer le serveur en mode verbose
 pnpm dev
 
@@ -179,19 +179,19 @@ pnpm dev
 # [v0] Payment Intent created: { clientSecret: "pi_...", amount: 2500 }
 # [v0] Payment Intent API called with: { guestEmail: "...", services: [...] }
 # [v0] Stripe error: { message: "...", type: "card_error" }
-```
+\`\`\`
 
 ### Logs Frontend (Console Browser)
 
 Ouvrir DevTools (F12) → Console :
 
-```javascript
+\`\`\`javascript
 // Logs à surveiller :
 [v0] Payment success: pi_xxxxxxxxxxxxx
 [v0] Payment error: Your card was declined
 [v0] Creating payment intent...
 [v0] Confirming payment...
-```
+\`\`\`
 
 ### Network Tab (DevTools)
 
@@ -264,13 +264,13 @@ Ouvrir DevTools (F12) → Console :
 2. Vérifier que la table `services` existe dans Supabase
 3. Vérifier que la table contient au moins 1 service
 4. Vérifier RLS policies (Row Level Security) permettent lecture anonyme :
-   ```sql
+   \`\`\`sql
    -- Dans Supabase SQL Editor
    CREATE POLICY "Allow anonymous read on services"
    ON services FOR SELECT
    TO anon
    USING (true);
-   ```
+   \`\`\`
 
 ---
 

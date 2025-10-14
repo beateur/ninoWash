@@ -34,7 +34,7 @@ Appliquer les migrations pour résoudre l'erreur `booking_number NOT NULL violat
 5. Vérifier le message de succès
 
 **Vérification** :
-```sql
+\`\`\`sql
 -- Tester que le trigger fonctionne
 SELECT 
   tgname as trigger_name,
@@ -43,7 +43,7 @@ FROM pg_trigger
 WHERE tgname = 'trg_bookings_booking_number';
 
 -- Devrait retourner 1 ligne avec enabled = 'O' (pour "Origin")
-```
+\`\`\`
 
 ### Étape 3 : Appliquer Migration 2 (Failed Operations Logging)
 1. Cliquer sur **"New query"**
@@ -53,7 +53,7 @@ WHERE tgname = 'trg_bookings_booking_number';
 5. Vérifier le message de succès
 
 **Vérification** :
-```sql
+\`\`\`sql
 -- Vérifier que les tables existent
 SELECT table_name 
 FROM information_schema.tables 
@@ -61,14 +61,14 @@ WHERE table_schema = 'public'
   AND table_name IN ('failed_account_creations', 'failed_bookings');
 
 -- Devrait retourner 2 lignes
-```
+\`\`\`
 
 ---
 
 ## ✅ Tests Post-Migration
 
 ### Test 1 : Trigger booking_number
-```sql
+\`\`\`sql
 -- Test INSERT sans booking_number (devrait être auto-généré)
 INSERT INTO bookings (
   user_id, 
@@ -90,10 +90,10 @@ INSERT INTO bookings (
 
 -- Nettoyer le test
 DELETE FROM bookings WHERE user_id = '00000000-0000-0000-0000-000000000000';
-```
+\`\`\`
 
 ### Test 2 : Failed Operations Tables
-```sql
+\`\`\`sql
 -- Test INSERT dans failed_account_creations
 INSERT INTO failed_account_creations (
   payment_intent_id,
@@ -129,7 +129,7 @@ INSERT INTO failed_bookings (
 -- Nettoyer les tests
 DELETE FROM failed_account_creations WHERE payment_intent_id = 'pi_test_123';
 DELETE FROM failed_bookings WHERE payment_intent_id = 'pi_test_456';
-```
+\`\`\`
 
 ---
 
@@ -162,7 +162,7 @@ Après avoir appliqué les migrations, tester le flow complet :
 ### Test Scenario 3 : Vérifier Logging (Optionnel)
 Si vous voulez tester le logging des erreurs (nécessite de provoquer une erreur) :
 
-```sql
+\`\`\`sql
 -- Désactiver temporairement le trigger pour forcer l'erreur
 ALTER TABLE bookings DISABLE TRIGGER trg_bookings_booking_number;
 
@@ -173,14 +173,14 @@ SELECT * FROM failed_bookings ORDER BY created_at DESC LIMIT 1;
 
 -- Réactiver le trigger
 ALTER TABLE bookings ENABLE TRIGGER trg_bookings_booking_number;
-```
+\`\`\`
 
 ---
 
 ## 🔍 Monitoring Queries (Admin Dashboard)
 
 ### Compter bookings par date
-```sql
+\`\`\`sql
 SELECT 
   DATE(created_at) as booking_date,
   COUNT(*) as total_bookings,
@@ -189,10 +189,10 @@ FROM bookings
 WHERE created_at > NOW() - INTERVAL '7 days'
 GROUP BY DATE(created_at)
 ORDER BY booking_date DESC;
-```
+\`\`\`
 
 ### Vérifier format booking_number
-```sql
+\`\`\`sql
 SELECT 
   booking_number,
   created_at,
@@ -202,10 +202,10 @@ WHERE booking_number NOT LIKE 'BK-%'
 ORDER BY created_at DESC;
 
 -- Devrait retourner 0 lignes (tous les booking_number ont le bon format)
-```
+\`\`\`
 
 ### Logs d'échecs récents
-```sql
+\`\`\`sql
 -- Failed account creations
 SELECT 
   payment_intent_id,
@@ -225,24 +225,24 @@ SELECT
 FROM failed_bookings
 WHERE created_at > NOW() - INTERVAL '24 hours'
 ORDER BY created_at DESC;
-```
+\`\`\`
 
 ---
 
 ## 🚨 Rollback (En Cas de Problème)
 
 ### Rollback Migration 1 (Trigger)
-```sql
+\`\`\`sql
 DROP TRIGGER IF EXISTS trg_bookings_booking_number ON public.bookings;
 DROP FUNCTION IF EXISTS generate_booking_number();
 DROP SEQUENCE IF EXISTS booking_number_seq;
-```
+\`\`\`
 
 ### Rollback Migration 2 (Failed Operations)
-```sql
+\`\`\`sql
 DROP TABLE IF EXISTS failed_bookings CASCADE;
 DROP TABLE IF EXISTS failed_account_creations CASCADE;
-```
+\`\`\`
 
 ---
 

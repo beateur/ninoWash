@@ -9,16 +9,16 @@ Tester l'ajout de cartes bancaires via Stripe Elements sur la page `/payment-met
 
 ### 1. Variables d'environnement
 Vérifier `.env.local` :
-```bash
+\`\`\`bash
 # Stripe Keys (Test Mode)
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...  # Optionnel pour payment methods
-```
+\`\`\`
 
 ### 2. Stripe CLI (Optionnel mais recommandé)
 Pour tester les webhooks en local :
-```bash
+\`\`\`bash
 # Installation (macOS)
 brew install stripe/stripe-cli/stripe
 
@@ -27,7 +27,7 @@ stripe login
 
 # Forward webhooks vers localhost
 stripe listen --forward-to localhost:3000/api/webhooks/stripe
-```
+\`\`\`
 
 **Note** : Les webhooks Stripe ne sont **pas nécessaires** pour l'ajout de cartes (Setup Intent), mais utiles pour les abonnements.
 
@@ -36,10 +36,10 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
 ## 🚀 Démarrage
 
 ### 1. Lancer le serveur de développement
-```bash
+\`\`\`bash
 cd /Users/bilel/Documents/websites/ninoWebsite/ninoWash
 pnpm dev
-```
+\`\`\`
 
 ### 2. Accéder à la page
 1. Se connecter à l'application (créer un compte si nécessaire)
@@ -70,9 +70,9 @@ pnpm dev
   - Actions : Définir par défaut, Supprimer
 
 **Vérification DB** (optionnel) :
-```sql
+\`\`\`sql
 SELECT * FROM payment_methods WHERE user_id = 'votre_user_id' ORDER BY created_at DESC LIMIT 1;
-```
+\`\`\`
 
 ---
 
@@ -157,17 +157,17 @@ Plus de cartes : [Stripe Test Cards](https://stripe.com/docs/testing#cards)
 
 ### 1. Logs Frontend (Console Browser)
 Préfixe : `[v0]`
-```javascript
+\`\`\`javascript
 // Exemples de logs attendus :
 [v0] Error creating setup intent: ...
 [v0] Error adding payment method: ...
-```
+\`\`\`
 
 ### 2. Logs Backend (Terminal pnpm dev)
-```bash
+\`\`\`bash
 [v0] Payment method creation error: ...
 [v0] Error fetching payment method from Stripe: ...
-```
+\`\`\`
 
 ### 3. Stripe Dashboard
 - **Test Mode** : [https://dashboard.stripe.com/test/payments](https://dashboard.stripe.com/test/payments)
@@ -222,7 +222,7 @@ Préfixe : `[v0]`
 ## 📊 Flux Technique
 
 ### Ajout d'une carte (Setup Intent)
-```
+\`\`\`
 1. User clicks "Ajouter une carte"
    → createSetupIntent() (server action)
      → Stripe.setupIntents.create({ customer })
@@ -247,7 +247,7 @@ Préfixe : `[v0]`
    → Return saved payment method
 
 6. Frontend: Refresh list + toast success
-```
+\`\`\`
 
 ---
 

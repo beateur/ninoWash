@@ -23,14 +23,14 @@ Transformation du `DashboardSidebar` en composant **responsive complet** :
 **Responsabilité** : Contenu partagé entre Desktop et Mobile
 
 **Props** :
-```tsx
+\`\`\`tsx
 interface SidebarContentProps {
   user: SupabaseUser
   hasActiveSubscription?: boolean
   isCollapsed?: boolean          // Desktop: affiche icons only
   onNavigate?: () => void         // Mobile: ferme le Sheet après clic
 }
-```
+\`\`\`
 
 **Fonctionnalités** :
 - Logo + Branding (adapté selon `isCollapsed`)
@@ -48,13 +48,13 @@ interface SidebarContentProps {
 **Responsabilité** : Gestion responsive Desktop + Mobile
 
 **États React** :
-```tsx
+\`\`\`tsx
 const [isCollapsed, setIsCollapsed] = useState(false)  // Desktop: expand/collapse
 const [isMobileOpen, setIsMobileOpen] = useState(false) // Mobile: sheet open/close
-```
+\`\`\`
 
 **localStorage** :
-```tsx
+\`\`\`tsx
 useEffect(() => {
   const collapsed = localStorage.getItem("sidebar-collapsed") === "true"
   setIsCollapsed(collapsed)
@@ -65,7 +65,7 @@ const toggleCollapsed = () => {
   setIsCollapsed(newState)
   localStorage.setItem("sidebar-collapsed", String(newState))
 }
-```
+\`\`\`
 
 ---
 
@@ -78,9 +78,9 @@ const toggleCollapsed = () => {
 - **Collapsed** : `w-16` (64px)
 
 **Transition** :
-```tsx
+\`\`\`tsx
 className="transition-all duration-300 ease-in-out"
-```
+\`\`\`
 
 **Toggle Button** :
 - Position : Header (à droite du logo)
@@ -119,16 +119,16 @@ className="transition-all duration-300 ease-in-out"
 ### Hamburger Button
 
 **Position** : 
-```tsx
+\`\`\`tsx
 className="fixed top-4 left-4 z-50 md:hidden"
-```
+\`\`\`
 
 **Style** :
-```tsx
+\`\`\`tsx
 variant="ghost"
 size="icon"
 className="bg-background/80 backdrop-blur-sm shadow-md"
-```
+\`\`\`
 
 **Icon** : `Menu` (lucide-react)
 
@@ -139,7 +139,7 @@ className="bg-background/80 backdrop-blur-sm shadow-md"
 **Composant** : `Sheet` de shadcn/ui (Radix Dialog)
 
 **Configuration** :
-```tsx
+\`\`\`tsx
 <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
   <SheetContent side="left" className="w-80 p-0">
     <SidebarContent
@@ -149,7 +149,7 @@ className="bg-background/80 backdrop-blur-sm shadow-md"
     />
   </SheetContent>
 </Sheet>
-```
+\`\`\`
 
 **Largeur** : `w-80` (320px)
 
@@ -163,7 +163,7 @@ className="bg-background/80 backdrop-blur-sm shadow-md"
 
 ### Desktop
 
-```tsx
+\`\`\`tsx
 // Sidebar
 className={cn(
   "hidden md:flex h-screen flex-col border-r bg-background transition-all duration-300 ease-in-out",
@@ -188,11 +188,11 @@ className={cn(
 <Avatar className="h-8 w-8 shrink-0 ring-2 ring-primary/20">
   <AvatarFallback>{userInitials}</AvatarFallback>
 </Avatar>
-```
+\`\`\`
 
 ### Mobile
 
-```tsx
+\`\`\`tsx
 // Hamburger Button
 className="fixed top-4 left-4 z-50 md:hidden bg-background/80 backdrop-blur-sm shadow-md hover:bg-background"
 
@@ -201,7 +201,7 @@ className="w-80 p-0"
 
 // Full Height Container
 className="flex h-full flex-col"
-```
+\`\`\`
 
 ---
 
@@ -357,7 +357,7 @@ className="flex h-full flex-col"
 ## 🎯 Résultats Attendus
 
 ### Desktop Expanded (w-64)
-```
+\`\`\`
 ┌────────────────────────────────┐
 │ [N] Nino Wash          [◧]     │ ← Toggle button
 ├────────────────────────────────┤
@@ -375,10 +375,10 @@ className="flex h-full flex-col"
 │ [👤] John Doe          [▼]     │ ← User menu
 │      john@example.com          │
 └────────────────────────────────┘
-```
+\`\`\`
 
 ### Desktop Collapsed (w-16)
-```
+\`\`\`
 ┌────┐
 │ N  │ ← Logo only
 ├────┤
@@ -396,10 +396,10 @@ className="flex h-full flex-col"
 ├────┤
 │[👤]│ ← Avatar only
 └────┘
-```
+\`\`\`
 
 ### Mobile (< 768px)
-```
+\`\`\`
 ┌────────────────────────────┐
 │ [☰]                        │ ← Hamburger fixed
 │                            │
@@ -416,7 +416,7 @@ Après clic sur [☰] :
 │ w-80       │               │
 │            │               │
 └────────────┴───────────────┘
-```
+\`\`\`
 
 ---
 

@@ -20,24 +20,24 @@
 
 ### 1.1 Vérifier la structure des fichiers
 
-```bash
+\`\`\`bash
 # Structure attendue :
 supabase/
 └── functions/
     └── reset-weekly-credits/
         ├── index.ts        # Code de la fonction
         └── deno.json       # Configuration Deno
-```
+\`\`\`
 
 ### 1.2 Login Supabase CLI
 
-```bash
+\`\`\`bash
 # Se connecter à Supabase
 supabase login
 
 # Lier le projet local au projet Supabase
 supabase link --project-ref YOUR_PROJECT_REF
-```
+\`\`\`
 
 **Trouver PROJECT_REF** :
 - Dashboard > Settings > General > Reference ID
@@ -45,35 +45,35 @@ supabase link --project-ref YOUR_PROJECT_REF
 
 ### 1.3 Déployer la fonction
 
-```bash
+\`\`\`bash
 # Déployer l'Edge Function
 supabase functions deploy reset-weekly-credits
 
 # Vérifier le déploiement
 supabase functions list
-```
+\`\`\`
 
 **Output attendu** :
-```
+\`\`\`
 NAME                      VERSION  CREATED AT                
 reset-weekly-credits      1        2025-10-05 12:34:56
-```
+\`\`\`
 
 ### 1.4 Tester la fonction manuellement
 
-```bash
+\`\`\`bash
 # Test avec curl (remplacer YOUR_PROJECT_REF et YOUR_ANON_KEY)
 curl -i --location --request POST \
   'https://YOUR_PROJECT_REF.supabase.co/functions/v1/reset-weekly-credits' \
   --header 'Authorization: Bearer YOUR_ANON_KEY' \
   --header 'Content-Type: application/json'
-```
+\`\`\`
 
 **Trouver ANON_KEY** :
 - Dashboard > Settings > API > anon/public key
 
 **Réponse attendue (200 OK)** :
-```json
+\`\`\`json
 {
   "success": true,
   "totalProcessed": 5,
@@ -89,7 +89,7 @@ curl -i --location --request POST \
     }
   ]
 }
-```
+\`\`\`
 
 ---
 
@@ -105,13 +105,13 @@ curl -i --location --request POST \
 
 ### 2.2 Préparer le script SQL
 
-```bash
+\`\`\`bash
 # Copier le template
 cp supabase/migrations/20251005000001_setup_credit_reset_cron.sql /tmp/cron_setup.sql
 
 # Éditer avec vos variables
 nano /tmp/cron_setup.sql
-```
+\`\`\`
 
 **Remplacer dans le fichier** :
 - `YOUR_PROJECT_REF` → Votre référence projet (ex: `abcdefghijklmnop`)
@@ -126,13 +126,13 @@ nano /tmp/cron_setup.sql
 4. Run
 
 **Option B : Via CLI**
-```bash
+\`\`\`bash
 supabase db push
-```
+\`\`\`
 
 ### 2.4 Vérifier le job créé
 
-```sql
+\`\`\`sql
 -- Dans SQL Editor
 SELECT 
   jobid,
@@ -146,7 +146,7 @@ SELECT
   jobname
 FROM cron.job
 WHERE jobname = 'reset-weekly-credits';
-```
+\`\`\`
 
 **Output attendu** :
 | jobid | schedule | jobname | active |
@@ -159,7 +159,7 @@ WHERE jobname = 'reset-weekly-credits';
 
 ### 3.1 Test Manuel Immédiat
 
-```sql
+\`\`\`sql
 -- Exécuter le reset maintenant (test)
 SELECT net.http_post(
   url := 'https://YOUR_PROJECT_REF.supabase.co/functions/v1/reset-weekly-credits',
@@ -169,11 +169,11 @@ SELECT net.http_post(
   ),
   body := '{}'::jsonb
 );
-```
+\`\`\`
 
 ### 3.2 Vérifier les Crédits Créés
 
-```sql
+\`\`\`sql
 -- Voir les crédits créés récemment
 SELECT 
   sc.id,
@@ -187,11 +187,11 @@ FROM subscription_credits sc
 JOIN auth.users u ON u.id = sc.user_id
 WHERE sc.created_at > NOW() - INTERVAL '5 minutes'
 ORDER BY sc.created_at DESC;
-```
+\`\`\`
 
 ### 3.3 Vérifier les Logs du Cron
 
-```sql
+\`\`\`sql
 -- Voir les 10 dernières exécutions
 SELECT 
   jobid,
@@ -209,7 +209,7 @@ FROM cron.job_run_details
 WHERE jobid = (SELECT jobid FROM cron.job WHERE jobname = 'reset-weekly-credits')
 ORDER BY start_time DESC 
 LIMIT 10;
-```
+\`\`\`
 
 ---
 
@@ -218,7 +218,7 @@ LIMIT 10;
 ### 4.1 Dashboard de Monitoring
 
 **Créer une vue personnalisée** :
-```sql
+\`\`\`sql
 CREATE OR REPLACE VIEW credit_reset_dashboard AS
 SELECT 
   DATE_TRUNC('day', start_time) AS execution_date,
@@ -230,12 +230,12 @@ FROM cron.job_run_details
 WHERE jobid = (SELECT jobid FROM cron.job WHERE jobname = 'reset-weekly-credits')
 GROUP BY DATE_TRUNC('day', start_time)
 ORDER BY execution_date DESC;
-```
+\`\`\`
 
 ### 4.2 Alertes (Optionnel)
 
 **Créer une notification si échec** :
-```sql
+\`\`\`sql
 -- Fonction pour envoyer un email en cas d'échec
 CREATE OR REPLACE FUNCTION notify_credit_reset_failure()
 RETURNS TRIGGER AS $$
@@ -259,17 +259,17 @@ WHEN (NEW.status = 'failed' AND NEW.jobid = (
   SELECT jobid FROM cron.job WHERE jobname = 'reset-weekly-credits'
 ))
 EXECUTE FUNCTION notify_credit_reset_failure();
-```
+\`\`\`
 
 ### 4.3 Logs dans l'Application
 
 **Voir les logs Edge Function** :
-```bash
+\`\`\`bash
 # Via CLI
 supabase functions logs reset-weekly-credits
 
 # Ou dans Dashboard > Functions > reset-weekly-credits > Logs
-```
+\`\`\`
 
 ---
 
@@ -277,17 +277,17 @@ supabase functions logs reset-weekly-credits
 
 ### 5.1 Modifier le Schedule
 
-```sql
+\`\`\`sql
 -- Changer pour chaque jour à 02:00 UTC (exemple)
 SELECT cron.alter_job(
   (SELECT jobid FROM cron.job WHERE jobname = 'reset-weekly-credits'),
   schedule := '0 2 * * *'
 );
-```
+\`\`\`
 
 ### 5.2 Désactiver Temporairement
 
-```sql
+\`\`\`sql
 -- Pause
 UPDATE cron.job 
 SET active = false 
@@ -297,11 +297,11 @@ WHERE jobname = 'reset-weekly-credits';
 UPDATE cron.job 
 SET active = true 
 WHERE jobname = 'reset-weekly-credits';
-```
+\`\`\`
 
 ### 5.3 Mettre à Jour la Fonction
 
-```bash
+\`\`\`bash
 # Modifier le code dans index.ts
 nano supabase/functions/reset-weekly-credits/index.ts
 
@@ -310,7 +310,7 @@ supabase functions deploy reset-weekly-credits
 
 # Vérifier la nouvelle version
 supabase functions list
-```
+\`\`\`
 
 ---
 
@@ -318,19 +318,19 @@ supabase functions list
 
 ### 6.1 Désactiver le Cron
 
-```sql
+\`\`\`sql
 SELECT cron.unschedule('reset-weekly-credits');
-```
+\`\`\`
 
 ### 6.2 Supprimer l'Edge Function
 
-```bash
+\`\`\`bash
 supabase functions delete reset-weekly-credits
-```
+\`\`\`
 
 ### 6.3 Revenir en Arrière (Migration)
 
-```sql
+\`\`\`sql
 -- Rollback SQL
 DROP TRIGGER IF EXISTS credit_reset_failure_alert ON cron.job_run_details;
 DROP FUNCTION IF EXISTS notify_credit_reset_failure();
@@ -338,7 +338,7 @@ DROP VIEW IF EXISTS credit_reset_dashboard;
 DROP VIEW IF EXISTS credit_reset_anomalies;
 DROP VIEW IF EXISTS credit_reset_stats;
 DROP TABLE IF EXISTS credit_reset_logs;
-```
+\`\`\`
 
 ---
 
@@ -360,21 +360,21 @@ DROP TABLE IF EXISTS credit_reset_logs;
 **En cas de problème** :
 
 1. **Logs Edge Function** :
-   ```bash
+   \`\`\`bash
    supabase functions logs reset-weekly-credits --tail
-   ```
+   \`\`\`
 
 2. **Logs PostgreSQL** :
-   ```sql
+   \`\`\`sql
    SELECT * FROM pg_stat_statements 
    WHERE query LIKE '%initialize_weekly_credits%'
    ORDER BY calls DESC;
-   ```
+   \`\`\`
 
 3. **Status Cron** :
-   ```sql
+   \`\`\`sql
    SELECT * FROM cron.job WHERE jobname = 'reset-weekly-credits';
-   ```
+   \`\`\`
 
 ---
 

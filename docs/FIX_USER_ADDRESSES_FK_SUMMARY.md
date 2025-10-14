@@ -34,13 +34,13 @@
 
 ### Option 2: Command Line
 
-```bash
+\`\`\`bash
 # Set your database URL
 export SUPABASE_DB_URL='postgresql://postgres:[PASSWORD]@[PROJECT].supabase.co:5432/postgres'
 
 # Run the script
 ./scripts/apply-user-addresses-fix.sh
-```
+\`\`\`
 
 ---
 
@@ -48,7 +48,7 @@ export SUPABASE_DB_URL='postgresql://postgres:[PASSWORD]@[PROJECT].supabase.co:5
 
 After applying the fix:
 
-```sql
+\`\`\`sql
 -- Check the constraint now points to auth.users
 SELECT 
   ccu.table_schema AS foreign_table_schema,
@@ -58,7 +58,7 @@ JOIN information_schema.constraint_column_usage AS ccu
   ON ccu.constraint_name = tc.constraint_name
 WHERE tc.table_name = 'user_addresses'
   AND tc.constraint_name = 'user_addresses_user_id_fkey';
-```
+\`\`\`
 
 **Expected result**:
 - `foreign_table_schema`: `auth`
@@ -78,14 +78,14 @@ WHERE tc.table_name = 'user_addresses'
 ## 📝 Technical Details
 
 ### Before
-```sql
+\`\`\`sql
 user_addresses.user_id → public.users(id)  ❌ (table doesn't exist)
-```
+\`\`\`
 
 ### After
-```sql
+\`\`\`sql
 user_addresses.user_id → auth.users(id)  ✅ (Supabase auth table)
-```
+\`\`\`
 
 ### Why This Happened
 - Supabase stores authenticated users in `auth.users`

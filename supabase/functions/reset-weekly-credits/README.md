@@ -11,7 +11,7 @@ Cette fonction s'exécute automatiquement **chaque lundi à 00:00 UTC** via un c
 
 ## 🏗️ Architecture
 
-```
+\`\`\`
 Cron Job (pg_cron)
     ↓
 HTTP POST → Edge Function (Deno)
@@ -21,29 +21,29 @@ RPC → initialize_weekly_credits(user_id, subscription_id, credits)
 PostgreSQL Function
     ↓
 INSERT INTO subscription_credits (UPSERT si existe déjà)
-```
+\`\`\`
 
 ## 🚀 Déploiement
 
 ### Prérequis
 
 1. Supabase CLI installé :
-   ```bash
+   \`\`\`bash
    npm install -g supabase
-   ```
+   \`\`\`
 
 2. Login Supabase :
-   ```bash
+   \`\`\`bash
    supabase login
    supabase link --project-ref YOUR_PROJECT_REF
-   ```
+   \`\`\`
 
 ### Étape 1 : Déployer la fonction
 
-```bash
+\`\`\`bash
 cd supabase/functions/reset-weekly-credits
 supabase functions deploy reset-weekly-credits
-```
+\`\`\`
 
 ### Étape 2 : Configurer le cron job
 
@@ -55,7 +55,7 @@ supabase functions deploy reset-weekly-credits
 
 ### Étape 3 : Tester
 
-```bash
+\`\`\`bash
 # Test manuel
 ./scripts/test-reset-credits.sh
 
@@ -63,30 +63,30 @@ supabase functions deploy reset-weekly-credits
 curl -i --location --request POST \
   'https://YOUR_PROJECT_REF.supabase.co/functions/v1/reset-weekly-credits' \
   --header 'Authorization: Bearer YOUR_ANON_KEY'
-```
+\`\`\`
 
 ## 📊 Monitoring
 
 ### Voir les logs
 
-```bash
+\`\`\`bash
 # Via CLI
 supabase functions logs reset-weekly-credits --tail
 
 # Ou Dashboard > Functions > reset-weekly-credits > Logs
-```
+\`\`\`
 
 ### Vérifier les exécutions du cron
 
-```sql
+\`\`\`sql
 SELECT * FROM cron.job_run_details 
 WHERE jobid = (SELECT jobid FROM cron.job WHERE jobname = 'reset-weekly-credits')
 ORDER BY start_time DESC LIMIT 10;
-```
+\`\`\`
 
 ### Statistiques
 
-```sql
+\`\`\`sql
 SELECT 
   DATE_TRUNC('week', execution_time) AS week,
   COUNT(*) AS total_executions,
@@ -95,41 +95,41 @@ SELECT
 FROM credit_reset_logs
 GROUP BY week
 ORDER BY week DESC;
-```
+\`\`\`
 
 ## 🔧 Configuration
 
 ### Changer le schedule
 
-```sql
+\`\`\`sql
 -- Exemple: tous les jours à 02:00 UTC au lieu du lundi
 SELECT cron.alter_job(
   (SELECT jobid FROM cron.job WHERE jobname = 'reset-weekly-credits'),
   schedule := '0 2 * * *'
 );
-```
+\`\`\`
 
 ### Désactiver temporairement
 
-```sql
+\`\`\`sql
 UPDATE cron.job 
 SET active = false 
 WHERE jobname = 'reset-weekly-credits';
-```
+\`\`\`
 
 ### Réactiver
 
-```sql
+\`\`\`sql
 UPDATE cron.job 
 SET active = true 
 WHERE jobname = 'reset-weekly-credits';
-```
+\`\`\`
 
 ## 🧪 Tests
 
 ### Test unitaire (fonction PostgreSQL)
 
-```sql
+\`\`\`sql
 -- Tester pour un utilisateur spécifique
 SELECT initialize_weekly_credits(
   'user-uuid-here'::UUID,
@@ -141,21 +141,21 @@ SELECT initialize_weekly_credits(
 SELECT * FROM subscription_credits 
 WHERE user_id = 'user-uuid-here'::UUID
 ORDER BY created_at DESC LIMIT 1;
-```
+\`\`\`
 
 ### Test Edge Function (local)
 
-```bash
+\`\`\`bash
 # Avec script
 ./scripts/test-reset-credits.sh
 
 # Vérifier la réponse
 # Expected: { "success": true, "totalProcessed": N, ... }
-```
+\`\`\`
 
 ### Test Cron Job (production)
 
-```sql
+\`\`\`sql
 -- Exécuter manuellement
 SELECT net.http_post(
   url := 'https://YOUR_PROJECT_REF.supabase.co/functions/v1/reset-weekly-credits',
@@ -165,20 +165,20 @@ SELECT net.http_post(
   ),
   body := '{}'::jsonb
 );
-```
+\`\`\`
 
 ## ⚠️ Gestion des Erreurs
 
 ### Erreur: "Function not found"
 
 **Solution** :
-```bash
+\`\`\`bash
 # Re-déployer la fonction
 supabase functions deploy reset-weekly-credits
 
 # Vérifier
 supabase functions list
-```
+\`\`\`
 
 ### Erreur: "Permission denied"
 
@@ -189,12 +189,12 @@ supabase functions list
 ### Erreur: "Subscription not found"
 
 **Solution** :
-```sql
+\`\`\`sql
 -- Vérifier les abonnements actifs
 SELECT id, user_id, plan_id, status 
 FROM subscriptions 
 WHERE status IN ('active', 'trialing');
-```
+\`\`\`
 
 ## 📈 Performance
 
@@ -224,37 +224,37 @@ WHERE status IN ('active', 'trialing');
 ### Le cron ne s'exécute pas
 
 1. Vérifier que le job est actif :
-   ```sql
+   \`\`\`sql
    SELECT * FROM cron.job WHERE jobname = 'reset-weekly-credits';
-   ```
+   \`\`\`
 
 2. Vérifier les extensions :
-   ```sql
+   \`\`\`sql
    SELECT * FROM pg_extension WHERE extname IN ('pg_cron', 'pg_net');
-   ```
+   \`\`\`
 
 3. Vérifier l'URL et les credentials dans le cron command
 
 ### Les crédits ne sont pas créés
 
 1. Vérifier les logs de la fonction :
-   ```bash
+   \`\`\`bash
    supabase functions logs reset-weekly-credits
-   ```
+   \`\`\`
 
 2. Tester manuellement la fonction PostgreSQL :
-   ```sql
+   \`\`\`sql
    SELECT initialize_weekly_credits(
      'test-user-id'::UUID,
      'test-sub-id'::UUID,
      2
    );
-   ```
+   \`\`\`
 
 3. Vérifier les RLS policies :
-   ```sql
+   \`\`\`sql
    SELECT * FROM pg_policies WHERE tablename = 'subscription_credits';
-   ```
+   \`\`\`
 
 ---
 

@@ -96,11 +96,11 @@
 ### DevOps
 
 **Environment variables**:
-```bash
+\`\`\`bash
 # .env.local / .env.production
 NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=false  # MVP launch
 # NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=true  # Production finale
-```
+\`\`\`
 
 ---
 
@@ -138,7 +138,7 @@ NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=false  # MVP launch
 
 ## 5. Data Flow
 
-```
+\`\`\`
 User Action → Frontend Component → Feature Flag Check → Rendering Logic
 
 Scenario 1 (Flag OFF):
@@ -149,7 +149,7 @@ URL /reservation?service=monthly → Middleware intercept → Redirect /pricing?
 
 Scenario 3 (Flag ON):
 Click "S'abonner" → Link normal → Navigation /reservation?service=monthly
-```
+\`\`\`
 
 ---
 
@@ -226,7 +226,7 @@ Click "S'abonner" → Link normal → Navigation /reservation?service=monthly
 ## Code Architecture
 
 **Layer separation**:
-```
+\`\`\`
 Frontend (Public)
 ├── services-section.tsx (UI rendering + teaser logic)
 ├── lib/flags.ts (feature flag)
@@ -236,7 +236,7 @@ Server (Protected)
 ├── app/reservation/page.tsx (page guard)
 ├── middleware.ts (URL guard)
 └── Existing: API routes already check service validity
-```
+\`\`\`
 
 **Removal strategy** (when going live):
 1. Set `NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=true`

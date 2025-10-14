@@ -12,11 +12,11 @@ La table `user_addresses` a une contrainte de clé étrangère qui pointe vers `
 
 ### Erreur Rencontrée
 
-```
+\`\`\`
 code: '23503',
 details: 'Key (user_id)=(134d7be6-fdc5-4a45-89f9-4a0f5b21e474) is not present in table "users".',
 message: 'insert or update on table "user_addresses" violates foreign key constraint "user_addresses_user_id_fkey"'
-```
+\`\`\`
 
 **Cause**: 
 - Les utilisateurs sont stockés dans `auth.users` (table Supabase)
@@ -29,14 +29,14 @@ message: 'insert or update on table "user_addresses" violates foreign key constr
 
 ### Option 1: Via Script (Recommandé)
 
-```bash
+\`\`\`bash
 # 1. Définir l'URL de votre base de données
 export SUPABASE_DB_URL='postgresql://postgres:[PASSWORD]@[PROJECT_REF].supabase.co:5432/postgres'
 
 # 2. Exécuter le script
 cd /Users/bilel/Documents/websites/ninoWebsite/ninoWash
 ./scripts/apply-user-addresses-fix.sh
-```
+\`\`\`
 
 ---
 
@@ -52,7 +52,7 @@ cd /Users/bilel/Documents/websites/ninoWebsite/ninoWash
 
 3. **Copier/Coller ce SQL**
 
-```sql
+\`\`\`sql
 -- Drop the incorrect foreign key constraint
 ALTER TABLE public.user_addresses 
 DROP CONSTRAINT IF EXISTS user_addresses_user_id_fkey;
@@ -81,21 +81,21 @@ JOIN information_schema.constraint_column_usage AS ccu
 WHERE tc.constraint_type = 'FOREIGN KEY'
   AND tc.table_name = 'user_addresses'
   AND kcu.column_name = 'user_id';
-```
+\`\`\`
 
 4. **Exécuter la requête**
    - Cliquer sur "Run" (ou Ctrl+Enter)
    - Vérifier le résultat
 
 **Résultat attendu** :
-```
+\`\`\`
 constraint_name              | user_addresses_user_id_fkey
 table_name                   | user_addresses
 column_name                  | user_id
 foreign_table_schema         | auth
 foreign_table_name           | users
 foreign_column_name          | id
-```
+\`\`\`
 
 ✅ La contrainte pointe maintenant vers `auth.users` !
 
@@ -107,13 +107,13 @@ Après avoir appliqué la migration :
 
 ### 1. Test Création d'Adresse (Booking Flow)
 
-```bash
+\`\`\`bash
 # 1. Démarrer le serveur de développement
 pnpm dev
 
 # 2. Ouvrir le navigateur
 open http://localhost:3000/reservation
-```
+\`\`\`
 
 **Étapes** :
 1. Cliquer sur "Nouvelle réservation"
@@ -134,7 +134,7 @@ open http://localhost:3000/reservation
 
 Via Supabase Dashboard → Table Editor → `user_addresses`
 
-```sql
+\`\`\`sql
 SELECT 
   id,
   user_id,
@@ -148,13 +148,13 @@ FROM public.user_addresses
 WHERE user_id = 'VOTRE_USER_ID'
 ORDER BY created_at DESC
 LIMIT 5;
-```
+\`\`\`
 
 ---
 
 ### 3. Test API Direct
 
-```bash
+\`\`\`bash
 # Créer une adresse via API
 curl -X POST http://localhost:3000/api/addresses \
   -H "Content-Type: application/json" \
@@ -168,10 +168,10 @@ curl -X POST http://localhost:3000/api/addresses \
     "buildingInfo": "Bâtiment A",
     "accessInstructions": "Code 1234"
   }'
-```
+\`\`\`
 
 **Résultat attendu** :
-```json
+\`\`\`json
 {
   "address": {
     "id": "uuid",
@@ -181,7 +181,7 @@ curl -X POST http://localhost:3000/api/addresses \
   },
   "message": "Adresse créée avec succès"
 }
-```
+\`\`\`
 
 ---
 
@@ -191,7 +191,7 @@ Si le problème persiste après la migration :
 
 ### 1. Vérifier la contrainte actuelle
 
-```sql
+\`\`\`sql
 SELECT
   constraint_name,
   table_name,
@@ -199,25 +199,25 @@ SELECT
 FROM information_schema.table_constraints
 WHERE table_name = 'user_addresses'
   AND constraint_type = 'FOREIGN KEY';
-```
+\`\`\`
 
 ### 2. Vérifier l'utilisateur existe dans auth.users
 
-```sql
+\`\`\`sql
 SELECT id, email, created_at
 FROM auth.users
 WHERE id = '134d7be6-fdc5-4a45-89f9-4a0f5b21e474';
-```
+\`\`\`
 
 Si vide → L'utilisateur n'existe pas (problème d'authentification)
 
 ### 3. Vérifier les logs backend
 
-```bash
+\`\`\`bash
 # Dans le terminal où tourne `pnpm dev`
 # Rechercher les logs :
 [v0] Address creation error: ...
-```
+\`\`\`
 
 ---
 
@@ -237,7 +237,7 @@ Si vide → L'utilisateur n'existe pas (problème d'authentification)
 
 Si la migration cause des problèmes :
 
-```sql
+\`\`\`sql
 -- Revenir à l'ancien état (déconseillé)
 ALTER TABLE public.user_addresses 
 DROP CONSTRAINT IF EXISTS user_addresses_user_id_fkey;
@@ -247,7 +247,7 @@ ADD CONSTRAINT user_addresses_user_id_fkey
 FOREIGN KEY (user_id) 
 REFERENCES public.users(id) 
 ON DELETE CASCADE;
-```
+\`\`\`
 
 **⚠️ Attention** : Cela ne résoudra pas le problème, juste le restaurera.
 

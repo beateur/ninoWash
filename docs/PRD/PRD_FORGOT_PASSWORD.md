@@ -93,7 +93,7 @@ Supabase Auth gère nativement la table `auth.users` et les tokens de réinitial
 
 **✅ DÉJÀ EXISTANT**
 
-```typescript
+\`\`\`typescript
 // lib/validations/auth.ts
 export const resetPasswordSchema = z.object({
   email: z.string().email("Email invalide"),
@@ -107,7 +107,7 @@ export const newPasswordSchema = z.object({
   message: "Les mots de passe ne correspondent pas",
   path: ["confirmPassword"],
 })
-```
+\`\`\`
 
 ### Security
 
@@ -142,11 +142,11 @@ Supabase utilise les variables existantes :
 2. Personnaliser le template "Reset Password"
 3. Configurer le SMTP (ou utiliser le service Supabase par défaut)
 4. Template par défaut :
-   ```html
+   \`\`\`html
    <h2>Reset Password</h2>
    <p>Follow this link to reset your password:</p>
    <a href="{{ .ConfirmationURL }}">Reset Password</a>
-   ```
+   \`\`\`
 
 5. **URL de callback** : Doit pointer vers `https://app.domain/auth/reset-password`
    - Configuration dans Supabase Dashboard → Authentication → URL Configuration
@@ -194,17 +194,17 @@ Supabase utilise les variables existantes :
 
 ### Flow 1: Demande de réinitialisation
 
-```
+\`\`\`
 User Action → /auth/forgot-password → Form Submit → 
 clientAuth.resetPassword(email) → 
 supabase.auth.resetPasswordForEmail(email, {redirectTo: '/auth/reset-password'}) → 
 Supabase Backend (génère token + envoie email) → 
 User receives email with link
-```
+\`\`\`
 
 ### Flow 2: Réinitialisation effective
 
-```
+\`\`\`
 User clicks link in email → 
 Supabase validates token → 
 Redirect to /auth/reset-password?token=xyz → 
@@ -213,7 +213,7 @@ clientAuth.updatePassword(newPassword) →
 supabase.auth.updateUser({ password: newPassword }) → 
 Supabase updates auth.users → 
 Frontend redirects to /dashboard
-```
+\`\`\`
 
 ## 6. Error Scenarios
 

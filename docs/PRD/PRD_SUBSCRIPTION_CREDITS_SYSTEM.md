@@ -81,7 +81,7 @@ Système de crédits hebdomadaires :
 - `GET /api/subscriptions` - Inclure crédits restants
 
 #### Business Logic
-```typescript
+\`\`\`typescript
 // Logique de consommation crédit
 if (userHasActiveSubscription && creditsRemaining > 0) {
   if (bookingWeight <= 15) {
@@ -98,14 +98,14 @@ if (userHasActiveSubscription && creditsRemaining > 0) {
   // Tarif classique complet
   totalAmount = calculateStandardPrice(bookingWeight)
 }
-```
+\`\`\`
 
 ### 3.3 Database
 
 #### Tables à Créer
 
 **`subscription_credits`**
-```sql
+\`\`\`sql
 CREATE TABLE subscription_credits (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -123,10 +123,10 @@ CREATE TABLE subscription_credits (
 
 CREATE INDEX idx_subscription_credits_user ON subscription_credits(user_id);
 CREATE INDEX idx_subscription_credits_reset ON subscription_credits(reset_at);
-```
+\`\`\`
 
 **`credit_usage_log`**
-```sql
+\`\`\`sql
 CREATE TABLE credit_usage_log (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -141,12 +141,12 @@ CREATE TABLE credit_usage_log (
 
 CREATE INDEX idx_credit_usage_user ON credit_usage_log(user_id);
 CREATE INDEX idx_credit_usage_booking ON credit_usage_log(booking_id);
-```
+\`\`\`
 
 #### Tables à Modifier
 
 **`bookings`**
-```sql
+\`\`\`sql
 -- Ajouter colonnes
 ALTER TABLE bookings 
   ADD COLUMN subscription_id UUID REFERENCES subscriptions(id),
@@ -155,14 +155,14 @@ ALTER TABLE bookings
   ADD COLUMN credit_discount_amount DECIMAL(10,2) DEFAULT 0;
 
 CREATE INDEX idx_bookings_subscription ON bookings(subscription_id);
-```
+\`\`\`
 
 #### Migrations
 - `supabase/migrations/YYYYMMDDHHMMSS_add_subscription_credits.sql`
 - `supabase/migrations/YYYYMMDDHHMMSS_alter_bookings_credits.sql`
 
 #### RLS Policies
-```sql
+\`\`\`sql
 -- subscription_credits
 CREATE POLICY "Users can view own credits" ON subscription_credits
   FOR SELECT USING (auth.uid() = user_id);
@@ -170,12 +170,12 @@ CREATE POLICY "Users can view own credits" ON subscription_credits
 -- credit_usage_log  
 CREATE POLICY "Users can view own usage log" ON credit_usage_log
   FOR SELECT USING (auth.uid() = user_id);
-```
+\`\`\`
 
 ### 3.4 Validation
 
 **Zod Schemas** (`lib/validations/subscription.ts`)
-```typescript
+\`\`\`typescript
 export const checkCreditsSchema = z.object({
   subscriptionId: z.string().uuid(),
   bookingWeight: z.number().positive().max(50),
@@ -186,7 +186,7 @@ export const consumeCreditSchema = z.object({
   bookingId: z.string().uuid(),
   bookingWeight: z.number().positive(),
 })
-```
+\`\`\`
 
 ### 3.5 Security
 
@@ -200,11 +200,11 @@ export const consumeCreditSchema = z.object({
 - Validation côté serveur du `user_id`
 
 #### RLS Policies
-```sql
+\`\`\`sql
 -- Empêcher consommation crédits d'autres users
 CREATE POLICY "prevent_credit_theft" ON subscription_credits
   FOR UPDATE USING (auth.uid() = user_id);
-```
+\`\`\`
 
 #### Input Sanitization
 - Validation poids réservation (max 50kg)
@@ -214,18 +214,18 @@ CREATE POLICY "prevent_credit_theft" ON subscription_credits
 ### 3.6 DevOps
 
 #### Environment Variables
-```bash
+\`\`\`bash
 # .env.local
 CREDITS_RESET_CRON_SECRET=xxx  # Secret pour cron job reset
 CREDITS_NOTIFICATION_DAYS=2     # Notifier 2 jours avant reset
-```
+\`\`\`
 
 #### Supabase Edge Functions
 **`supabase/functions/reset-weekly-credits/index.ts`**
-```typescript
+\`\`\`typescript
 // Fonction Cron pour reset hebdomadaire
 // Déclenchée chaque lundi à 00:00 UTC
-```
+\`\`\`
 
 #### Webhooks
 - Stripe webhook : Création abonnement → Initialiser crédits
@@ -313,7 +313,7 @@ CREDITS_NOTIFICATION_DAYS=2     # Notifier 2 jours avant reset
 
 ### Parcours : Réservation avec Crédit
 
-```
+\`\`\`
 1. User ouvre /reservation
    ↓
 2. Frontend : GET /api/subscriptions (inclut crédits)
@@ -337,11 +337,11 @@ CREDITS_NOTIFICATION_DAYS=2     # Notifier 2 jours avant reset
 7. Frontend : Redirection /dashboard
    ↓
 8. Dashboard : Affiche "1 crédit restant"
-```
+\`\`\`
 
 ### Parcours : Réservation sans Crédit
 
-```
+\`\`\`
 1. User ouvre /reservation (0 crédits)
    ↓
 2. Frontend : Affiche "Tarif classique appliqué"
@@ -354,11 +354,11 @@ CREDITS_NOTIFICATION_DAYS=2     # Notifier 2 jours avant reset
    └─> used_subscription_credit = false
    ↓
 5. Frontend : Affiche "Paiement requis : 24,99€"
-```
+\`\`\`
 
 ### Parcours : Reset Hebdomadaire
 
-```
+\`\`\`
 Lundi 00:00 UTC
    ↓
 Supabase Edge Function déclenchée
@@ -373,7 +373,7 @@ Pour chaque subscription active :
    └─> Logger anciens crédits non utilisés
    ↓
 Envoyer email notification (optionnel)
-```
+\`\`\`
 
 ---
 
@@ -437,7 +437,7 @@ Envoyer email notification (optionnel)
 ## 8. Testing Strategy
 
 ### Unit Tests (`__tests__/services/subscription-credits.test.ts`)
-```typescript
+\`\`\`typescript
 describe("Subscription Credits Service", () => {
   it("should initialize 2 credits for monthly plan", () => {})
   it("should initialize 3 credits for quarterly plan", () => {})
@@ -448,10 +448,10 @@ describe("Subscription Credits Service", () => {
   it("should reset credits on monday", () => {})
   it("should log credit usage", () => {})
 })
-```
+\`\`\`
 
 ### Integration Tests (`__tests__/api/bookings-with-credits.test.ts`)
-```typescript
+\`\`\`typescript
 describe("POST /api/bookings with credits", () => {
   it("should create free booking with available credit", async () => {})
   it("should charge standard price with 0 credits", async () => {})
@@ -460,10 +460,10 @@ describe("POST /api/bookings with credits", () => {
   it("should create credit_usage_log entry", async () => {})
   it("should prevent double credit consumption", async () => {})
 })
-```
+\`\`\`
 
 ### E2E Tests (Playwright)
-```typescript
+\`\`\`typescript
 test("User with credits creates free booking", async ({ page }) => {
   // 1. Login as subscribed user (2 credits)
   // 2. Navigate to /reservation
@@ -483,7 +483,7 @@ test("User without credits pays standard price", async ({ page }) => {
   // 6. Submit booking
   // 7. Verify payment required
 })
-```
+\`\`\`
 
 ---
 
@@ -563,7 +563,7 @@ test("User without credits pays standard price", async ({ page }) => {
 
 ## 12. Timeline
 
-```
+\`\`\`
 Semaine 1-2 : Développement
 ├─ Jour 1-3  : Database + Migrations
 ├─ Jour 4-6  : Backend API + Services
@@ -584,7 +584,7 @@ Semaine 5 : Production
 ├─ Jour 1    : Déploiement production
 ├─ Jour 2-5  : Monitoring intensif
 └─> Semaine 6+: Optimizations
-```
+\`\`\`
 
 **Charge totale** : ~12-15 jours de développement
 

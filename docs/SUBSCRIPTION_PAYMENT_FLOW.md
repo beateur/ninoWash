@@ -10,7 +10,7 @@
 
 ### Scénario: User passe de Mensuel (99,99€) → Trimestriel (299,99€)
 
-```mermaid
+\`\`\`mermaid
 sequenceDiagram
     participant U as User
     participant F as Frontend
@@ -63,7 +63,7 @@ sequenceDiagram
     U->>F: Redirigé vers /subscription/success
     
     Note over U: Résultat:<br/>✅ Abonnement Trimestriel actif<br/>✅ Payé 299,99€ pour 3 mois<br/>❌ PAS de double paiement
-```
+\`\`\`
 
 ---
 
@@ -99,10 +99,10 @@ sequenceDiagram
 ## 🚨 Problème Actuel: Pas de Proration
 
 ### Code Actuel (stripe.ts ligne 74-75)
-```typescript
+\`\`\`typescript
 // Cancel immediately in Stripe (not at period end)
 await stripe.subscriptions.cancel(existingSubscription.stripe_subscription_id)
-```
+\`\`\`
 
 **Résultat**:
 - ❌ Annulation immédiate
@@ -117,7 +117,7 @@ Stripe peut gérer automatiquement la **proration** (remboursement proportionnel
 
 ### Option 1: Proration Automatique (Upgrade)
 
-```typescript
+\`\`\`typescript
 // Au lieu d'annuler, MODIFIER l'abonnement existant
 await stripe.subscriptions.update(existingSubscription.stripe_subscription_id, {
   items: [{
@@ -126,21 +126,21 @@ await stripe.subscriptions.update(existingSubscription.stripe_subscription_id, {
   }],
   proration_behavior: 'always_invoice', // Facture le prorata
 })
-```
+\`\`\`
 
 **Exemple Calcul Proration (Upgrade Mensuel → Trimestriel)**:
-```
+\`\`\`
 Ancien: 99,99€/mois (payé le 30 sept, reste 23 jours)
 Nouveau: 299,99€/trimestre
 
 Crédit prorata: (23 jours / 30 jours) × 99,99€ = 76,66€
 Charge trimestriel: 299,99€
 Facture finale: 299,99€ - 76,66€ = 223,33€ ✅
-```
+\`\`\`
 
 ### Option 2: Downgrade à la Fin de Période
 
-```typescript
+\`\`\`typescript
 // Pour downgrade, attendre la fin de période actuelle
 await stripe.subscriptions.update(existingSubscription.stripe_subscription_id, {
   cancel_at_period_end: true,
@@ -149,16 +149,16 @@ await stripe.subscriptions.update(existingSubscription.stripe_subscription_id, {
     price: newPriceId,
   }],
 })
-```
+\`\`\`
 
 **Exemple (Downgrade Trimestriel → Mensuel)**:
-```
+\`\`\`
 Ancien: 299,99€/trimestre (expire le 30 déc)
 Nouveau: 99,99€/mois (débutera le 31 déc)
 
 Client utilise le reste du trimestre payé ✅
 Pas de perte d'argent
-```
+\`\`\`
 
 ---
 
@@ -166,7 +166,7 @@ Pas de perte d'argent
 
 ### `app/actions/stripe.ts` (avec proration)
 
-```typescript
+\`\`\`typescript
 // Check if user has an existing active subscription
 const { data: existingSubscription } = await supabase
   .from("subscriptions")
@@ -246,7 +246,7 @@ if (existingSubscription && existingSubscription.plan_id !== planId) {
     // Continue anyway - webhook will handle it
   }
 }
-```
+\`\`\`
 
 ---
 

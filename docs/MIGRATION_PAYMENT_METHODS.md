@@ -32,13 +32,13 @@ Migration d'une référence morte (`/profile#payment-methods`) vers une **page i
 ### 1. Architecture - Nouveau Dossier `components/payment-methods/`
 
 **Fichiers créés** :
-```
+\`\`\`
 components/payment-methods/
 ├── README.md                              # Documentation du module
 ├── payment-method-card.tsx                # Carte visuelle (brand, last 4, expiration)
 ├── payment-method-delete-confirm.tsx      # Dialog de confirmation suppression
 └── payment-methods-list.tsx               # Container avec CRUD (fetch, actions, états)
-```
+\`\`\`
 
 **Principes** :
 - **Presentational** : `payment-method-card.tsx` (affichage pur)
@@ -69,7 +69,7 @@ components/payment-methods/
 ### 3. Routing - Nouvelle Page `/payment-methods`
 
 **Page créée** :
-```typescript
+\`\`\`typescript
 // app/(authenticated)/payment-methods/page.tsx
 
 import { requireAuth } from "@/lib/auth/route-guards"
@@ -85,10 +85,10 @@ export default async function PaymentMethodsPage() {
     </div>
   )
 }
-```
+\`\`\`
 
 **Protection Middleware** :
-```typescript
+\`\`\`typescript
 // middleware.ts
 const PROTECTED_ROUTES = {
   auth: [
@@ -101,7 +101,7 @@ const PROTECTED_ROUTES = {
   ],
   ...
 }
-```
+\`\`\`
 
 ---
 
@@ -110,13 +110,13 @@ const PROTECTED_ROUTES = {
 **Fichier** : `components/layout/dashboard-sidebar.tsx`
 
 **Changement** (2 occurrences - mobile + desktop) :
-```diff
+\`\`\`diff
 - <Link href="/profile#payment-methods">
 + <Link href="/payment-methods">
     <CreditCard className="mr-2 h-4 w-4" />
     Modes de paiement
   </Link>
-```
+\`\`\`
 
 ---
 
@@ -127,7 +127,7 @@ const PROTECTED_ROUTES = {
 **Rôle** : Affichage d'une carte bancaire avec actions
 
 **Props** :
-```typescript
+\`\`\`typescript
 {
   paymentMethod: {
     id: string
@@ -141,7 +141,7 @@ const PROTECTED_ROUTES = {
   onDelete: (id: string) => void
   isLoading?: boolean
 }
-```
+\`\`\`
 
 **Features** :
 - Badge "Par défaut" si `is_default = true`
@@ -178,7 +178,7 @@ const PROTECTED_ROUTES = {
 **Rôle** : Dialog de confirmation avant suppression
 
 **Props** :
-```typescript
+\`\`\`typescript
 {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -189,7 +189,7 @@ const PROTECTED_ROUTES = {
     lastFour: string
   }
 }
-```
+\`\`\`
 
 **UX** :
 - Affiche les détails de la carte (brand + last 4)
@@ -203,7 +203,7 @@ const PROTECTED_ROUTES = {
 **Table** : `payment_methods` (déjà existante)
 
 **Colonnes utilisées** :
-```sql
+\`\`\`sql
 id                          UUID PRIMARY KEY
 user_id                     UUID REFERENCES users(id)
 type                        TEXT (card, paypal, etc.)
@@ -217,7 +217,7 @@ is_default                  BOOLEAN
 is_active                   BOOLEAN (soft delete)
 created_at                  TIMESTAMPTZ
 updated_at                  TIMESTAMPTZ
-```
+\`\`\`
 
 **RLS Policies** (à vérifier) :
 - ✅ User peut lire ses propres cartes : `SELECT WHERE user_id = auth.uid()`
@@ -250,7 +250,7 @@ updated_at                  TIMESTAMPTZ
 ## 🚀 Data Flow
 
 ### Affichage des cartes
-```
+\`\`\`
 User → /payment-methods
   → requireAuth() (SSR)
   → <PaymentMethodsList /> mounts
@@ -259,10 +259,10 @@ User → /payment-methods
     → Supabase query (RLS filter)
     → Return JSON { paymentMethods: [...] }
   → Render <PaymentMethodCard /> for each
-```
+\`\`\`
 
 ### Définir carte par défaut
-```
+\`\`\`
 User clicks "Définir par défaut"
   → PATCH /api/payments/methods/[id] { isDefault: true }
     → Verify ownership (user_id)
@@ -271,10 +271,10 @@ User clicks "Définir par défaut"
     → Return success
   → Refresh list
   → Toast success
-```
+\`\`\`
 
 ### Supprimer une carte
-```
+\`\`\`
 User clicks "Supprimer"
   → Open PaymentMethodDeleteConfirm dialog
   → User confirms
@@ -285,7 +285,7 @@ User clicks "Supprimer"
     → Return success
   → Remove from UI
   → Toast success
-```
+\`\`\`
 
 ---
 
@@ -401,7 +401,7 @@ User clicks "Supprimer"
 ## 🔗 Fichiers Modifiés
 
 ### Créés
-```
+\`\`\`
 components/payment-methods/
 ├── README.md
 ├── payment-method-card.tsx
@@ -416,13 +416,13 @@ app/api/payments/methods/[id]/
 
 docs/PRD/
 └── PRD_PAYMENT_METHODS_PAGE.md
-```
+\`\`\`
 
 ### Modifiés
-```
+\`\`\`
 middleware.ts (ligne 23 - ajout "/payment-methods" dans PROTECTED_ROUTES.auth)
 components/layout/dashboard-sidebar.tsx (lignes 245 + 535 - liens sidebar)
-```
+\`\`\`
 
 ---
 

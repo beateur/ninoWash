@@ -24,7 +24,7 @@ Refonte complète du système de scheduling de réservation pour remplacer la s�
 ## Architecture Technique
 
 ### Data Flow
-```
+\`\`\`
 User UI → CollectionDeliveryStep → GET /api/logistic-slots (fetch slots)
        ↓
 User selects pickup + delivery slots
@@ -38,7 +38,7 @@ Backend validates delay + slot availability
 Create booking + 2 slot_requests (tracking)
        ↓
 Return success → redirect to confirmation
-```
+\`\`\`
 
 ### Stack Layers
 
@@ -50,7 +50,7 @@ Return success → redirect to confirmation
 
 #### 2. Validation (TODO)
 **File** : `lib/validations/logistic-slots.ts` (NEW)
-```typescript
+\`\`\`typescript
 export const logisticSlotSchema = z.object({
   id: z.string().uuid(),
   role: z.enum(['pickup', 'delivery']),
@@ -70,7 +70,7 @@ export const slotSelectionSchema = z.object({
   pickupSlotId: z.string().uuid(),
   deliverySlotId: z.string().uuid(),
 })
-```
+\`\`\`
 
 **File** : `lib/validations/booking.ts` (UPDATE)
 - Ajouter `pickupSlotId?: z.string().uuid().optional()`
@@ -80,7 +80,7 @@ export const slotSelectionSchema = z.object({
 
 #### 3. Types TypeScript (TODO)
 **File** : `lib/types/logistic-slots.ts` (NEW)
-```typescript
+\`\`\`typescript
 export interface LogisticSlot {
   id: string
   role: 'pickup' | 'delivery'
@@ -106,11 +106,11 @@ export interface SlotSelection {
   pickupSlot: LogisticSlot | null
   deliverySlot: LogisticSlot | null
 }
-```
+\`\`\`
 
 #### 4. Services Layer (TODO)
 **File** : `lib/services/logistic-slots.ts` (NEW)
-```typescript
+\`\`\`typescript
 import { createClient } from "@/lib/supabase/server"
 import type { LogisticSlot } from "@/lib/types/logistic-slots"
 
@@ -198,12 +198,12 @@ export function validateSlotDelay(
   
   return { valid: true }
 }
-```
+\`\`\`
 
 #### 5. API Routes (TODO)
 
 ##### GET `/api/logistic-slots/route.ts` (NEW)
-```typescript
+\`\`\`typescript
 import { NextRequest, NextResponse } from "next/server"
 import { getLogisticSlotsSchema } from "@/lib/validations/logistic-slots"
 import { getAvailableSlots } from "@/lib/services/logistic-slots"
@@ -235,7 +235,7 @@ export async function GET(request: NextRequest) {
     )
   }
 }
-```
+\`\`\`
 
 ##### UPDATE `app/api/bookings/route.ts`
 - Ajouter logic pour détecter si `pickupSlotId` présent
@@ -251,7 +251,7 @@ export async function GET(request: NextRequest) {
 #### 6. Frontend Components (TODO)
 
 ##### Hook `hooks/use-logistic-slots.ts` (NEW)
-```typescript
+\`\`\`typescript
 import { useState, useEffect } from 'react'
 import type { LogisticSlot } from '@/lib/types/logistic-slots'
 
@@ -285,7 +285,7 @@ export function useLogisticSlots(role: 'pickup' | 'delivery', startDate?: string
   
   return { slots, loading, error }
 }
-```
+\`\`\`
 
 ##### Component `components/booking/collection-delivery-step.tsx` (NEW)
 - Remplace `datetime-step.tsx` (guest + auth)
@@ -298,7 +298,7 @@ export function useLogisticSlots(role: 'pickup' | 'delivery', startDate?: string
   - Error : toast Sonner
   - Success : grille interactive
 - Props :
-  ```typescript
+  \`\`\`typescript
   interface Props {
     onPickupSelect: (slot: LogisticSlot) => void
     onDeliverySelect: (slot: LogisticSlot) => void
@@ -306,7 +306,7 @@ export function useLogisticSlots(role: 'pickup' | 'delivery', startDate?: string
     selectedDelivery: LogisticSlot | null
     serviceType: 'express' | 'classic' // for delay validation
   }
-  ```
+  \`\`\`
 - Validation client-side : désactive slots livraison ne respectant pas délai minimum
 - Responsive : 1 col mobile, 2 cols desktop
 - Accessibilité : `aria-pressed`, focus management

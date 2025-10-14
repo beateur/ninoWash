@@ -130,7 +130,7 @@ L'application utilise le nouveau App Router de Next.js avec les conventions suiv
 - `admin` : Routes protégées avec layout admin (sidebar + header)
 
 #### Layouts Imbriqués
-```
+\`\`\`
 app/layout.tsx (Root)
 ├── app/(main)/layout.tsx (Public)
 │   └── app/(main)/page.tsx (Accueil)
@@ -141,7 +141,7 @@ app/layout.tsx (Root)
 └── app/admin/layout.tsx (Admin)
     ├── app/admin/page.tsx (Dashboard)
     └── app/admin/bookings/page.tsx (Gestion)
-```
+\`\`\`
 
 **Note:** La page `/bookings` obsolète a été supprimée. La liste des réservations utilisateur est désormais affichée dans le dashboard authentifié (`/dashboard`).
 
@@ -159,7 +159,7 @@ app/layout.tsx (Root)
 4. **Cohérence UX** : Pattern standard des applications SaaS modernes
 
 **Implémentation :**
-```typescript
+\`\`\`typescript
 // ✅ app/(authenticated)/layout.tsx
 export default async function AuthenticatedLayout({ children }) {
   return (
@@ -192,7 +192,7 @@ export default function BadAuthenticatedLayout({ children }) {
     </>
   )
 }
-```
+\`\`\`
 
 **Navigation dans les pages authentifiées :**
 - **Desktop** : DashboardSidebar fixe (w-64) avec toggle plier/déplier
@@ -205,7 +205,7 @@ export default function BadAuthenticatedLayout({ children }) {
 - ❌ `components/mobile/bottom-nav.tsx` (supprimé - pattern obsolète)
 - ❌ `app/(main)/bookings/page.tsx` (supprimé - utilisait mock data au lieu de Supabase, duplicata du dashboard)
 - ❌ `app/(main)/bookings/BookingCard.tsx` (supprimé - duplicata, le vrai composant est dans `@/components/booking/booking-card`)
-```
+\`\`\`
 app/layout.tsx (Root)
 ├── app/(main)/layout.tsx (Public)
 │   └── app/(main)/page.tsx (Accueil)
@@ -215,7 +215,7 @@ app/layout.tsx (Root)
 └── app/admin/layout.tsx (Admin)
     ├── app/admin/page.tsx (Dashboard)
     └── app/admin/bookings/page.tsx (Gestion)
-```
+\`\`\`
 
 **Note:** Toutes les réservations utilisateur sont affichées dans `/dashboard` (Server Component → Client Component avec données réelles Supabase).
 
@@ -256,7 +256,7 @@ app/layout.tsx (Root)
 
 Next.js App Router impose une séparation stricte entre Server et Client Components. Les Server Components peuvent utiliser `next/headers` (cookies, headers) mais les Client Components ne le peuvent pas.
 
-```typescript
+\`\`\`typescript
 // ✅ Client Browser (Client Components uniquement)
 // Utiliser pour : composants avec "use client", hooks React, interactivité
 import { createClient } from "@/lib/supabase/client"
@@ -268,7 +268,7 @@ import { createClient } from "@/lib/supabase/server"
 // ✅ Middleware (Edge Runtime)
 // Utiliser pour : protection des routes, session refresh
 import { updateSession } from "@/lib/supabase/middleware"
-```
+\`\`\`
 
 **Règles de séparation :**
 - ❌ Ne jamais importer `lib/supabase/server.ts` dans un Client Component
@@ -305,7 +305,7 @@ L'authentification suit un pattern hybride pour maximiser la sécurité et les p
    - Option de créer un compte après réservation
 
 **Exemple d'implémentation :**
-```typescript
+\`\`\`typescript
 // ✅ Bon : Server Component wrapper + Client Component pour l'UI
 // app/auth/signin/page.tsx (Server Component)
 export default async function SignInPage() {
@@ -328,7 +328,7 @@ export function AuthForm({ mode }) {
     // ...
   }
 }
-```
+\`\`\`
 
 #### Protection des Routes
 
@@ -336,7 +336,7 @@ export function AuthForm({ mode }) {
 
 Les pages admin utilisent une architecture hybride pour combiner sécurité serveur et interactivité client :
 
-```typescript
+\`\`\`typescript
 // ✅ Pattern Recommandé : Server Component pour auth + Client Component pour UI
 // app/admin/page.tsx (Server Component)
 import { requireAdmin } from "@/lib/auth/route-guards"
@@ -357,10 +357,10 @@ export default function AdminDashboardClient() {
   useEffect(() => { /* fetch data */ }, [])
   // Toute l'interactivité ici
 }
-```
+\`\`\`
 
 **Middleware pour routes protégées :**
-```typescript
+\`\`\`typescript
 // middleware.ts
 export async function middleware(request: NextRequest) {
   // Refresh session automatiquement
@@ -378,7 +378,7 @@ export const config = {
   matcher: ['/dashboard/:path*', '/admin/:path*', '/profile/:path*', '/subscription/:path*']
   // Note: /bookings removed (obsolete page deleted, booking list now in /dashboard)
 }
-```
+\`\`\`
 \`\`\`
 
 ### 3. Gestion d'État
@@ -392,7 +392,7 @@ export const config = {
   - **Ne contient plus** de logique serveur (cookies, headers)
   
 **Migration récente :**
-```typescript
+\`\`\`typescript
 // ❌ Ancien (causait des erreurs) :
 import { clientAuth } from "@/lib/services/auth.service"
 await clientAuth.signOut()
@@ -401,7 +401,7 @@ await clientAuth.signOut()
 import { createClient } from "@/lib/supabase/client"
 const supabase = createClient()
 await supabase.auth.signOut()
-```
+\`\`\`
 
 #### Hooks Personnalisés
 - **useAuth** : Accès au contexte d'authentification

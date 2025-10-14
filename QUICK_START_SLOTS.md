@@ -5,9 +5,9 @@
 ### Option 1 : Script TypeScript (Recommandé) ⭐
 
 **Commande** :
-```bash
+\`\`\`bash
 pnpm slots:create
-```
+\`\`\`
 
 **Avantages** :
 - ✅ Validation automatique
@@ -18,7 +18,7 @@ pnpm slots:create
 **Configuration** :
 Ouvrir `scripts/create-slots.ts` et modifier :
 
-```typescript
+\`\`\`typescript
 const SLOT_CONFIG: SlotConfig[] = [
   {
     date: "2025-10-21",      // Date (YYYY-MM-DD)
@@ -30,12 +30,12 @@ const SLOT_CONFIG: SlotConfig[] = [
   },
   // Ajouter d'autres créneaux...
 ]
-```
+\`\`\`
 
 Puis exécuter :
-```bash
+\`\`\`bash
 pnpm slots:create
-```
+\`\`\`
 
 ---
 
@@ -44,12 +44,12 @@ pnpm slots:create
 **Étapes** :
 1. Ouvrir `scripts/create-slots-simple.sql`
 2. Modifier les blocs `INSERT INTO` :
-   ```sql
+   \`\`\`sql
    INSERT INTO public.logistic_slots (role, slot_date, start_time, end_time, label, is_open, capacity_limit, capacity_used, notes)
    VALUES 
      ('pickup', '2025-10-21', '09:00', '12:00', 'Matin', TRUE, 5, 0, 'Mon créneau'),
      ('delivery', '2025-10-21', '09:00', '12:00', 'Matin', TRUE, 5, 0, 'Mon créneau');
-   ```
+   \`\`\`
 3. Copier tout le fichier
 4. Ouvrir Supabase Dashboard > SQL Editor
 5. Coller et exécuter (Run)
@@ -82,16 +82,16 @@ Contient :
 ### Créer 3 créneaux pour une journée
 
 **TypeScript** :
-```typescript
+\`\`\`typescript
 const SLOT_CONFIG = [
   { date: "2025-10-21", startTime: "09:00", endTime: "12:00", label: "Matin", createBoth: true },
   { date: "2025-10-21", startTime: "14:00", endTime: "17:00", label: "Après-midi", createBoth: true },
   { date: "2025-10-21", startTime: "18:00", endTime: "21:00", label: "Soirée", createBoth: true },
 ]
-```
+\`\`\`
 
 **SQL** :
-```sql
+\`\`\`sql
 -- Matin
 INSERT INTO public.logistic_slots (role, slot_date, start_time, end_time, label, is_open, capacity_limit, capacity_used)
 VALUES 
@@ -109,31 +109,31 @@ INSERT INTO public.logistic_slots (role, slot_date, start_time, end_time, label,
 VALUES 
   ('pickup', '2025-10-21', '18:00', '21:00', 'Soirée', TRUE, 5, 0),
   ('delivery', '2025-10-21', '18:00', '21:00', 'Soirée', TRUE, 5, 0);
-```
+\`\`\`
 
 ---
 
 ## 🔍 Requêtes SQL Utiles
 
 ### Voir tous les créneaux
-```sql
+\`\`\`sql
 SELECT role, slot_date, start_time, end_time, label, is_open, capacity_limit, capacity_used
 FROM logistic_slots 
 WHERE slot_date >= CURRENT_DATE 
 ORDER BY slot_date, role, start_time;
-```
+\`\`\`
 
 ### Fermer un créneau
-```sql
+\`\`\`sql
 UPDATE logistic_slots 
 SET is_open = FALSE 
 WHERE slot_date = '2025-10-21' AND start_time = '09:00' AND role = 'pickup';
-```
+\`\`\`
 
 ### Supprimer des créneaux
-```sql
+\`\`\`sql
 DELETE FROM logistic_slots WHERE slot_date = '2025-10-21';
-```
+\`\`\`
 
 ---
 

@@ -28,7 +28,7 @@
 ### 1. Feature Flag System
 
 #### `lib/flags.ts`
-```typescript
+\`\`\`typescript
 /**
  * Feature Flags Configuration
  * 
@@ -52,7 +52,7 @@
  */
 export const SUBSCRIPTIONS_ENABLED: boolean =
   process.env.NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED === "true"
-```
+\`\`\`
 
 **Taille** : 44 lignes (avec JSDoc)
 **Emplacement** : Racine `lib/`
@@ -60,7 +60,7 @@ export const SUBSCRIPTIONS_ENABLED: boolean =
 ---
 
 #### `env.d.ts`
-```typescript
+\`\`\`typescript
 /// <reference types="node" />
 
 /**
@@ -85,7 +85,7 @@ declare namespace NodeJS {
     NODE_ENV: "development" | "production" | "test"
   }
 }
-```
+\`\`\`
 
 **Taille** : 25 lignes
 **Emplacement** : Racine projet
@@ -165,7 +165,7 @@ declare namespace NodeJS {
 ### 1. `components/sections/services-section.tsx`
 
 **Changements** :
-```diff
+\`\`\`diff
 + "use client"
 +
   import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -277,7 +277,7 @@ declare namespace NodeJS {
       </section>
     )
   }
-```
+\`\`\`
 
 **Lignes ajoutées** : ~40
 **Lignes modifiées** : ~15
@@ -288,7 +288,7 @@ declare namespace NodeJS {
 ### 2. `app/reservation/page.tsx`
 
 **Changements** :
-```diff
+\`\`\`diff
   import { redirect } from "next/navigation"
   import { requireAuth } from "@/lib/auth/route-guards"
   import { createClient } from "@/lib/supabase/server"
@@ -321,7 +321,7 @@ declare namespace NodeJS {
 
     // ... rest of the file (unchanged)
   }
-```
+\`\`\`
 
 **Lignes ajoutées** : 8
 **Impact** : Server-side guard (sécurité)
@@ -331,7 +331,7 @@ declare namespace NodeJS {
 ### 3. `middleware.ts`
 
 **Changements** :
-```diff
+\`\`\`diff
   // ... (imports unchanged)
 
   export async function middleware(request: NextRequest) {
@@ -370,7 +370,7 @@ declare namespace NodeJS {
   }
 
   // ... (config unchanged)
-```
+\`\`\`
 
 **Lignes ajoutées** : 17
 **Impact** : URL protection (première ligne de défense)
@@ -380,7 +380,7 @@ declare namespace NodeJS {
 ### 4. `.env.example`
 
 **Changements** :
-```diff
+\`\`\`diff
   # Supabase Auth Redirect (Development)
   NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL=http://localhost:3000/auth/callback
 
@@ -390,7 +390,7 @@ declare namespace NodeJS {
 + # Set to "true" to fully activate subscriptions (CTAs become functional)
 + # Default: false
 + NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=false
-```
+\`\`\`
 
 **Lignes ajoutées** : 6
 
@@ -400,7 +400,7 @@ declare namespace NodeJS {
 
 ### Recherche Rapide
 
-```bash
+\`\`\`bash
 # Trouver tous les blocs TEASER LAYER
 grep -r "TEASER LAYER" components/
 
@@ -408,12 +408,12 @@ grep -r "TEASER LAYER" components/
 # components/sections/services-section.tsx:41:                    {/* TEASER LAYER — delete when subscriptions go live */}
 # components/sections/services-section.tsx:56:                    {/* TEASER LAYER — Blur overlay on features only */}
 # components/sections/services-section.tsx:71:                    // TEASER LAYER — Disabled button with no href
-```
+\`\`\`
 
 ### Blocs à Supprimer (Optionnel après Go-Live)
 
 **Bloc 1** : Badge "Bientôt"
-```tsx
+\`\`\`tsx
 {/* TEASER LAYER — delete when subscriptions go live */}
 {isLocked && (
   <Badge variant="secondary" className="text-xs">
@@ -421,20 +421,20 @@ grep -r "TEASER LAYER" components/
     Bientôt
   </Badge>
 )}
-```
+\`\`\`
 
 **Bloc 2** : Overlay blur
-```tsx
+\`\`\`tsx
 {/* TEASER LAYER — Blur overlay on features only */}
 {isLocked && (
   <div className="absolute inset-0 rounded-xl backdrop-blur-[2px] bg-background/40 flex items-end justify-center p-3">
     <p className="text-xs font-medium text-muted-foreground">Bientôt disponible</p>
   </div>
 )}
-```
+\`\`\`
 
 **Bloc 3** : Conditional CTA
-```tsx
+\`\`\`tsx
 {/* Conditional CTA: Link (active) or Button (disabled) */}
 {isLocked ? (
   // TEASER LAYER — Disabled button with no href
@@ -442,7 +442,7 @@ grep -r "TEASER LAYER" components/
 ) : (
   <Button asChild><Link>...</Link></Button>
 )}
-```
+\`\`\`
 
 **Remplacement** : Toujours utiliser `<Button asChild><Link>...</Link></Button>`
 
@@ -452,7 +452,7 @@ grep -r "TEASER LAYER" components/
 
 ### Test Local
 
-```bash
+\`\`\`bash
 # 1. Configurer flag OFF
 echo "NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=false" >> .env.local
 
@@ -473,13 +473,13 @@ pnpm dev
 # 6. Vérifier cartes unlocked
 # - Tous cliquables
 # - Pas de blur
-```
+\`\`\`
 
 ---
 
 ### Production (Vercel)
 
-```bash
+\`\`\`bash
 # 1. Commit + Push
 git add .
 git commit -m "feat: add subscription teaser with feature flag
@@ -521,18 +521,18 @@ vercel --prod
 # 4. Activer plus tard
 # Dashboard → Change NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED = true
 # Automatic redeploy (~2 min)
-```
+\`\`\`
 
 ---
 
 ## 📊 Validation Finale
 
 ### TypeScript Compilation
-```bash
+\`\`\`bash
 $ pnpm tsc --noEmit
 ✅ 0 errors in production code
 ⚠️ 15 errors in obsolete tests only
-```
+\`\`\`
 
 ### Files Modified/Created
 
@@ -555,12 +555,12 @@ $ pnpm tsc --noEmit
 ---
 
 ### Dev Server Status
-```bash
+\`\`\`bash
 $ pnpm dev
 ✅ Running on http://localhost:3000
 ✅ No compilation errors
 ✅ Components render correctly
-```
+\`\`\`
 
 ---
 

@@ -9,13 +9,13 @@ La migration d'un lien mort (`/profile#payment-methods`) vers une page indépend
 
 **Création du nouveau répertoire `payment-methods`** pour isoler tous les composants liés aux moyens de paiement :
 
-```
+\`\`\`
 components/payment-methods/
 ├── README.md                              # Documentation du module
 ├── payment-method-card.tsx                # Composant d'affichage d'une carte (presentational)
 ├── payment-method-delete-confirm.tsx      # Dialog de confirmation de suppression
 └── payment-methods-list.tsx               # Container avec fetch API + CRUD
-```
+\`\`\`
 
 **Composants créés** :
 - **`payment-method-card.tsx`** : Affiche une carte bancaire (brand logo, last 4 digits, expiration, actions)
@@ -64,13 +64,13 @@ components/payment-methods/
 **Fichier modifié** : `components/layout/dashboard-sidebar.tsx`
 
 **Changements** (2 occurrences : mobile + desktop) :
-```diff
+\`\`\`diff
 - <Link href="/profile#payment-methods">
 + <Link href="/payment-methods">
     <CreditCard className="mr-2 h-4 w-4" />
     Modes de paiement
   </Link>
-```
+\`\`\`
 
 **Emplacements** :
 - Ligne 245 : Menu utilisateur mobile (`SidebarContent`)
@@ -168,7 +168,7 @@ Cette migration suit le pattern établi par `/addresses` :
 ## 🔗 Fichiers Créés
 
 ### Nouveaux fichiers (11 total)
-```
+\`\`\`
 components/payment-methods/
 ├── README.md
 ├── payment-method-card.tsx
@@ -184,13 +184,13 @@ app/api/payments/methods/[id]/
 docs/
 ├── PRD/PRD_PAYMENT_METHODS_PAGE.md
 └── MIGRATION_PAYMENT_METHODS.md
-```
+\`\`\`
 
 ### Fichiers modifiés (2 total)
-```
+\`\`\`
 middleware.ts (ligne 23 - protection route)
 components/layout/dashboard-sidebar.tsx (lignes 245, 535 - liens)
-```
+\`\`\`
 
 ---
 

@@ -31,7 +31,7 @@
 
 #### DELETE Endpoint
 **Supprimé** :
-```typescript
+\`\`\`typescript
 if (existingAddress.is_default) {
   return NextResponse.json(
     {
@@ -40,13 +40,13 @@ if (existingAddress.is_default) {
     { status: 400 }
   )
 }
-```
+\`\`\`
 
 **Résultat** : Plus de blocage pour adresses par défaut
 
 #### PUT Endpoint
 **Supprimé** :
-```typescript
+\`\`\`typescript
 // If this is set as default, unset other default addresses
 if (validatedData.isDefault) {
   await supabase
@@ -55,16 +55,16 @@ if (validatedData.isDefault) {
     .eq("user_id", user.id)
     .neq("id", addressId)
 }
-```
+\`\`\`
 
 **Supprimé dans l'update** :
-```typescript
+\`\`\`typescript
 is_default: validatedData.isDefault, // ❌ Retiré
-```
+\`\`\`
 
 #### PATCH Endpoint
 **Supprimé** :
-```typescript
+\`\`\`typescript
 // If setting as default, unset other default addresses
 if (body.is_default === true) {
   await supabase
@@ -73,14 +73,14 @@ if (body.is_default === true) {
     .eq("user_id", user.id)
     .neq("id", addressId)
 }
-```
+\`\`\`
 
 ---
 
 ### 2️⃣ **Frontend : `components/addresses/addresses-section.tsx`**
 
 **Fonction supprimée** :
-```typescript
+\`\`\`typescript
 // Set default address
 const handleSetDefault = async (id: string) => {
   try {
@@ -108,34 +108,34 @@ const handleSetDefault = async (id: string) => {
     throw error
   }
 }
-```
+\`\`\`
 
 **Prop supprimée du composant** :
-```tsx
+\`\`\`tsx
 <AddressCard
   address={address}
   onEdit={handleEdit}
   onSetDefault={handleSetDefault} // ❌ Retiré
   onDelete={handleDeleteClick}
 />
-```
+\`\`\`
 
 ---
 
 ### 3️⃣ **Composant : `components/addresses/address-card.tsx`**
 
 **Interface simplifiée** :
-```typescript
+\`\`\`typescript
 interface AddressCardProps {
   address: Address
   onEdit: (address: Address) => void
   onDelete: (address: Address) => void
   onSetDefault?: (id: string) => void // ❌ Retiré
 }
-```
+\`\`\`
 
 **Badge "Par défaut" supprimé** :
-```tsx
+\`\`\`tsx
 <div className="flex items-center space-x-2">
   {getAddressIcon(address.type)}
   <span className="font-medium">{address.label}</span>
@@ -143,10 +143,10 @@ interface AddressCardProps {
     <Badge variant="secondary">Par défaut</Badge>
   )}
 </div>
-```
+\`\`\`
 
 **Bouton "Définir par défaut" supprimé** :
-```tsx
+\`\`\`tsx
 {!address.is_default && onSetDefault && ( // ❌ Retiré tout le bloc
   <Button
     variant="ghost"
@@ -157,7 +157,7 @@ interface AddressCardProps {
     Définir par défaut
   </Button>
 )}
-```
+\`\`\`
 
 **Layout simplifié** :
 - Avant : `flex-col` avec 2 lignes (boutons + bouton défaut)
@@ -182,23 +182,23 @@ interface AddressCardProps {
 ## 📊 Tests de Validation
 
 ### ✅ Test 1 : Suppression d'adresse non utilisée
-```
+\`\`\`
 POST /api/addresses 200       # Création nouvelle adresse
 DELETE /api/addresses/c3578... 200  # Suppression réussie
-```
+\`\`\`
 **Résultat** : ✅ Succès
 
 ### ✅ Test 2 : Suppression d'adresse utilisée dans booking
-```
+\`\`\`
 DELETE /api/addresses/00fb32... 400
 [API] Bookings check: [ { id: '90be3e...', status: 'pending' } ]
-```
+\`\`\`
 **Résultat** : ✅ Bloquée avec message clair
 
 ### ✅ Test 3 : Suppression de "l'ancienne adresse par défaut"
-```
+\`\`\`
 DELETE /api/addresses/d637c2... 400
-```
+\`\`\`
 **Résultat** : ✅ Plus de blocage lié au statut "par défaut"  
 **Raison du 400** : Adresse utilisée dans booking (pas à cause du flag `is_default`)
 
@@ -210,9 +210,9 @@ La colonne `is_default` existe toujours dans `user_addresses` mais **n'est plus 
 
 ### Option Future : Nettoyer le schéma
 Si tu veux supprimer complètement :
-```sql
+\`\`\`sql
 ALTER TABLE user_addresses DROP COLUMN is_default;
-```
+\`\`\`
 
 ⚠️ **Attention** : Vérifier avant que cette colonne n'est pas utilisée ailleurs (parcours de réservation, etc.)
 
@@ -221,7 +221,7 @@ ALTER TABLE user_addresses DROP COLUMN is_default;
 ## 🎨 Interface Simplifiée
 
 ### Avant
-```
+\`\`\`
 ┌─────────────────────────────────────┐
 │ 🏠 Domicile  [Par défaut]  Domicile │
 │                                     │
@@ -231,10 +231,10 @@ ALTER TABLE user_addresses DROP COLUMN is_default;
 │ [Modifier]  [Supprimer]             │
 │ [Définir par défaut]                │
 └─────────────────────────────────────┘
-```
+\`\`\`
 
 ### Après
-```
+\`\`\`
 ┌─────────────────────────────────────┐
 │ 🏠 Domicile           Domicile      │
 │                                     │
@@ -243,7 +243,7 @@ ALTER TABLE user_addresses DROP COLUMN is_default;
 │                                     │
 │ [Modifier]  [Supprimer]             │
 └─────────────────────────────────────┘
-```
+\`\`\`
 
 Plus simple, plus épuré ! ✨
 

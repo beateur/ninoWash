@@ -15,7 +15,7 @@
 - Duplicate customers dans Stripe
 
 ### Données Actuelles
-```json
+\`\`\`json
 {
   "user_id": "4253ed6b-0e53-4187-ac30-7731744189e4",
   "old_subscription": {
@@ -31,20 +31,20 @@
     "status": "active" // ✅ But not in DB
   }
 }
-```
+\`\`\`
 
 ### Cause Racine
 
 **Fonction bugée** : `lib/stripe/helpers.ts` → `getOrCreateStripeCustomer()`
 
-```typescript
+\`\`\`typescript
 // ❌ CODE BUGUÉ (AVANT)
 const customers = await stripe.customers.list({ email: params.email, limit: 1 })
 if (customers.data.length > 0) {
   return customers.data[0].id // Only checks by email
 }
 // Creates NEW customer every time
-```
+\`\`\`
 
 **Problèmes** :
 1. ❌ Ne cherche que par **email** (pas de check metadata.user_id)
@@ -64,7 +64,7 @@ if (customers.data.length > 0) {
 4. ✅ Crée un nouveau customer SEULEMENT si aucun n'existe
 5. ✅ Customer ID stocké dans `subscriptions.stripe_customer_id` (pas dans `users` table)
 
-```typescript
+\`\`\`typescript
 // ✅ CODE CORRIGÉ
 export async function getOrCreateStripeCustomer(params: {
   userId: string
@@ -116,7 +116,7 @@ export async function getOrCreateStripeCustomer(params: {
 
   return customer.id
 }
-```
+\`\`\`
 
 ---
 
@@ -126,7 +126,7 @@ export async function getOrCreateStripeCustomer(params: {
 
 **Fichier** : `scripts/fix-duplicate-stripe-customer.sql`
 
-```sql
+\`\`\`sql
 BEGIN;
 
 -- 1. Cancel old monthly subscription
@@ -186,7 +186,7 @@ DO UPDATE SET
   updated_at = NOW();
 
 COMMIT;
-```
+\`\`\`
 
 ---
 
@@ -194,7 +194,7 @@ COMMIT;
 
 ### Après Exécution du Script SQL
 
-```sql
+\`\`\`sql
 SELECT 
   stripe_subscription_id, 
   stripe_customer_id, 
@@ -204,7 +204,7 @@ SELECT
 FROM subscriptions 
 WHERE user_id = '4253ed6b-0e53-4187-ac30-7731744189e4'
 ORDER BY created_at DESC;
-```
+\`\`\`
 
 **Résultat attendu** :
 | subscription_id | customer_id | status | plan |
@@ -219,9 +219,9 @@ ORDER BY created_at DESC;
 1. **Déployer le code corrigé**
 2. **Tester un changement d'abonnement**
 3. **Vérifier les logs** : 
-   ```
+   \`\`\`
    [v0] Using existing Stripe customer from subscription: cus_TBgMH9MKtLLTij
-   ```
+   \`\`\`
 4. **Vérifier Stripe Dashboard** : Aucun nouveau customer créé
 5. **Vérifier DB** : Ancien abonnement = `canceled`, nouveau = `active`
 

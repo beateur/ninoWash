@@ -18,7 +18,7 @@ Les utilisateurs tentaient de supprimer des adresses utilisées dans des réserv
 
 Différenciation selon le statut des réservations :
 
-```typescript
+\`\`\`typescript
 // Pour réservations ACTIVES (pending, confirmed, in_progress)
 "Cette adresse ne peut pas être supprimée car elle est utilisée dans une ou 
 plusieurs réservations en cours. Vous devez d'abord annuler ou terminer ces réservations."
@@ -30,7 +30,7 @@ de réservations. Vous pouvez la modifier si vous le souhaitez."
 // Fallback (contrainte FK PostgreSQL)
 "Cette adresse ne peut pas être supprimée car elle est liée à des réservations 
 existantes. Pour protéger votre historique, veuillez plutôt modifier l'adresse si nécessaire."
-```
+\`\`\`
 
 ### 2. Toast amélioré côté frontend
 
@@ -40,20 +40,20 @@ existantes. Pour protéger votre historique, veuillez plutôt modifier l'adresse
 - **Durée augmentée**: 6 secondes (au lieu de 3-4s par défaut) pour laisser le temps de lire
 - **Message contextualisé**: Reprend le message détaillé de l'API
 
-```typescript
+\`\`\`typescript
 toast({
   title: "Suppression impossible",
   description: errorMessage, // Message explicite de l'API
   variant: "destructive",
   duration: 6000, // 6 secondes pour lire confortablement
 })
-```
+\`\`\`
 
 ## 📊 Logique de détection
 
 ### Backend - Vérification pré-suppression
 
-```typescript
+\`\`\`typescript
 // 1. Requête pour vérifier si adresse utilisée
 const { data: bookingsWithAddress } = await supabase
   .from("bookings")
@@ -73,26 +73,26 @@ if (activeBookings.length > 0) {
 } else {
   return "Message pour historique"
 }
-```
+\`\`\`
 
 ## 🎨 Expérience utilisateur
 
 ### Avant
-```
+\`\`\`
 ❌ [Toast rouge] Erreur
    Impossible de supprimer cette adresse
-```
+\`\`\`
 → Utilisateur confus, ne sait pas pourquoi ni quoi faire
 
 ### Après
-```
+\`\`\`
 🚫 [Toast rouge] Suppression impossible
    Cette adresse ne peut pas être supprimée car elle est utilisée 
    dans une ou plusieurs réservations en cours. Vous devez d'abord 
    annuler ou terminer ces réservations.
    
    [Durée: 6 secondes]
-```
+\`\`\`
 → Utilisateur comprend **pourquoi** et **quoi faire**
 
 ## 🛡️ Protection des données
@@ -128,18 +128,18 @@ Pour tester :
 1. **Lien direct vers les réservations** : Toast cliquable qui redirige vers `/dashboard` avec filtrage sur les réservations utilisant cette adresse
 
 2. **Soft delete** : Ajouter colonne `deleted_at` pour "masquer" l'adresse sans la supprimer physiquement
-   ```sql
+   \`\`\`sql
    ALTER TABLE user_addresses ADD COLUMN deleted_at TIMESTAMPTZ;
-   ```
+   \`\`\`
    - Avantage : Préserve l'historique, améliore l'UX
    - Inconvénient : Complexité accrue (filtrage `WHERE deleted_at IS NULL`)
 
 3. **Badge visuel** : Indiquer sur la carte d'adresse si elle est utilisée dans des réservations actives
-   ```tsx
+   \`\`\`tsx
    {hasActiveBookings && (
      <Badge variant="secondary">Utilisée dans 2 réservations</Badge>
    )}
-   ```
+   \`\`\`
 
 ## ✅ Validation
 

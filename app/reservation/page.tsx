@@ -80,8 +80,7 @@ export default async function ReservationPage({ searchParams }: PageProps) {
 
     // Vérifier si la réservation peut être modifiée
     const canModify =
-      (booking.status === "pending" || booking.status === "confirmed") &&
-      new Date(booking.pickup_date) > new Date()
+      (booking.status === "pending" || booking.status === "confirmed") && new Date(booking.pickup_date) > new Date()
 
     if (!canModify) {
       redirect("/dashboard?error=cannot_modify_booking")
@@ -99,3 +98,5 @@ export default async function ReservationPage({ searchParams }: PageProps) {
   // Mode nouvelle réservation
   return <ReservationClient serviceType={serviceType} />
 }
+
+export { default as BookingFlow } from "./reservation-client"

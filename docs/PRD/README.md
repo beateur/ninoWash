@@ -6,7 +6,7 @@ Ce dossier contient tous les Product Requirements Documents du projet ninoWash.
 
 ## 📂 Structure
 
-```
+\`\`\`
 docs/PRD/
 ├── README.md (ce fichier)
 │
@@ -25,7 +25,7 @@ docs/PRD/
 └── 📚 GUIDES
     ├── TESTING_GUIDE.md
     └── IMPLEMENTATION_SUMMARY.md
-```
+\`\`\`
 
 ---
 

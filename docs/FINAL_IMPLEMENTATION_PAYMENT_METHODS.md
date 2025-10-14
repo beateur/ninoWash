@@ -21,7 +21,7 @@
 
 ### Composants Créés
 
-```
+\`\`\`
 components/payment-methods/
 ├── payment-method-card.tsx              ✅ Carte avec dropdown custom
 ├── payment-methods-list.tsx             ✅ Liste avec gestion CRUD
@@ -29,27 +29,27 @@ components/payment-methods/
 ├── replace-payment-method-dialog.tsx    ✅ Dialog explicatif remplacement
 ├── add-payment-method-dialog.tsx        ✅ Stripe Elements integration
 └── README.md                            ✅ Documentation composants
-```
+\`\`\`
 
 ### API Routes
 
-```
+\`\`\`
 app/api/payments/methods/
 ├── route.ts                  ✅ GET (list) + POST (create)
 └── [id]/route.ts            ✅ PATCH (update) + DELETE (soft delete)
-```
+\`\`\`
 
 ### Server Actions
 
-```
+\`\`\`
 app/actions/payment-methods.ts    ✅ createSetupIntent()
-```
+\`\`\`
 
 ### Page
 
-```
+\`\`\`
 app/(authenticated)/payment-methods/page.tsx    ✅ Protected route
-```
+\`\`\`
 
 ---
 
@@ -64,7 +64,7 @@ Radix UI DropdownMenu ne s'affichait pas (problème de Portal/CSS avec Tailwind 
 - 2 options : "Remplacer la carte" et "Supprimer"
 
 **Code** :
-```tsx
+\`\`\`tsx
 <div className="relative" ref={dropdownRef}>
   <Button onClick={() => setIsOpen(!isOpen)}>
     <MoreVertical />
@@ -81,7 +81,7 @@ Radix UI DropdownMenu ne s'affichait pas (problème de Portal/CSS avec Tailwind 
     </div>
   )}
 </div>
-```
+\`\`\`
 
 ---
 
@@ -117,7 +117,7 @@ Radix UI DropdownMenu ne s'affichait pas (problème de Portal/CSS avec Tailwind 
 
 ### Schéma Corrigé
 
-```sql
+\`\`\`sql
 CREATE TABLE payment_methods (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id),
@@ -135,7 +135,7 @@ CREATE TABLE payment_methods (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
-```
+\`\`\`
 
 **RLS Policies** :
 - `SELECT`: User peut voir ses propres cartes
@@ -174,14 +174,14 @@ CREATE TABLE payment_methods (
 ## 📝 Logs de Debug
 
 Tous les logs utilisent le préfixe `[v0]` :
-```javascript
+\`\`\`javascript
 [v0] Dropdown button clicked
 [v0] Replace clicked: <card_id>
 [v0] Delete clicked: <card_id>
 [v0] Creating setup intent...
 [v0] Setup intent created: { clientSecret: "seti_..." }
 [v0] Error adding payment method: <error>
-```
+\`\`\`
 
 ---
 

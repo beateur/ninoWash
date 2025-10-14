@@ -17,7 +17,7 @@ La page `app/(main)/bookings/page.tsx` utilisait des **données fictives (mock d
 4. **Architecture Incohérente** : Ne suivait pas les règles établies dans `.github/copilot-instructions.md`
 
 ### Code Problématique (Supprimé)
-```tsx
+\`\`\`tsx
 // ❌ app/(main)/bookings/page.tsx (SUPPRIMÉ)
 "use client"
 
@@ -34,16 +34,16 @@ export default function BookingsPage() {
   const { user } = useAuth() // Pattern obsolète
   // ...
 }
-```
+\`\`\`
 
 ---
 
 ## ✅ Actions Réalisées
 
 ### 1. Fichiers Supprimés
-```bash
+\`\`\`bash
 rm -rf /Users/bilel/Documents/websites/ninoWebsite/ninoWash/app/(main)/bookings
-```
+\`\`\`
 
 **Fichiers supprimés :**
 - ❌ `app/(main)/bookings/page.tsx` (280 lignes avec mock data)
@@ -53,38 +53,38 @@ rm -rf /Users/bilel/Documents/websites/ninoWebsite/ninoWash/app/(main)/bookings
 
 #### `components/dashboard/dashboard-client.tsx`
 **Avant :**
-```tsx
+\`\`\`tsx
 {bookings.length > 5 && (
   <Button variant="link" asChild>
     <Link href="/bookings">Voir tout</Link>
   </Button>
 )}
-```
+\`\`\`
 
 **Après :**
-```tsx
+\`\`\`tsx
 {/* Note: All bookings are displayed here. "Voir tout" link removed as obsolete /bookings page was deleted */}
-```
+\`\`\`
 
 **Raison :** Le lien "Voir tout" pointait vers la page obsolète qui n'existe plus.
 
 #### `middleware.ts`
 **Avant :**
-```typescript
+\`\`\`typescript
 const PROTECTED_ROUTES = {
   auth: ["/dashboard", "/profile", "/bookings", "/reservation", "/subscription/manage"],
   // ...
 }
-```
+\`\`\`
 
 **Après :**
-```typescript
+\`\`\`typescript
 const PROTECTED_ROUTES = {
   auth: ["/dashboard", "/profile", "/reservation", "/subscription/manage"],
   // Note: /bookings removed - obsolete page deleted, booking list now in /dashboard
   // ...
 }
-```
+\`\`\`
 
 ### 3. Documentation Mise à Jour
 
@@ -112,7 +112,7 @@ const PROTECTED_ROUTES = {
 
 ### Pattern Utilisé par le Dashboard (✅ Correct)
 
-```
+\`\`\`
 ┌─────────────────────────────────────────────────┐
 │ app/(authenticated)/dashboard/page.tsx          │
 │ (Server Component)                              │
@@ -144,12 +144,12 @@ const PROTECTED_ROUTES = {
 │ - Status badges                                 │
 │ - Actions (view details, cancel, etc.)          │
 └─────────────────────────────────────────────────┘
-```
+\`\`\`
 
 ### Flux de Données
 
 1. **Server Component** (`dashboard/page.tsx`) :
-   ```typescript
+   \`\`\`typescript
    // Authentification
    const user = await requireAuth()
    
@@ -165,10 +165,10 @@ const PROTECTED_ROUTES = {
    
    // Pass to Client Component
    return <DashboardClient bookings={bookings} user={user} />
-   ```
+   \`\`\`
 
 2. **Client Component** (`dashboard-client.tsx`) :
-   ```tsx
+   \`\`\`tsx
    "use client"
    
    export default function DashboardClient({ bookings, user }) {
@@ -187,7 +187,7 @@ const PROTECTED_ROUTES = {
        </div>
      )
    }
-   ```
+   \`\`\`
 
 ### Avantages de cette Architecture
 
@@ -217,7 +217,7 @@ const PROTECTED_ROUTES = {
 
 ### ❌ Ancien Pattern (Supprimé)
 
-```tsx
+\`\`\`tsx
 // app/(main)/bookings/page.tsx
 "use client"
 
@@ -244,7 +244,7 @@ export default function BookingsPage() {
   
   return <div>{/* Affiche mock data */}</div>
 }
-```
+\`\`\`
 
 **Problèmes :**
 - 🔴 Mock data au lieu de vraies données Supabase
@@ -255,7 +255,7 @@ export default function BookingsPage() {
 
 ### ✅ Nouveau Pattern (Actuel)
 
-```tsx
+\`\`\`tsx
 // app/(authenticated)/dashboard/page.tsx
 import { requireAuth } from "@/lib/auth/route-guards"
 import { createClient } from "@/lib/supabase/server"
@@ -276,7 +276,7 @@ export default async function DashboardPage() {
   // ✅ Pass real data to Client Component
   return <DashboardClient bookings={bookings || []} user={user} />
 }
-```
+\`\`\`
 
 **Avantages :**
 - ✅ Vraies données Supabase avec RLS
@@ -316,7 +316,7 @@ export default async function DashboardPage() {
 ### Si une page `/bookings` dédiée est nécessaire dans le futur :
 
 1. **Créer en Server Component** :
-   ```typescript
+   \`\`\`typescript
    // app/(authenticated)/bookings/page.tsx
    import { requireAuth } from "@/lib/auth/route-guards"
    import { createClient } from "@/lib/supabase/server"
@@ -334,7 +334,7 @@ export default async function DashboardPage() {
      
      return <BookingsClient bookings={bookings || []} />
    }
-   ```
+   \`\`\`
 
 2. **Réutiliser les composants existants** :
    - `@/components/booking/booking-card` (présentation)
@@ -348,21 +348,21 @@ export default async function DashboardPage() {
    - Recherche par numéro de réservation
 
 4. **Mettre à jour le middleware** :
-   ```typescript
+   \`\`\`typescript
    const PROTECTED_ROUTES = {
      auth: ["/dashboard", "/profile", "/bookings", "/reservation"],
    }
-   ```
+   \`\`\`
 
 5. **Ajouter lien dans la navigation** :
-   ```tsx
+   \`\`\`tsx
    // components/dashboard/dashboard-client.tsx
    {bookings.length > 5 && (
      <Button variant="link" asChild>
        <Link href="/bookings">Voir tout</Link>
      </Button>
    )}
-   ```
+   \`\`\`
 
 ### Checklist pour Nouvelle Page Bookings
 

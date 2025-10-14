@@ -59,9 +59,9 @@ Logs des comptes créés avec succès mais création de réservation échouée.
 ### Méthode 1 : Supabase Dashboard (Recommandée)
 
 1. **Ouvrir Supabase Dashboard** :
-   ```
+   \`\`\`
    https://supabase.com/dashboard/project/YOUR_PROJECT_ID
-   ```
+   \`\`\`
 
 2. **Naviguer vers SQL Editor** :
    - Cliquer sur "SQL Editor" dans la sidebar
@@ -79,7 +79,7 @@ Logs des comptes créés avec succès mais création de réservation échouée.
    - Attendre le message de confirmation
 
 6. **Vérifier** :
-   ```sql
+   \`\`\`sql
    -- Vérifier que les tables existent
    SELECT table_name, table_type 
    FROM information_schema.tables 
@@ -99,60 +99,60 @@ Logs des comptes créés avec succès mais création de réservation échouée.
    SELECT tablename, policyname, permissive, roles, cmd, qual 
    FROM pg_policies 
    WHERE tablename IN ('failed_account_creations', 'failed_bookings');
-   ```
+   \`\`\`
 
 ### Méthode 2 : Supabase CLI
 
 1. **Vérifier que Supabase CLI est installé** :
-   ```bash
+   \`\`\`bash
    supabase --version
-   ```
+   \`\`\`
 
 2. **Installer si nécessaire** :
-   ```bash
+   \`\`\`bash
    brew install supabase/tap/supabase
    # OU
    npm install -g supabase
-   ```
+   \`\`\`
 
 3. **Se connecter** :
-   ```bash
+   \`\`\`bash
    supabase login
-   ```
+   \`\`\`
 
 4. **Lier le projet** :
-   ```bash
+   \`\`\`bash
    cd /Users/bilel/Documents/websites/ninoWebsite/ninoWash
    supabase link --project-ref YOUR_PROJECT_REF
-   ```
+   \`\`\`
 
 5. **Appliquer la migration** :
-   ```bash
+   \`\`\`bash
    supabase db push
-   ```
+   \`\`\`
 
 ### Méthode 3 : Script apply-migration.sh
 
 1. **Naviguer vers le dossier migrations** :
-   ```bash
+   \`\`\`bash
    cd supabase/migrations
-   ```
+   \`\`\`
 
 2. **Rendre le script exécutable** (si nécessaire) :
-   ```bash
+   \`\`\`bash
    chmod +x apply-migration.sh
-   ```
+   \`\`\`
 
 3. **Exécuter le script** :
-   ```bash
+   \`\`\`bash
    ./apply-migration.sh
-   ```
+   \`\`\`
 
 ## Vérification Post-Migration
 
 ### 1. Vérifier les tables
 
-```sql
+\`\`\`sql
 -- Lister les tables
 \dt
 
@@ -161,11 +161,11 @@ Logs des comptes créés avec succès mais création de réservation échouée.
 
 -- Description de failed_bookings
 \d failed_bookings
-```
+\`\`\`
 
 ### 2. Tester l'insertion (Service Role)
 
-```sql
+\`\`\`sql
 -- Test insert dans failed_account_creations
 INSERT INTO failed_account_creations (
   payment_intent_id,
@@ -190,23 +190,23 @@ SELECT * FROM failed_account_creations WHERE payment_intent_id = 'pi_test_123456
 
 -- Nettoyer
 DELETE FROM failed_account_creations WHERE payment_intent_id = 'pi_test_123456';
-```
+\`\`\`
 
 ### 3. Tester les RLS Policies
 
-```sql
+\`\`\`sql
 -- En tant qu'admin (via Dashboard), devrait fonctionner
 SELECT * FROM failed_account_creations LIMIT 5;
 
 -- Via service_role (API backend), INSERT devrait fonctionner
 -- Via anon/authenticated role sans admin, devrait échouer (policy violation)
-```
+\`\`\`
 
 ## Utilisation dans le Code
 
 Les fonctions `logFailedAccountCreation()` et `logFailedBooking()` dans `app/api/bookings/guest/route.ts` utiliseront automatiquement ces tables :
 
-```typescript
+\`\`\`typescript
 // Exemple d'utilisation (déjà implémenté)
 await logFailedAccountCreation(supabase, {
   paymentIntentId,
@@ -222,13 +222,13 @@ await logFailedAccountCreation(supabase, {
     pickupTimeSlot,
   },
 })
-```
+\`\`\`
 
 ## Monitoring
 
 ### Requêtes utiles pour l'admin dashboard
 
-```sql
+\`\`\`sql
 -- Compter les échecs récents (dernières 24h)
 SELECT 
   COUNT(*) as total_failures,
@@ -254,23 +254,23 @@ SELECT
 FROM failed_account_creations
 ORDER BY created_at DESC
 LIMIT 20;
-```
+\`\`\`
 
 ## Récupération Manuelle
 
 Pour récupérer une réservation perdue :
 
 1. **Identifier le log** :
-   ```sql
+   \`\`\`sql
    SELECT * FROM failed_account_creations 
    WHERE payment_intent_id = 'pi_xxx';
-   ```
+   \`\`\`
 
 2. **Récupérer les données** :
-   ```sql
+   \`\`\`sql
    SELECT booking_data FROM failed_account_creations 
    WHERE id = 'uuid';
-   ```
+   \`\`\`
 
 3. **Créer manuellement le compte et la réservation** via admin dashboard
 
@@ -278,10 +278,10 @@ Pour récupérer une réservation perdue :
 
 Si besoin de supprimer les tables :
 
-```sql
+\`\`\`sql
 DROP TABLE IF EXISTS failed_bookings CASCADE;
 DROP TABLE IF EXISTS failed_account_creations CASCADE;
-```
+\`\`\`
 
 ## Notes Importantes
 

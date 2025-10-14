@@ -26,28 +26,28 @@ Le système de scheduling basé sur des créneaux dynamiques (`logistic_slots`) 
 
 ### 1. Appliquer la migration SQL (SI PAS DÉJÀ FAIT)
 
-```bash
+\`\`\`bash
 # Via Supabase Dashboard
 # → SQL Editor → Copier/coller le contenu de :
 supabase/migrations/20251013000100_create_logistic_slots.sql
 
 # Ou via CLI
 supabase migration up
-```
+\`\`\`
 
 ### 2. Insérer les slots de test
 
-```bash
+\`\`\`bash
 # Via Supabase Dashboard → SQL Editor
 # Copier/coller le contenu de :
 scripts/insert-test-slots.sql
 
 # Exécuter → Vérifier message: "✅ 8 slots de test créés avec succès"
-```
+\`\`\`
 
 ### 3. Tester l'API
 
-```bash
+\`\`\`bash
 # Terminal (ou Postman)
 curl "http://localhost:3000/api/logistic-slots?role=pickup"
 
@@ -58,12 +58,12 @@ curl "http://localhost:3000/api/logistic-slots?role=pickup"
 #     ...
 #   ]
 # }
-```
+\`\`\`
 
 ### 4. Intégrer dans le flow de réservation
 
 **Option A : Remplacer l'étape existante (recommandé)**
-```tsx
+\`\`\`tsx
 // Dans app/reservation/page.tsx (ou wizard guest)
 import { CollectionDeliveryStep } from "@/components/booking/collection-delivery-step"
 
@@ -77,10 +77,10 @@ import { CollectionDeliveryStep } from "@/components/booking/collection-delivery
   onNext={handleNextStep}
   onBack={handlePreviousStep}
 />
-```
+\`\`\`
 
 **Option B : Feature flag progressive (si rollout phasé)**
-```tsx
+\`\`\`tsx
 const useNewSlotSystem = process.env.NEXT_PUBLIC_USE_SLOT_SCHEDULING === "true"
 
 {useNewSlotSystem ? (
@@ -88,7 +88,7 @@ const useNewSlotSystem = process.env.NEXT_PUBLIC_USE_SLOT_SCHEDULING === "true"
 ) : (
   <DateTimeStep ... /> // Legacy
 )}
-```
+\`\`\`
 
 ---
 
@@ -96,7 +96,7 @@ const useNewSlotSystem = process.env.NEXT_PUBLIC_USE_SLOT_SCHEDULING === "true"
 
 ### Data Flow Complet
 
-```
+\`\`\`
 ┌─────────────────────────────────────────────────────────────┐
 │ 1. USER SELECTS SERVICE                                      │
 │    → Détermine serviceType: 'express' (24h) ou 'classic' (72h) │
@@ -169,7 +169,7 @@ const useNewSlotSystem = process.env.NEXT_PUBLIC_USE_SLOT_SCHEDULING === "true"
 │    → createSlotRequest(deliverySlotId, 'delivery', bookingId)│
 │    → Non-blocking: analytics only                            │
 └─────────────────────────────────────────────────────────────┘
-```
+\`\`\`
 
 ---
 
@@ -205,7 +205,7 @@ const useNewSlotSystem = process.env.NEXT_PUBLIC_USE_SLOT_SCHEDULING === "true"
 
 **Fichier à modifier** : `app/reservation/guest/page.tsx` (ou équivalent)
 
-```tsx
+\`\`\`tsx
 import { useState } from "react"
 import { CollectionDeliveryStep } from "@/components/booking/collection-delivery-step"
 import type { LogisticSlot } from "@/lib/types/logistic-slots"
@@ -256,13 +256,13 @@ export default function GuestBookingPage() {
     </div>
   )
 }
-```
+\`\`\`
 
 ### Flow Authentifié (Dashboard `/dashboard/reservation`)
 
 **Similaire au flow guest**, mais sans besoin de `guestPickupAddress`/`guestDeliveryAddress`/`guestContact`.
 
-```tsx
+\`\`\`tsx
 const payload = {
   pickupSlotId: pickupSlot?.id,
   deliverySlotId: deliverySlot?.id,
@@ -271,7 +271,7 @@ const payload = {
   items: selectedItems,
   serviceType,
 }
-```
+\`\`\`
 
 ---
 
@@ -322,33 +322,33 @@ const payload = {
 
 ### Ajouter de nouveaux slots
 
-```sql
+\`\`\`sql
 -- Via Supabase SQL Editor (ou script automatisé futur)
 INSERT INTO public.logistic_slots (role, slot_date, start_time, end_time, label, is_open, notes)
 VALUES 
   ('pickup', '2025-10-20', '09:00', '12:00', 'Matin', TRUE, 'Créneau matin lundi 20'),
   ('delivery', '2025-10-20', '09:00', '12:00', 'Matin', TRUE, 'Créneau matin lundi 20');
-```
+\`\`\`
 
 ### Désactiver un slot (suppression logique)
 
-```sql
+\`\`\`sql
 UPDATE public.logistic_slots 
 SET is_open = FALSE 
 WHERE id = 'slot-uuid-here';
-```
+\`\`\`
 
 ### Supprimer définitivement un slot
 
-```sql
+\`\`\`sql
 -- Attention: supprime aussi les slot_requests associés (CASCADE)
 -- Les bookings gardent leur FK à NULL grâce à ON DELETE SET NULL
 DELETE FROM public.logistic_slots WHERE id = 'slot-uuid-here';
-```
+\`\`\`
 
 ### Monitoring des demandes de slots
 
-```sql
+\`\`\`sql
 -- Dashboard admin: voir les slots les plus demandés
 SELECT 
   ls.slot_date,
@@ -361,7 +361,7 @@ LEFT JOIN public.slot_requests sr ON sr.slot_id = ls.id
 WHERE ls.slot_date >= CURRENT_DATE
 GROUP BY ls.id, ls.slot_date, ls.role, ls.start_time, ls.end_time, ls.label
 ORDER BY ls.slot_date, ls.role DESC, ls.start_time;
-```
+\`\`\`
 
 ---
 

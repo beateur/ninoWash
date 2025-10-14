@@ -86,7 +86,7 @@ Les utilisateurs ont besoin de gérer leurs réservations futures :
 **API Routes créés**:
 
 #### 1. POST /api/bookings/[id]/cancel
-```typescript
+\`\`\`typescript
 // Request
 {
   "reason": "Changement de plans",
@@ -104,7 +104,7 @@ Les utilisateurs ont besoin de gérer leurs réservations futures :
   "error": "Booking already cancelled",
   "code": "ALREADY_CANCELLED"
 }
-```
+\`\`\`
 
 **Business Logic**:
 - ✅ Check: User owns the booking
@@ -117,7 +117,7 @@ Les utilisateurs ont besoin de gérer leurs réservations futures :
 - ⚠️ TODO Phase 2: Release reserved time slot (if applicable)
 
 #### 2. PUT /api/bookings/[id]
-```typescript
+\`\`\`typescript
 // Request
 {
   "pickupAddress": "uuid-address-id",
@@ -134,7 +134,7 @@ Les utilisateurs ont besoin de gérer leurs réservations futures :
   "booking": { ...updatedBooking },
   "message": "Réservation modifiée avec succès"
 }
-```
+\`\`\`
 
 **Business Logic**:
 - Check: User owns the booking
@@ -146,7 +146,7 @@ Les utilisateurs ont besoin de gérer leurs réservations futures :
 - Store: modification history (audit log)
 
 #### 3. POST /api/bookings/[id]/report
-```typescript
+\`\`\`typescript
 // Request
 {
   "type": "damaged_items" | "missing_items" | "late_delivery" | "quality_issue" | "other",
@@ -160,7 +160,7 @@ Les utilisateurs ont besoin de gérer leurs réservations futures :
   "reportId": "uuid",
   "message": "Problème signalé. Notre équipe vous contactera sous 24h."
 }
-```
+\`\`\`
 
 ### 3.3 Database ✅ (Implémenté)
 
@@ -168,7 +168,7 @@ Les utilisateurs ont besoin de gérer leurs réservations futures :
 
 **Schema Changes**:
 
-```sql
+\`\`\`sql
 -- Migration: Add cancellation fields to bookings
 ALTER TABLE bookings 
   ADD COLUMN cancellation_reason TEXT,
@@ -207,11 +207,11 @@ CREATE INDEX idx_booking_modifications_created_at ON booking_modifications(creat
 CREATE INDEX idx_booking_reports_booking_id ON booking_reports(booking_id);
 CREATE INDEX idx_booking_reports_status ON booking_reports(status);
 CREATE INDEX idx_booking_reports_user_id ON booking_reports(user_id);
-```
+\`\`\`
 
 **RLS Policies**:
 
-```sql
+\`\`\`sql
 -- Bookings: Users can only cancel their own bookings
 CREATE POLICY "Users can update their own bookings"
   ON bookings FOR UPDATE
@@ -254,13 +254,13 @@ CREATE POLICY "Admins can update all reports"
   USING (
     (SELECT user_metadata->>'role' FROM auth.users WHERE id = auth.uid()) = 'admin'
   );
-```
+\`\`\`
 
 ### 3.4 Validation ✅ (Implémenté)
 
 **Zod Schemas** (`lib/validations/booking.ts`):
 
-```typescript
+\`\`\`typescript
 import { z } from "zod"
 
 export const cancelBookingSchema = z.object({
@@ -289,7 +289,7 @@ export const reportProblemSchema = z.object({
 export type CancelBookingInput = z.infer<typeof cancelBookingSchema>
 export type ModifyBookingInput = z.infer<typeof modifyBookingSchema>
 export type ReportProblemInput = z.infer<typeof reportProblemSchema>
-```
+\`\`\`
 
 ### 3.5 Security ✅
 
@@ -399,7 +399,7 @@ export type ReportProblemInput = z.infer<typeof reportProblemSchema>
 ## 5. Data Flow
 
 ### Cancel Booking Flow
-```
+\`\`\`
 User clicks "Annuler" 
   → Confirmation dialog opens
   → User confirms
@@ -410,10 +410,10 @@ User clicks "Annuler"
   → Frontend: Toast "Réservation annulée"
   → Frontend: Refresh bookings list
   → Frontend: Close detail panel
-```
+\`\`\`
 
 ### Modify Booking Flow
-```
+\`\`\`
 User clicks "Modifier"
   → Form dialog opens with current values
   → User changes address/date/time
@@ -424,7 +424,7 @@ User clicks "Modifier"
   → Backend: Return updated booking
   → Frontend: Toast "Réservation modifiée"
   → Frontend: Update UI with new values
-```
+\`\`\`
 
 ---
 
@@ -455,23 +455,23 @@ User clicks "Modifier"
 ## 8. Testing Strategy
 
 **Unit Tests** (`__tests__/booking-actions.test.ts`):
-```typescript
+\`\`\`typescript
 describe("Booking Actions", () => {
   it("should allow cancel for future pending booking", () => {})
   it("should not allow cancel for past booking", () => {})
   it("should not allow cancel for delivered booking", () => {})
   it("should validate cancellation reason length", () => {})
 })
-```
+\`\`\`
 
 **Integration Tests** (`__tests__/api/bookings-cancel.test.ts`):
-```typescript
+\`\`\`typescript
 describe("POST /api/bookings/[id]/cancel", () => {
   it("should cancel booking successfully", async () => {})
   it("should return 403 if not owner", async () => {})
   it("should return 400 if already cancelled", async () => {})
 })
-```
+\`\`\`
 
 **E2E Tests** (Playwright/Cypress):
 - [ ] User cancels future booking successfully

@@ -34,7 +34,7 @@ Phase 2 Day 1-2 implémente l'intégration complète de Stripe Payment Intents d
   - Dates: `pickupDate`, `pickupTimeSlot`
 - Calcul du montant total en centimes (`amount = sum(quantity × basePrice) × 100`)
 - Création Stripe Payment Intent avec métadonnées complètes:
-  ```typescript
+  \`\`\`typescript
   const paymentIntent = await stripe.paymentIntents.create({
     amount: totalAmount,
     currency: "eur",
@@ -51,7 +51,7 @@ Phase 2 Day 1-2 implémente l'intégration complète de Stripe Payment Intents d
       bookingType: "guest",
     },
   })
-  ```
+  \`\`\`
 - Retourne `clientSecret` au frontend
 - Gestion d'erreurs robuste:
   - StripeCardError → Erreur carte
@@ -71,14 +71,14 @@ Phase 2 Day 1-2 implémente l'intégration complète de Stripe Payment Intents d
 **Fichier**: `components/booking/guest/stripe-payment.tsx` (295 lignes)
 
 **Architecture**:
-```tsx
+\`\`\`tsx
 <StripePayment bookingData={...} onSuccess={...} onError={...}>
   → loadStripe (NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
   → <Elements> (locale: "fr", clientSecret)
     → <PaymentForm>
       → <PaymentElement> (Stripe UI)
       → <Button> (Confirmer le paiement)
-```
+\`\`\`
 
 **Fonctionnalités**:
 - **StripePayment** (wrapper):
@@ -117,7 +117,7 @@ Phase 2 Day 1-2 implémente l'intégration complète de Stripe Payment Intents d
 **Solution implémentée**:
 
 1. **Fetch Services from Supabase** (useEffect):
-   ```typescript
+   \`\`\`typescript
    useEffect(() => {
      const fetchServices = async () => {
        const serviceIds = bookingData.items.map((item) => item.serviceId)
@@ -129,10 +129,10 @@ Phase 2 Day 1-2 implémente l'intégration complète de Stripe Payment Intents d
      }
      fetchServices()
    }, [bookingData.items])
-   ```
+   \`\`\`
 
 2. **Transform GuestBookingState to StripePaymentProps**:
-   ```typescript
+   \`\`\`typescript
    <StripePayment
      bookingData={{
        contact: {
@@ -153,7 +153,7 @@ Phase 2 Day 1-2 implémente l'intégration complète de Stripe Payment Intents d
        totalAmount: bookingData.totalAmount,
      }}
    />
-   ```
+   \`\`\`
 
 3. **Loading State Handling**:
    - `loadingServices` pendant le fetch
@@ -198,14 +198,14 @@ Phase 2 Day 1-2 implémente l'intégration complète de Stripe Payment Intents d
 ### Variables Requises
 
 **Backend (Server-only)**:
-```bash
+\`\`\`bash
 STRIPE_SECRET_KEY=sk_test_... # ⚠️ NEVER expose to client
-```
+\`\`\`
 
 **Frontend (Public)**:
-```bash
+\`\`\`bash
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_... # ✅ Safe for client
-```
+\`\`\`
 
 ### Sécurité Implementée
 
@@ -222,7 +222,7 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_... # ✅ Safe for client
 ### 1. Payment Intent API
 
 **Test Success**:
-```bash
+\`\`\`bash
 curl -X POST http://localhost:3000/api/bookings/guest/create-payment-intent \
   -H "Content-Type: application/json" \
   -d '{
@@ -245,26 +245,26 @@ curl -X POST http://localhost:3000/api/bookings/guest/create-payment-intent \
     "pickupDate": "2025-01-20",
     "pickupTimeSlot": "10:00-12:00"
   }'
-```
+\`\`\`
 
 **Expected Response**:
-```json
+\`\`\`json
 {
   "clientSecret": "pi_xxxxxxxxxxxxxxxxxxxxx_secret_xxxxxxxxxxxxxxxxxxxxx"
 }
-```
+\`\`\`
 
 **Test Error (Missing Field)**:
-```bash
+\`\`\`bash
 curl -X POST http://localhost:3000/api/bookings/guest/create-payment-intent \
   -H "Content-Type: application/json" \
   -d '{
     "guestEmail": "test@example.com"
   }'
-```
+\`\`\`
 
 **Expected Response**:
-```json
+\`\`\`json
 {
   "error": "Validation échouée",
   "issues": [
@@ -272,7 +272,7 @@ curl -X POST http://localhost:3000/api/bookings/guest/create-payment-intent \
     ...
   ]
 }
-```
+\`\`\`
 
 ---
 
@@ -384,7 +384,7 @@ curl -X POST http://localhost:3000/api/bookings/guest/create-payment-intent \
 ### Type Definitions
 
 **StripePaymentProps**:
-```typescript
+\`\`\`typescript
 interface StripePaymentProps {
   bookingData: {
     contact: {
@@ -418,10 +418,10 @@ interface StripePaymentProps {
   onSuccess: (paymentIntentId: string) => void
   onError: (error: string) => void
 }
-```
+\`\`\`
 
 **PaymentIntentRequest** (Zod Schema):
-```typescript
+\`\`\`typescript
 const createPaymentIntentSchema = z.object({
   guestEmail: z.string().email(),
   guestName: z.string().min(1),
@@ -445,7 +445,7 @@ const createPaymentIntentSchema = z.object({
   pickupDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   pickupTimeSlot: z.string().min(1),
 })
-```
+\`\`\`
 
 ---
 
@@ -456,7 +456,7 @@ const createPaymentIntentSchema = z.object({
 **Description**: Crée un Stripe Payment Intent pour une réservation invité
 
 **Request Body**:
-```json
+\`\`\`json
 {
   "guestEmail": "string (email)",
   "guestName": "string",
@@ -482,47 +482,47 @@ const createPaymentIntentSchema = z.object({
   "pickupDate": "string (YYYY-MM-DD)",
   "pickupTimeSlot": "string"
 }
-```
+\`\`\`
 
 **Success Response (200)**:
-```json
+\`\`\`json
 {
   "clientSecret": "pi_xxxxxxxxxxxxxxxxxxxxx_secret_xxxxxxxxxxxxxxxxxxxxx"
 }
-```
+\`\`\`
 
 **Error Responses**:
 
 - **400 Bad Request** (Validation Error):
-  ```json
+  \`\`\`json
   {
     "error": "Validation échouée",
     "issues": [
       { "path": ["guestEmail"], "message": "Invalid email" }
     ]
   }
-  ```
+  \`\`\`
 
 - **400 Bad Request** (Stripe Card Error):
-  ```json
+  \`\`\`json
   {
     "error": "Erreur carte: Your card was declined"
   }
-  ```
+  \`\`\`
 
 - **400 Bad Request** (Stripe Invalid Request):
-  ```json
+  \`\`\`json
   {
     "error": "Paramètres invalides: Amount must be positive"
   }
-  ```
+  \`\`\`
 
 - **500 Internal Server Error**:
-  ```json
+  \`\`\`json
   {
     "error": "Erreur lors de la création du paiement"
   }
-  ```
+  \`\`\`
 
 ---
 

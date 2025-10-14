@@ -40,7 +40,7 @@ Gérer ses moyens de paiement doit être aussi simple qu'élégant. Sécurité m
 
 ### 3.1 Vue Liste (État par défaut)
 
-```
+\`\`\`
 ┌─────────────────────────────────────────────────────────┐
 │  Modes de paiement                           [+ Ajouter une carte]
 │
@@ -63,12 +63,12 @@ Gérer ses moyens de paiement doit être aussi simple qu'élégant. Sécurité m
 │  └──────────────────────────────────────────────┘
 │
 └─────────────────────────────────────────────────────────┘
-```
+\`\`\`
 
 ### 3.2 Composants UI
 
 #### Card Payment Method
-```typescript
+\`\`\`typescript
 interface PaymentMethodCardProps {
   paymentMethod: StripePaymentMethod
   isDefault: boolean
@@ -87,10 +87,10 @@ interface StripePaymentMethod {
   }
   created: number
 }
-```
+\`\`\`
 
 **Design**:
-```typescript
+\`\`\`typescript
 // Card normale
 <Card className="border border-gray-200 bg-white rounded-xl p-6">
   <div className="flex items-center justify-between">
@@ -123,11 +123,11 @@ interface StripePaymentMethod {
     <DropdownMenu>...</DropdownMenu>
   </div>
 </Card>
-```
+\`\`\`
 
 #### Dialog Ajout Carte (Stripe Elements)
 
-```typescript
+\`\`\`typescript
 <DialogContent className="sm:max-w-md">
   <DialogHeader>
     <DialogTitle className="text-2xl font-light flex items-center">
@@ -189,7 +189,7 @@ interface StripePaymentMethod {
     </Button>
   </DialogFooter>
 </DialogContent>
-```
+\`\`\`
 
 ### 3.3 Actions Disponibles
 
@@ -203,7 +203,7 @@ interface StripePaymentMethod {
 ### 3.4 États Spéciaux
 
 #### Liste Vide (Première carte)
-```
+\`\`\`
 ┌─────────────────────────────────────────────────────────┐
 │                                                          │
 │              💳                                          │
@@ -217,14 +217,14 @@ interface StripePaymentMethod {
 │         [+ Ajouter ma première carte]                    │
 │                                                          │
 └─────────────────────────────────────────────────────────┘
-```
+\`\`\`
 
 #### Loading
 - Skeleton cards avec animation shimmer
 - Placeholder Stripe Elements (loading state)
 
 #### Erreur Stripe
-```typescript
+\`\`\`typescript
 const stripeErrors = {
   card_declined: "Votre carte a été refusée. Veuillez en essayer une autre.",
   insufficient_funds: "Fonds insuffisants sur cette carte.",
@@ -232,7 +232,7 @@ const stripeErrors = {
   incorrect_cvc: "Le code de sécurité (CVC) est incorrect.",
   processing_error: "Une erreur est survenue. Réessayez dans un instant.",
 }
-```
+\`\`\`
 
 ---
 
@@ -241,24 +241,24 @@ const stripeErrors = {
 ### 4.1 Frontend
 
 **Fichiers à créer**:
-```
+\`\`\`
 components/profile/
   ├── payment-methods-section.tsx    ← Section principale
   ├── payment-method-card.tsx        ← Card individuelle
   ├── add-payment-method-dialog.tsx  ← Dialog Stripe Elements
   └── payment-method-delete-confirm.tsx
-```
+\`\`\`
 
 **Dépendances**:
-```json
+\`\`\`json
 {
   "@stripe/stripe-js": "^2.4.0",
   "@stripe/react-stripe-js": "^2.4.0"
 }
-```
+\`\`\`
 
 **Intégration Stripe Elements**:
-```typescript
+\`\`\`typescript
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
 
@@ -327,14 +327,14 @@ function PaymentMethodForm({ onSuccess }) {
     </form>
   )
 }
-```
+\`\`\`
 
 ### 4.2 Backend
 
 **API Routes à créer/modifier**:
 
 #### GET `/api/payments/methods`
-```typescript
+\`\`\`typescript
 // app/api/payments/methods/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { apiRequireAuth } from '@/lib/auth/api-guards'
@@ -375,10 +375,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to fetch payment methods' }, { status: 500 })
   }
 }
-```
+\`\`\`
 
 #### POST `/api/payments/methods`
-```typescript
+\`\`\`typescript
 export async function POST(request: NextRequest) {
   const { user, supabase, error: authError } = await apiRequireAuth(request)
   if (authError) return authError
@@ -435,10 +435,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to add payment method' }, { status: 500 })
   }
 }
-```
+\`\`\`
 
 #### PUT `/api/payments/methods/[id]`
-```typescript
+\`\`\`typescript
 // Set as default
 export async function PUT(
   request: NextRequest,
@@ -473,10 +473,10 @@ export async function PUT(
     return NextResponse.json({ error: 'Failed to set default' }, { status: 500 })
   }
 }
-```
+\`\`\`
 
 #### DELETE `/api/payments/methods/[id]`
-```typescript
+\`\`\`typescript
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -496,12 +496,12 @@ export async function DELETE(
     return NextResponse.json({ error: 'Failed to delete payment method' }, { status: 500 })
   }
 }
-```
+\`\`\`
 
 ### 4.3 Database
 
 **Migration à créer**:
-```sql
+\`\`\`sql
 -- Add stripe_customer_id to profiles table
 ALTER TABLE profiles 
   ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT UNIQUE;
@@ -510,7 +510,7 @@ CREATE INDEX IF NOT EXISTS idx_profiles_stripe_customer_id
   ON profiles(stripe_customer_id);
 
 COMMENT ON COLUMN profiles.stripe_customer_id IS 'Stripe customer ID for payment management';
-```
+\`\`\`
 
 ---
 
@@ -518,7 +518,7 @@ COMMENT ON COLUMN profiles.stripe_customer_id IS 'Stripe customer ID for payment
 
 ### 5.1 Brand Icons par Carte
 
-```typescript
+\`\`\`typescript
 const cardBrandIcons = {
   visa: (
     <div className="w-12 h-8 bg-gradient-to-br from-blue-600 to-blue-800 rounded flex items-center justify-center">
@@ -539,11 +539,11 @@ const cardBrandIcons = {
     </div>
   ),
 }
-```
+\`\`\`
 
 ### 5.2 Messages de Confiance
 
-```typescript
+\`\`\`typescript
 <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
   <div className="flex items-start">
     <Shield className="h-5 w-5 text-green-600 mt-0.5 mr-3" />
@@ -559,7 +559,7 @@ const cardBrandIcons = {
     </div>
   </div>
 </div>
-```
+\`\`\`
 
 ---
 
@@ -590,7 +590,7 @@ const cardBrandIcons = {
 
 ### 7.1 Ajouter une Carte
 
-```
+\`\`\`
 1. User clique "+ Ajouter une carte"
 2. Dialog s'ouvre avec Stripe Elements
 3. User saisit numéro carte + date expiration + CVC
@@ -602,16 +602,16 @@ const cardBrandIcons = {
 9. Dialog se ferme
 10. Nouvelle card apparaît en liste
 11. Toast "Carte ajoutée avec succès"
-```
+\`\`\`
 
 ### 7.2 Définir par Défaut
 
-```
+\`\`\`
 1. User clique menu "•••" → "Définir par défaut"
 2. API call à Stripe (< 200ms)
 3. Badge "Par défaut" se déplace instantanément
 4. Toast "Carte par défaut mise à jour"
-```
+\`\`\`
 
 ---
 
@@ -619,7 +619,7 @@ const cardBrandIcons = {
 
 ### Cartes de Test Stripe
 
-```
+\`\`\`
 Visa réussite:       4242 4242 4242 4242
 Visa refusée:        4000 0000 0000 0002
 Mastercard:          5555 5555 5555 4444
@@ -630,7 +630,7 @@ CVC incorrect:       4000 0000 0000 0127
 
 CVC: n'importe quel 3 chiffres
 Date: n'importe quelle date future
-```
+\`\`\`
 
 ### Scénarios
 - [ ] Ajouter première carte (devient default auto)

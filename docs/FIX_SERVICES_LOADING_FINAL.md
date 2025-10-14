@@ -33,14 +33,14 @@ User noticed:
 > "Il semblerait que le service step guest ne call pas la database de la même manière que le service step auth"
 
 **Browser Console Errors**:
-```
+\`\`\`
 GET .../services?select=*&is_active=eq.true&order=category.asc 400 (Bad Request)
 
 {
   code: '42703',
   message: 'column services.category does not exist'
 }
-```
+\`\`\`
 
 **🎯 BREAKTHROUGH**: The table doesn't have a `category` column!
 
@@ -49,7 +49,7 @@ GET .../services?select=*&is_active=eq.true&order=category.asc 400 (Bad Request)
 ## 📊 Pattern Comparison
 
 ### Authenticated Services Step (`components/booking/services-step.tsx`)
-```typescript
+\`\`\`typescript
 const fetchServices = async () => {
   try {
     const response = await fetch("/api/services")  // ✅ Uses API route
@@ -60,14 +60,14 @@ const fetchServices = async () => {
     console.error("Error fetching services:", error)
   }
 }
-```
+\`\`\`
 
 **Result**: ✅ Works perfectly
 
 ---
 
 ### Guest Services Step (BEFORE FIX)
-```typescript
+\`\`\`typescript
 const fetchServices = async () => {
   try {
     const supabase = createClient()
@@ -79,21 +79,21 @@ const fetchServices = async () => {
     // ...
   }
 }
-```
+\`\`\`
 
 **Result**: ❌ Failed with PostgreSQL error 42703
 
 ---
 
 ### API Route (`app/api/services/route.ts`)
-```typescript
+\`\`\`typescript
 const { data: services, error } = await supabase
   .from("services")
   .select("*")
   .eq("is_active", true)
   .order("type", { ascending: true })  // ✅ Correct column: "type"
   .order("name", { ascending: true })
-```
+\`\`\`
 
 **Result**: ✅ Works correctly
 
@@ -129,7 +129,7 @@ const { data: services, error } = await supabase
 ### Changed Guest Services-Step to Use API Route
 
 **Before** (Direct Supabase query):
-```typescript
+\`\`\`typescript
 import { createClient } from "@/lib/supabase/client"
 
 const supabase = createClient()
@@ -138,14 +138,14 @@ const { data, error } = await supabase
   .select("*")
   .eq("is_active", true)
   .order("category", { ascending: true })  // ❌ Wrong column
-```
+\`\`\`
 
 **After** (API route - same as authenticated flow):
-```typescript
+\`\`\`typescript
 const response = await fetch("/api/services")  // ✅ Uses API abstraction
 const data = await response.json()
 const allServices = Object.values(data.services || {}).flat()
-```
+\`\`\`
 
 ---
 
@@ -176,23 +176,23 @@ const allServices = Object.values(data.services || {}).flat()
 ## 🧪 Testing Results
 
 ### Before Fix
-```
+\`\`\`
 1. Navigate to /reservation/guest
 2. Complete Steps 0-1
 3. Arrive at Step 2
    ❌ "Aucun service disponible pour le moment"
    ❌ Console: "column services.category does not exist"
-```
+\`\`\`
 
 ### After Fix
-```
+\`\`\`
 1. Navigate to /reservation/guest
 2. Complete Steps 0-1
 3. Arrive at Step 2
    ✅ Services load correctly
    ✅ No console errors
    ✅ Can select services and proceed to Step 3
-```
+\`\`\`
 
 ---
 

@@ -44,7 +44,7 @@ Réutiliser le parcours de réservation existant (`/reservation`) en **précharg
 **Fichier**: `components/booking/booking-card.tsx`
 
 **Changement effectué**:
-```tsx
+\`\`\`tsx
 {/* Modifier la réservation - seulement pour réservations futures */}
 {canModify && (
   <Button variant="outline" className="w-full justify-start" asChild>
@@ -54,7 +54,7 @@ Réutiliser le parcours de réservation existant (`/reservation`) en **précharg
     </Link>
   </Button>
 )}
-```
+\`\`\`
 
 **Règle métier**: `canModify` est `true` si:
 - Réservation est dans le futur (`pickupDate > new Date()`)
@@ -66,7 +66,7 @@ Réutiliser le parcours de réservation existant (`/reservation`) en **précharg
 **Modifications nécessaires**:
 
 1. **Détecter le mode modification**:
-```typescript
+\`\`\`typescript
 // app/reservation/page.tsx (Server Component)
 import { Suspense } from "react"
 import { notFound, redirect } from "next/navigation"
@@ -123,10 +123,10 @@ export default async function ReservationPage({
     />
   )
 }
-```
+\`\`\`
 
 2. **Précharger les données dans le formulaire**:
-```typescript
+\`\`\`typescript
 // app/reservation/booking-flow-client.tsx (Client Component)
 "use client"
 
@@ -182,7 +182,7 @@ export default function BookingFlowClient({
     </div>
   )
 }
-```
+\`\`\`
 
 ### Backend
 
@@ -191,7 +191,7 @@ export default function BookingFlowClient({
 
 **Méthode à ajouter**: `PATCH`
 
-```typescript
+\`\`\`typescript
 // app/api/bookings/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
@@ -285,7 +285,7 @@ export async function PATCH(
     )
   }
 }
-```
+\`\`\`
 
 ### Database
 
@@ -335,30 +335,30 @@ Aucun changement de schéma nécessaire. Les colonnes suivantes sont déjà modi
 #### 3.6 Vérifications de Sécurité
 
 1. **Server-Side Auth Check**:
-   ```typescript
+   \`\`\`typescript
    const user = await requireAuth() // Vérifie JWT token
-   ```
+   \`\`\`
 
 2. **Ownership Verification**:
-   ```typescript
+   \`\`\`typescript
    .eq("user_id", user.id) // User peut seulement modifier ses réservations
-   ```
+   \`\`\`
 
 3. **Status & Date Validation**:
-   ```typescript
+   \`\`\`typescript
    const canModify = 
      new Date(booking.pickup_date) > new Date() &&
      ["pending", "confirmed"].includes(booking.status)
-   ```
+   \`\`\`
 
 4. **RLS Policies** (déjà en place):
-   ```sql
+   \`\`\`sql
    -- Les users peuvent seulement modifier leurs propres réservations
    CREATE POLICY "Users can update own bookings"
      ON bookings FOR UPDATE
      USING (auth.uid() = user_id)
      WITH CHECK (auth.uid() = user_id);
-   ```
+   \`\`\`
 
 ### Error Handling
 
@@ -418,7 +418,7 @@ Aucun changement de schéma nécessaire. Les colonnes suivantes sont déjà modi
 
 ### Modification de Réservation (Complet)
 
-```
+\`\`\`
 1. User clique "Modifier" dans dashboard
    ↓
 2. Redirection vers /reservation?modify={bookingId}
@@ -449,7 +449,7 @@ Aucun changement de schéma nécessaire. Les colonnes suivantes sont déjà modi
    - Toast "Réservation modifiée avec succès"
    - Redirection vers /dashboard
    - Afficher réservation mise à jour
-```
+\`\`\`
 
 ---
 
@@ -492,7 +492,7 @@ Aucun changement de schéma nécessaire. Les colonnes suivantes sont déjà modi
 ## 7. Testing Strategy
 
 ### Unit Tests
-```typescript
+\`\`\`typescript
 // __tests__/api/bookings/[id]/patch.test.ts
 describe("PATCH /api/bookings/[id]", () => {
   it("should update booking successfully", async () => {
@@ -519,10 +519,10 @@ describe("PATCH /api/bookings/[id]", () => {
     // Test validation dates invalides
   })
 })
-```
+\`\`\`
 
 ### Integration Tests
-```typescript
+\`\`\`typescript
 // __tests__/booking-modification-flow.test.tsx
 describe("Booking Modification Flow", () => {
   it("should prefill form with existing booking data", async () => {
@@ -541,10 +541,10 @@ describe("Booking Modification Flow", () => {
     // Test redirection
   })
 })
-```
+\`\`\`
 
 ### E2E Tests
-```typescript
+\`\`\`typescript
 // __tests__/e2e/booking-modification.spec.ts
 test("Complete booking modification flow", async ({ page }) => {
   // 1. Login
@@ -555,7 +555,7 @@ test("Complete booking modification flow", async ({ page }) => {
   // 6. Confirm
   // 7. Verify updated booking in dashboard
 })
-```
+\`\`\`
 
 ---
 

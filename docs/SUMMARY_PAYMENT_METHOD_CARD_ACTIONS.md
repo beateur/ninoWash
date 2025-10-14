@@ -26,18 +26,18 @@ Améliorer l'UX des cartes de paiement en ajoutant un menu dropdown avec les act
 - Utilisation de `DropdownMenuSeparator` pour séparer visuellement les actions
 
 **Avant** :
-```tsx
+\`\`\`tsx
 // Dropdown uniquement pour cartes non-par défaut
 // Bouton "Supprimer" seul pour carte par défaut
-```
+\`\`\`
 
 **Après** :
-```tsx
+\`\`\`tsx
 // Dropdown toujours affiché avec actions contextuelles :
 // - "Définir par défaut" (si non-par défaut)
 // - "Remplacer la carte" (toujours)
 // - "Supprimer" (toujours)
-```
+\`\`\`
 
 ---
 
@@ -56,7 +56,7 @@ Améliorer l'UX des cartes de paiement en ajoutant un menu dropdown avec les act
 - Bouton "Continuer" (bleu) + "Annuler"
 
 **Props** :
-```tsx
+\`\`\`tsx
 interface ReplacePaymentMethodDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -66,7 +66,7 @@ interface ReplacePaymentMethodDialogProps {
     card_last4: string
   } | null
 }
-```
+\`\`\`
 
 ---
 
@@ -111,16 +111,16 @@ interface ReplacePaymentMethodDialogProps {
 ### Menu Dropdown (toujours affiché)
 
 **Pour carte par défaut** :
-```
+\`\`\`
 ┌───────────────────────┐
 │ 📝 Remplacer la carte │
 ├───────────────────────┤
 │ 🗑️  Supprimer          │
 └───────────────────────┘
-```
+\`\`\`
 
 **Pour carte non-par défaut** :
-```
+\`\`\`
 ┌───────────────────────┐
 │ ⭐ Définir par défaut │
 ├───────────────────────┤
@@ -128,11 +128,11 @@ interface ReplacePaymentMethodDialogProps {
 ├───────────────────────┤
 │ 🗑️  Supprimer          │
 └───────────────────────┘
-```
+\`\`\`
 
 ### Replace Dialog
 
-```
+\`\`\`
 ┌────────────────────────────────────────┐
 │ ℹ️  Remplacer votre carte              │
 │                                         │
@@ -148,7 +148,7 @@ interface ReplacePaymentMethodDialogProps {
 │                                         │
 │         [Annuler]  [Continuer]         │
 └────────────────────────────────────────┘
-```
+\`\`\`
 
 ---
 
@@ -198,13 +198,13 @@ interface ReplacePaymentMethodDialogProps {
 
 ## 📁 Fichiers Modifiés
 
-```
+\`\`\`
 components/payment-methods/
 ├── payment-method-card.tsx              (modifié)
 ├── payment-methods-list.tsx             (modifié)
 ├── replace-payment-method-dialog.tsx    (nouveau)
 └── README.md                            (à mettre à jour)
-```
+\`\`\`
 
 ---
 

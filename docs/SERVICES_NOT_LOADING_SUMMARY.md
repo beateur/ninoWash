@@ -30,12 +30,12 @@
 
 ## 🎯 Root Cause
 
-```
+\`\`\`
 Table: services
 ├─ RLS: ✅ ENABLED
 ├─ Policies: ❌ NONE (0 policies)
 └─ Result: 🚨 DEFAULT DENY ALL
-```
+\`\`\`
 
 **PostgreSQL Behavior**:
 - RLS enabled + no policies = **DENY ALL access by default**
@@ -65,27 +65,27 @@ Table: services
 ### Step 1: Apply Migration (2 minutes)
 
 **Option A: Supabase Dashboard** (RECOMMENDED)
-```
+\`\`\`
 1. Open: https://supabase.com/dashboard → SQL Editor
 2. Copy: supabase/migrations/20251009000001_add_services_rls_policies.sql
 3. Paste & Run
 4. Verify: "Success. No rows returned"
-```
+\`\`\`
 
 **Option B: Supabase CLI**
-```bash
+\`\`\`bash
 cd /Users/bilel/Documents/websites/ninoWebsite/ninoWash
 supabase db push
-```
+\`\`\`
 
 ### Step 2: Test Guest Booking Flow
 
-```
+\`\`\`
 1. Open: http://localhost:3000/reservation/guest
 2. Complete: Step 0 (Contact)
 3. Complete: Step 1 (Addresses)
 4. Check: Step 2 (Services) → Should load ✅
-```
+\`\`\`
 
 ---
 
@@ -93,7 +93,7 @@ supabase db push
 
 ### SQL Test (Run in Supabase Dashboard)
 
-```sql
+\`\`\`sql
 -- 1. Check RLS enabled
 SELECT tablename, rowsecurity 
 FROM pg_tables 
@@ -111,14 +111,14 @@ SET ROLE anon;
 SELECT id, name, base_price FROM services WHERE is_active = true LIMIT 5;
 RESET ROLE;
 -- Expected: Returns rows (if data exists)
-```
+\`\`\`
 
 ---
 
 ## 📊 Impact Analysis
 
 ### Before Fix
-```
+\`\`\`
 Anonymous User → Client Query → Supabase
                    ↓
             SELECT * FROM services
@@ -130,10 +130,10 @@ Anonymous User → Client Query → Supabase
          🚨 DENY (returns [])
                    ↓
     Frontend: "Aucun service disponible"
-```
+\`\`\`
 
 ### After Fix
-```
+\`\`\`
 Anonymous User → Client Query → Supabase
                    ↓
             SELECT * FROM services
@@ -146,7 +146,7 @@ Anonymous User → Client Query → Supabase
          ALLOW (returns services)
                    ↓
     Frontend: Displays service cards ✅
-```
+\`\`\`
 
 ---
 
@@ -184,7 +184,7 @@ Anonymous User → Client Query → Supabase
 ### Issue 2: Schema Mismatch
 **Symptom**: TypeScript errors or missing columns  
 **Solution**: Verify `services` table columns match TypeScript interface:
-```typescript
+\`\`\`typescript
 interface Service {
   id: string
   name: string
@@ -195,14 +195,14 @@ interface Service {
   processing_time_hours: number
   is_active: boolean
 }
-```
+\`\`\`
 
 ### Issue 3: All Services Inactive
 **Symptom**: Services exist but not visible  
 **Solution**: 
-```sql
+\`\`\`sql
 UPDATE services SET is_active = true WHERE id IN (...);
-```
+\`\`\`
 
 ---
 

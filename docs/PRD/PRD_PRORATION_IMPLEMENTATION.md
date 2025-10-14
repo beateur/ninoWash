@@ -31,7 +31,7 @@ Cette implémentation résout le problème de **perte d'argent** lors des change
 
 ### Flux Upgrade (Mensuel → Trimestriel)
 
-```mermaid
+\`\`\`mermaid
 sequenceDiagram
     participant U as User
     participant F as Frontend
@@ -69,11 +69,11 @@ sequenceDiagram
     U->>S: Paie 223.33€ (299.99€ - 76.66€)
     
     Note over U: ✅ Crédit automatique appliqué !
-```
+\`\`\`
 
 ### Flux Downgrade (Trimestriel → Mensuel)
 
-```mermaid
+\`\`\`mermaid
 sequenceDiagram
     participant U as User
     participant F as Frontend
@@ -119,7 +119,7 @@ sequenceDiagram
     
     Note over C: User doit maintenant créer<br/>nouveau abonnement via UI
     end
-```
+\`\`\`
 
 ---
 
@@ -129,7 +129,7 @@ sequenceDiagram
 
 **Modifications apportées** :
 
-```typescript
+\`\`\`typescript
 // Ligne 62-170 : Logique upgrade/downgrade intelligente
 
 if (existingSubscription && existingSubscription.plan_id !== planId) {
@@ -171,7 +171,7 @@ if (existingSubscription && existingSubscription.plan_id !== planId) {
     })
   }
 }
-```
+\`\`\`
 
 **Points clés** :
 - ✅ Détection automatique upgrade vs downgrade
@@ -185,7 +185,7 @@ if (existingSubscription && existingSubscription.plan_id !== planId) {
 
 **Nouvelles fonctionnalités** :
 
-```typescript
+\`\`\`typescript
 // État pour gérer le downgrade planifié
 const [scheduledDowngrade, setScheduledDowngrade] = useState<ScheduledDowngradeResponse | null>(null)
 
@@ -231,7 +231,7 @@ if (scheduledDowngrade) {
     </Card>
   )
 }
-```
+\`\`\`
 
 **Points clés** :
 - ✅ Parse JSON pour détecter downgrade
@@ -248,7 +248,7 @@ if (scheduledDowngrade) {
 
 **Fonctionnalités** :
 
-```sql
+\`\`\`sql
 -- Fonction pour traiter les downgrades expirés
 CREATE OR REPLACE FUNCTION process_scheduled_downgrades()
 RETURNS void AS $$
@@ -281,11 +281,11 @@ SELECT cron.schedule(
   '0 * * * *', -- Chaque heure
   $$ SELECT process_scheduled_downgrades(); $$
 );
-```
+\`\`\`
 
 **Table d'audit créée** :
 
-```sql
+\`\`\`sql
 CREATE TABLE subscription_audit_log (
   id UUID PRIMARY KEY,
   subscription_id UUID REFERENCES subscriptions(id),
@@ -296,7 +296,7 @@ CREATE TABLE subscription_audit_log (
   notes TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
-```
+\`\`\`
 
 **Points clés** :
 - ✅ Cron job toutes les heures
@@ -310,7 +310,7 @@ CREATE TABLE subscription_audit_log (
 
 **Fichier** : `supabase/migrations/20250107000001_scheduled_downgrade_notification.sql`
 
-```sql
+\`\`\`sql
 CREATE OR REPLACE FUNCTION notify_scheduled_downgrade_ready(p_user_id UUID)
 RETURNS JSONB AS $$
 DECLARE
@@ -332,7 +332,7 @@ BEGIN
   );
 END;
 $$;
-```
+\`\`\`
 
 **Usage futur** : Edge Function Supabase appellera cette fonction pour envoyer email via Resend/SendGrid.
 
@@ -351,10 +351,10 @@ $$;
 | **Expérience** | ⭐ Mauvaise | ⭐⭐⭐⭐⭐ Excellente |
 
 **Calcul proration** :
-```
+\`\`\`
 Crédit = (23 jours / 30 jours) × 99.99€ = 76.66€
 Facture finale = 299.99€ - 76.66€ = 223.33€ ✅
-```
+\`\`\`
 
 ---
 
@@ -370,13 +370,13 @@ Facture finale = 299.99€ - 76.66€ = 223.33€ ✅
 | **Expérience** | ⭐ Horrible | ⭐⭐⭐⭐⭐ Excellente |
 
 **Fonctionnement** :
-```
+\`\`\`
 Ancien : Expire le 30 décembre
 Action : Marqué cancel_at_period_end = true
 Résultat : User continue jusqu'au 30 déc ✅
 Puis : Cron job marque cancelled = true
 Ensuite : User crée nouveau abonnement via UI
-```
+\`\`\`
 
 ---
 
@@ -385,13 +385,13 @@ Ensuite : User crée nouveau abonnement via UI
 ### Test 1 : Upgrade avec Proration
 
 **Setup** :
-```bash
+\`\`\`bash
 # Terminal 1 : Dev server
 pnpm dev
 
 # Terminal 2 : Stripe CLI
 stripe listen --forward-to localhost:3000/api/webhooks/stripe
-```
+\`\`\`
 
 **Steps** :
 1. ✅ Créer abonnement mensuel (99.99€)
@@ -433,7 +433,7 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
 ### Test 3 : Vérifier Cron Job
 
 **Commande Supabase** :
-```sql
+\`\`\`sql
 -- Forcer l'exécution manuelle du cron job
 SELECT process_scheduled_downgrades();
 
@@ -454,7 +454,7 @@ FROM subscriptions
 WHERE cancel_at_period_end = TRUE
   AND current_period_end < NOW()
 ORDER BY current_period_end DESC;
-```
+\`\`\`
 
 ---
 
@@ -464,23 +464,23 @@ ORDER BY current_period_end DESC;
 
 Dans Supabase Dashboard → SQL Editor :
 
-```sql
+\`\`\`sql
 CREATE EXTENSION IF NOT EXISTS pg_cron;
-```
+\`\`\`
 
 ### 2. Appliquer Migrations
 
-```bash
+\`\`\`bash
 cd supabase/migrations
 psql $DATABASE_URL -f 20250107000000_setup_scheduled_downgrade_cron.sql
 psql $DATABASE_URL -f 20250107000001_scheduled_downgrade_notification.sql
-```
+\`\`\`
 
 Ou via Supabase Dashboard → SQL Editor (copier/coller le contenu des migrations).
 
 ### 3. Vérifier Cron Jobs
 
-```sql
+\`\`\`sql
 -- Lister tous les cron jobs
 SELECT * FROM cron.job;
 
@@ -489,7 +489,7 @@ SELECT * FROM cron.job_run_details
 WHERE jobid = (SELECT jobid FROM cron.job WHERE jobname = 'process-scheduled-downgrades')
 ORDER BY start_time DESC
 LIMIT 10;
-```
+\`\`\`
 
 ---
 
@@ -504,7 +504,7 @@ LIMIT 10;
 
 ### Logs à Monitorer
 
-```typescript
+\`\`\`typescript
 // Dans app/actions/stripe.ts
 console.log("[v0] Upgrade proration info:", {
   daysRemaining,
@@ -514,11 +514,11 @@ console.log("[v0] Upgrade proration info:", {
 })
 
 console.log("[v0] Downgrade scheduled for:", periodEndDate)
-```
+\`\`\`
 
 ### Queries Utiles
 
-```sql
+\`\`\`sql
 -- Nombre de downgrades planifiés en attente
 SELECT COUNT(*) FROM subscriptions
 WHERE cancel_at_period_end = TRUE AND cancelled = FALSE;
@@ -535,7 +535,7 @@ SELECT
 FROM subscription_audit_log
 GROUP BY action, day
 ORDER BY day DESC;
-```
+\`\`\`
 
 ---
 

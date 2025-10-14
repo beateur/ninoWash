@@ -8,11 +8,11 @@
 - **Responsive**: sidebar desktop, bottom nav mobile
 
 ### 2. Composants créés
-```
+\`\`\`
 ✅ components/layout/dashboard-sidebar.tsx
 ✅ components/booking/booking-card.tsx  
 ✅ components/dashboard/dashboard-client.tsx
-```
+\`\`\`
 
 ### 3. Refonte du dashboard
 - **KPIs** en cards (réservations actives, adresses, prochaine collecte)
@@ -28,7 +28,7 @@
 
 Créer `components/booking/report-problem-form.tsx`:
 
-```typescript
+\`\`\`typescript
 "use client"
 
 import { useState } from "react"
@@ -154,11 +154,11 @@ export function ReportProblemForm({ bookingId, onSuccess, onCancel }: ReportProb
     </Form>
   )
 }
-```
+\`\`\`
 
 **API Route** `app/api/bookings/[id]/report/route.ts`:
 
-```typescript
+\`\`\`typescript
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { z } from "zod"
@@ -219,11 +219,11 @@ export async function POST(
     )
   }
 }
-```
+\`\`\`
 
 **Migration SQL** pour la table `booking_reports`:
 
-```sql
+\`\`\`sql
 -- Create booking_reports table
 CREATE TABLE IF NOT EXISTS booking_reports (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -256,13 +256,13 @@ CREATE POLICY "Admins can view all reports"
 CREATE POLICY "Admins can update all reports"
   ON booking_reports FOR UPDATE
   USING (auth.jwt() ->> 'role' = 'admin');
-```
+\`\`\`
 
 ### Étape 2: Intégrer le formulaire dans BookingDetailPanel
 
 Modifier `components/booking/booking-card.tsx`:
 
-```typescript
+\`\`\`typescript
 // Ajouter import
 import { ReportProblemForm } from "./report-problem-form"
 
@@ -280,7 +280,7 @@ import { ReportProblemForm } from "./report-problem-form"
     />
   </div>
 )}
-```
+\`\`\`
 
 ### Étape 3: Formulaire "Modifier réservations futures"
 
@@ -298,7 +298,7 @@ Créer les sections dans `/profile`:
 
 ## 📋 Commandes Git
 
-```bash
+\`\`\`bash
 # Créer une nouvelle feature branch
 git checkout -b feature/booking-problem-reports
 
@@ -310,7 +310,7 @@ git push origin feature/booking-problem-reports
 # Merge dans feature/dashboard-sidebar-ui
 git checkout feature/dashboard-sidebar-ui
 git merge feature/booking-problem-reports
-```
+\`\`\`
 
 ---
 

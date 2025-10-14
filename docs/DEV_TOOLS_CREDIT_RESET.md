@@ -15,13 +15,13 @@ These tools allow developers to manually reset weekly subscription credits durin
 **File**: `scripts/dev-reset-credits.sh`
 
 **Usage**:
-```bash
+\`\`\`bash
 # Reset all active subscriptions
 ./scripts/dev-reset-credits.sh
 
 # Reset specific user
 ./scripts/dev-reset-credits.sh abc-123-def-456-ghi
-```
+\`\`\`
 
 **Prerequisites**:
 - Load environment variables: `source .env.local`
@@ -32,7 +32,7 @@ These tools allow developers to manually reset weekly subscription credits durin
 - `SUPABASE_SERVICE_ROLE_KEY`
 
 **Example Output**:
-```bash
+\`\`\`bash
 ═══════════════════════════════════════════════════════════
    🔄 Manual Credit Reset (DEV MODE)
 ═══════════════════════════════════════════════════════════
@@ -74,7 +74,7 @@ Continue with reset? [y/N]: y
   ❌ Failed: 0
 
 ✨ Done!
-```
+\`\`\`
 
 **Features**:
 - ✅ Interactive confirmation prompt
@@ -93,14 +93,14 @@ Continue with reset? [y/N]: y
 **Security**: Blocked in production (`NODE_ENV === "production"`)
 
 **Request Body**:
-```json
+\`\`\`json
 {
   "userId": "abc-123-def-456" // Optional: reset specific user
 }
-```
+\`\`\`
 
 **Response** (Success):
-```json
+\`\`\`json
 {
   "success": true,
   "message": "Reset completed: 3 successful, 0 failed",
@@ -122,17 +122,17 @@ Continue with reset? [y/N]: y
     }
   ]
 }
-```
+\`\`\`
 
 **Response** (Error):
-```json
+\`\`\`json
 {
   "error": "This endpoint is only available in development mode"
 }
-```
+\`\`\`
 
 **cURL Example**:
-```bash
+\`\`\`bash
 # Reset all active subscriptions
 curl -X POST http://localhost:3000/api/dev/reset-credits \
   -H "Content-Type: application/json"
@@ -141,16 +141,16 @@ curl -X POST http://localhost:3000/api/dev/reset-credits \
 curl -X POST http://localhost:3000/api/dev/reset-credits \
   -H "Content-Type: application/json" \
   -d '{"userId":"abc-123-def-456"}'
-```
+\`\`\`
 
 **GET Endpoint** (Verification):
-```bash
+\`\`\`bash
 # Check all credits
 curl http://localhost:3000/api/dev/reset-credits
 
 # Check specific user
 curl "http://localhost:3000/api/dev/reset-credits?userId=abc-123-def-456"
-```
+\`\`\`
 
 ---
 
@@ -169,7 +169,7 @@ curl "http://localhost:3000/api/dev/reset-credits?userId=abc-123-def-456"
 - ✅ Only visible in development mode
 
 **Screenshot Description**:
-```
+\`\`\`
 ┌─────────────────────────────────────────────────┐
 │ 🔄 Dev: Reset Credits         [DEV ONLY]       │
 │ Manually reset weekly credits for testing       │
@@ -187,7 +187,7 @@ curl "http://localhost:3000/api/dev/reset-credits?userId=abc-123-def-456"
 │  • Quarterly plans: 3 credits                   │
 │  • Update reset_at timestamp                    │
 └─────────────────────────────────────────────────┘
-```
+\`\`\`
 
 **User Flow**:
 1. User clicks "Reset Credits Now" button
@@ -203,11 +203,11 @@ curl "http://localhost:3000/api/dev/reset-credits?userId=abc-123-def-456"
 ### Business Logic
 
 1. **Fetch Active Subscriptions**:
-   ```sql
+   \`\`\`sql
    SELECT id, user_id, plan_id 
    FROM subscriptions 
    WHERE status IN ('active', 'trialing')
-   ```
+   \`\`\`
 
 2. **Map Plan to Credits**:
    - `monthly` → 2 credits
@@ -215,13 +215,13 @@ curl "http://localhost:3000/api/dev/reset-credits?userId=abc-123-def-456"
    - Default → 2 credits
 
 3. **Call PostgreSQL Function**:
-   ```sql
+   \`\`\`sql
    SELECT initialize_weekly_credits(
      p_user_id := 'abc-123-def',
      p_subscription_id := 'sub-id',
      p_credits := 2
    );
-   ```
+   \`\`\`
 
 4. **Function Behavior** (`initialize_weekly_credits`):
    - Inserts new row in `subscription_credits`
@@ -237,7 +237,7 @@ curl "http://localhost:3000/api/dev/reset-credits?userId=abc-123-def-456"
 ### Scenario: Test Free Booking with Credits
 
 **Step 1**: Create test user with subscription
-```sql
+\`\`\`sql
 -- Insert subscription
 INSERT INTO subscriptions (user_id, plan_id, status, stripe_subscription_id)
 VALUES (
@@ -246,10 +246,10 @@ VALUES (
   'active',
   'sub_test_' || gen_random_uuid()
 );
-```
+\`\`\`
 
 **Step 2**: Reset credits via any tool
-```bash
+\`\`\`bash
 # Option A: Bash script
 ./scripts/dev-reset-credits.sh your-user-id
 
@@ -259,33 +259,33 @@ curl -X POST http://localhost:3000/api/dev/reset-credits \
   -d '{"userId":"your-user-id"}'
 
 # Option C: Click button in dashboard UI
-```
+\`\`\`
 
 **Step 3**: Verify credits
-```sql
+\`\`\`sql
 SELECT * FROM subscription_credits WHERE user_id = 'your-user-id';
 -- Expected: credits_remaining = 2, credits_allocated = 2
-```
+\`\`\`
 
 **Step 4**: Create booking (should be free)
-```bash
+\`\`\`bash
 # Via UI: /reservation
 # Via API: POST /api/bookings
-```
+\`\`\`
 
 **Step 5**: Verify credit consumed
-```sql
+\`\`\`sql
 SELECT * FROM subscription_credits WHERE user_id = 'your-user-id';
 -- Expected: credits_remaining = 1
 
 SELECT * FROM credit_usage_log WHERE user_id = 'your-user-id';
 -- Expected: 1 row with action = 'consumed'
-```
+\`\`\`
 
 **Step 6**: Reset again for next test
-```bash
+\`\`\`bash
 ./scripts/dev-reset-credits.sh your-user-id
-```
+\`\`\`
 
 ---
 
@@ -294,37 +294,37 @@ SELECT * FROM credit_usage_log WHERE user_id = 'your-user-id';
 ### Issue 1: "Missing environment variables"
 
 **Error**:
-```bash
+\`\`\`bash
 ❌ Error: Missing environment variables
 
 Required variables:
   - NEXT_PUBLIC_SUPABASE_URL
   - SUPABASE_SERVICE_ROLE_KEY
-```
+\`\`\`
 
 **Solution**:
-```bash
+\`\`\`bash
 # Load .env.local
 source .env.local
 
 # Or export manually
 export NEXT_PUBLIC_SUPABASE_URL="https://xxx.supabase.co"
 export SUPABASE_SERVICE_ROLE_KEY="eyJhbGc..."
-```
+\`\`\`
 
 ---
 
 ### Issue 2: "jq command not found"
 
 **Error**:
-```bash
+\`\`\`bash
 ❌ Error: 'jq' is required but not installed
-```
+\`\`\`
 
 **Solution**:
-```bash
+\`\`\`bash
 brew install jq
-```
+\`\`\`
 
 ---
 
@@ -336,7 +336,7 @@ brew install jq
 - Wrong user ID
 
 **Verification**:
-```sql
+\`\`\`sql
 -- Check if user has subscription
 SELECT id, user_id, plan_id, status 
 FROM subscriptions 
@@ -347,10 +347,10 @@ SELECT id, user_id, plan_id, status
 FROM subscriptions 
 ORDER BY created_at DESC 
 LIMIT 10;
-```
+\`\`\`
 
 **Solution**:
-```sql
+\`\`\`sql
 -- Create test subscription
 INSERT INTO subscriptions (user_id, plan_id, status, stripe_subscription_id)
 VALUES (
@@ -359,7 +359,7 @@ VALUES (
   'active',
   'sub_test_' || gen_random_uuid()
 );
-```
+\`\`\`
 
 ---
 
@@ -370,14 +370,14 @@ VALUES (
 - Component import error
 
 **Verification**:
-```bash
+\`\`\`bash
 # Check NODE_ENV
 echo $NODE_ENV
 # Should be empty or "development"
 
 # Check if dev server is running
 pnpm dev
-```
+\`\`\`
 
 **Solution**:
 - Ensure `NODE_ENV !== "production"`
@@ -389,11 +389,11 @@ pnpm dev
 ### Issue 5: 403 Forbidden (Production Block)
 
 **Error**:
-```json
+\`\`\`json
 {
   "error": "This endpoint is only available in development mode"
 }
-```
+\`\`\`
 
 **Cause**: Trying to use dev tools in production
 
@@ -406,7 +406,7 @@ pnpm dev
 ### Check Reset History
 
 **SQL Query**:
-```sql
+\`\`\`sql
 -- View all credit resets for a user
 SELECT 
   user_id,
@@ -419,12 +419,12 @@ FROM subscription_credits
 WHERE user_id = 'your-user-id'
 ORDER BY created_at DESC
 LIMIT 10;
-```
+\`\`\`
 
 ### Check Usage Log
 
 **SQL Query**:
-```sql
+\`\`\`sql
 -- View credit consumption history
 SELECT 
   user_id,
@@ -437,12 +437,12 @@ FROM credit_usage_log
 WHERE user_id = 'your-user-id'
 ORDER BY created_at DESC
 LIMIT 10;
-```
+\`\`\`
 
 ### Check All Active Credits
 
 **SQL Query**:
-```sql
+\`\`\`sql
 -- View current credits for all users
 SELECT 
   sc.user_id,
@@ -455,7 +455,7 @@ FROM subscription_credits sc
 JOIN subscriptions s ON s.user_id = sc.user_id
 WHERE s.status IN ('active', 'trialing')
 ORDER BY sc.created_at DESC;
-```
+\`\`\`
 
 ---
 

@@ -9,7 +9,7 @@
 ## ✅ Ce qui a été fait (Phase 1 Day 1-2)
 
 ### Fichiers créés (11)
-```
+\`\`\`
 app/reservation/guest/
   ├─ page.tsx                 ✅ Entry point
   └─ layout.tsx               ✅ Minimal layout
@@ -36,7 +36,7 @@ docs/
   ├─ PRD/PRD_GUEST_BOOKING_FLOW.md
   ├─ IMPLEMENTATION_GUEST_BOOKING_PHASE1.md
   └─ PHASE1_COMPLETION_SUMMARY.md
-```
+\`\`\`
 
 ### Fonctionnalités opérationnelles
 - ✅ Route `/reservation/guest` accessible
@@ -64,7 +64,7 @@ docs/
   - ❌ Pas de bouton "Définir par défaut"
 
 **Code de départ**:
-```typescript
+\`\`\`typescript
 // components/booking/guest/steps/addresses-step.tsx
 "use client"
 
@@ -97,7 +97,7 @@ export function AddressesStep({
     </div>
   )
 }
-```
+\`\`\`
 
 **Actions**:
 1. Créer le fichier `addresses-step.tsx`
@@ -124,7 +124,7 @@ export function AddressesStep({
   - ❌ Pas de services abonnement
 
 **Code de départ**:
-```typescript
+\`\`\`typescript
 // components/booking/guest/steps/services-step.tsx
 "use client"
 
@@ -163,7 +163,7 @@ export function ServicesStep({ initialItems, onComplete }: ServicesStepProps) {
     </div>
   )
 }
-```
+\`\`\`
 
 **Actions**:
 1. Créer le fichier `services-step.tsx`
@@ -189,12 +189,12 @@ export function ServicesStep({ initialItems, onComplete }: ServicesStepProps) {
 - Affichage délai livraison estimé (72h)
 
 **Code de départ**:
-```typescript
+\`\`\`typescript
 // components/booking/guest/steps/datetime-step.tsx
 // TODO: Copier depuis components/booking/datetime-step.tsx
 // TODO: Adapter les props pour accepter initialPickupDate + initialPickupTimeSlot
 // TODO: Supprimer les références aux crédits si existantes
-```
+\`\`\`
 
 **Actions**:
 1. Copier `datetime-step.tsx` depuis le parcours authentifié
@@ -222,7 +222,7 @@ export function ServicesStep({ initialItems, onComplete }: ServicesStepProps) {
   - ❌ Toggle "Utiliser mes crédits"
 
 **Code de départ**:
-```typescript
+\`\`\`typescript
 // components/booking/guest/steps/summary-step.tsx
 "use client"
 
@@ -277,7 +277,7 @@ export function SummaryStep({ bookingData, onComplete }: SummaryStepProps) {
     </div>
   )
 }
-```
+\`\`\`
 
 **Actions**:
 1. Créer le fichier `summary-step.tsx`
@@ -292,29 +292,29 @@ export function SummaryStep({ bookingData, onComplete }: SummaryStepProps) {
 ## 🔧 Commandes utiles
 
 ### Démarrer le serveur dev
-```bash
+\`\`\`bash
 pnpm dev
-```
+\`\`\`
 
 ### Tester l'application
-```
+\`\`\`
 http://localhost:3000/reservation/guest
-```
+\`\`\`
 
 ### Vérifier TypeScript
-```bash
+\`\`\`bash
 pnpm tsc --noEmit
-```
+\`\`\`
 
 ### Build production
-```bash
+\`\`\`bash
 pnpm build
-```
+\`\`\`
 
 ### Vérifier SessionStorage (console navigateur)
-```javascript
+\`\`\`javascript
 JSON.parse(sessionStorage.getItem('ninowash_guest_booking'))
-```
+\`\`\`
 
 ---
 

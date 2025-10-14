@@ -9,10 +9,10 @@
 - ✅ `env.d.ts` - Types TypeScript pour variables d'environnement
 
 **Configuration** :
-```typescript
+\`\`\`typescript
 export const SUBSCRIPTIONS_ENABLED: boolean =
   process.env.NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED === "true"
-```
+\`\`\`
 
 ---
 
@@ -31,9 +31,9 @@ export const SUBSCRIPTIONS_ENABLED: boolean =
 6. Badge "Bientôt disponible" avec icône Lock
 
 **Code markers pour cleanup futur** :
-```tsx
+\`\`\`tsx
 // TEASER LAYER — delete when subscriptions go live
-```
+\`\`\`
 
 ---
 
@@ -42,13 +42,13 @@ export const SUBSCRIPTIONS_ENABLED: boolean =
 **Fichier modifié** : `app/reservation/page.tsx`
 
 **Ajout** :
-```typescript
+\`\`\`typescript
 // SERVER GUARD: Block subscription access if feature flag is OFF
 const isSubscription = serviceType !== "classic"
 if (isSubscription && !SUBSCRIPTIONS_ENABLED) {
   redirect("/pricing?locked=1")
 }
-```
+\`\`\`
 
 **Sécurité** :
 - Vérification côté serveur (impossible à bypass client-side)
@@ -62,7 +62,7 @@ if (isSubscription && !SUBSCRIPTIONS_ENABLED) {
 **Fichier modifié** : `middleware.ts`
 
 **Ajout** :
-```typescript
+\`\`\`typescript
 // FEATURE FLAG GUARD: Block subscription access if flag OFF
 if (pathname.startsWith("/reservation") && !guestBooking) {
   const serviceType = searchParams.get("service")
@@ -73,7 +73,7 @@ if (pathname.startsWith("/reservation") && !guestBooking) {
     redirect("/pricing?locked=1")
   }
 }
-```
+\`\`\`
 
 **Protection** :
 - Première ligne de défense (avant page load)
@@ -159,7 +159,7 @@ if (pathname.startsWith("/reservation") && !guestBooking) {
 ### MVP Launch (Subscriptions Locked)
 
 **Étape 1** : Configurer variable d'environnement
-```bash
+\`\`\`bash
 # .env.local (development)
 NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=false
 
@@ -167,14 +167,14 @@ NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=false
 # Environment Variables → Add
 # Key: NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED
 # Value: false
-```
+\`\`\`
 
 **Étape 2** : Deploy
-```bash
+\`\`\`bash
 git add .
 git commit -m "feat: add subscription teaser with feature flag"
 git push origin dev
-```
+\`\`\`
 
 **Étape 3** : Vérifier
 - Visit `/` → Voir cartes abonnements avec blur
@@ -186,18 +186,18 @@ git push origin dev
 ### Production Activation (Subscriptions Live)
 
 **Étape 1** : Changer flag
-```bash
+\`\`\`bash
 # .env.local ou Vercel Dashboard
 NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=true
-```
+\`\`\`
 
 **Étape 2** : Redeploy
-```bash
+\`\`\`bash
 # Vercel : Automatic rebuild on env var change
 # Ou trigger manuel
 git commit --allow-empty -m "chore: activate subscriptions"
 git push origin main
-```
+\`\`\`
 
 **Étape 3** : Vérifier
 - Visit `/` → Cartes abonnements sans blur
@@ -211,9 +211,9 @@ git push origin main
 ## 📊 Testing Checklist
 
 ### Compilation TypeScript
-```bash
+\`\`\`bash
 pnpm tsc --noEmit
-```
+\`\`\`
 **Résultat** : ✅ 0 erreurs dans code production (15 erreurs dans tests obsolètes seulement)
 
 ### Visual Testing (Flag OFF)
@@ -261,9 +261,9 @@ pnpm tsc --noEmit
 Quand les abonnements sont live **en permanence**, cleanup possible :
 
 ### Rechercher les blocs teaser
-```bash
+\`\`\`bash
 grep -r "TEASER LAYER" components/
-```
+\`\`\`
 
 ### Simplifier le component
 **Supprimer** :

@@ -26,7 +26,7 @@
 
 **File**: `components/booking/guest/steps/services-step.tsx` (lines 48-73)
 
-```typescript
+\`\`\`typescript
 const fetchServices = async () => {
   try {
     const supabase = createClient() // Client-side Supabase (anon key)
@@ -52,7 +52,7 @@ const fetchServices = async () => {
     setLoading(false)
   }
 }
-```
+\`\`\`
 
 **Analysis**:
 - ✅ Uses `createClient()` from `@/lib/supabase/client` (correct for Client Component)
@@ -70,7 +70,7 @@ const fetchServices = async () => {
 
 **File**: `middleware.ts` (lines 19-30)
 
-```typescript
+\`\`\`typescript
 const PROTECTED_ROUTES = {
   auth: ["/dashboard", "/profile", "/addresses", "/payment-methods", "/subscription/manage"],
   authenticatedBooking: ["/reservation"],
@@ -78,22 +78,22 @@ const PROTECTED_ROUTES = {
   guest: ["/auth/signin", "/auth/signup"],
   guestBooking: ["/reservation/guest"],
 }
-```
+\`\`\`
 
 **Middleware Logic** (lines 128-140):
-```typescript
+\`\`\`typescript
 // Check guest booking routes FIRST (before authenticated booking check)
 // /reservation/guest should be accessible to everyone (no auth required)
 if (PROTECTED_ROUTES.guestBooking.some((route) => pathname.startsWith(route))) {
   // Allow access to everyone (logged in or not)
   console.log("[v0] Guest booking route accessed:", pathname, "User:", user ? "logged in" : "anonymous")
 }
-```
+\`\`\`
 
 **Terminal Logs**:
-```
+\`\`\`
 [v0] Guest booking route accessed: /reservation/guest User: anonymous
-```
+\`\`\`
 
 **Analysis**:
 - ✅ `/reservation/guest` is explicitly allowed for anonymous users
@@ -108,16 +108,16 @@ if (PROTECTED_ROUTES.guestBooking.some((route) => pathname.startsWith(route))) {
 
 **Schema Reference**: `docs/DATABASE_SCHEMA.md` (lines 257-268)
 
-```markdown
+\`\`\`markdown
 **services**
 - Service catalog
 - Columns: `id`, `name`, `code`, `type`, `base_price`, `processing_days`, `min_items`, `max_items`
 - Defines available services
 - Pricing and capacity management
-```
+\`\`\`
 
 **Expected Columns** (from `services-step.tsx`):
-```typescript
+\`\`\`typescript
 interface Service {
   id: string
   name: string
@@ -127,7 +127,7 @@ interface Service {
   category: string
   processing_time_hours: number
 }
-```
+\`\`\`
 
 **Analysis**:
 - ⚠️ Schema documentation shows different columns than TypeScript interface
@@ -141,10 +141,10 @@ interface Service {
 ### 4. Row Level Security (RLS) Analysis
 
 **Migration Search Results**:
-```bash
+\`\`\`bash
 grep -r "services.*rls\|policy.*services\|CREATE POLICY.*services" supabase/migrations/*.sql
 # No matches found ❌
-```
+\`\`\`
 
 **Migration Files** (20 total):
 - ❌ No migration file creates `services` table
@@ -179,12 +179,12 @@ When Row Level Security is enabled on a table **WITHOUT any policies**:
 4. User sees "Aucun service disponible" message (empty services array)
 
 **PostgreSQL Behavior**:
-```sql
+\`\`\`sql
 -- If RLS is enabled and no policies exist:
 SELECT * FROM services WHERE is_active = true;
 -- Returns: [] (empty array for anon user)
 -- No error thrown, just silently blocks access
-```
+\`\`\`
 
 ---
 
@@ -193,11 +193,11 @@ SELECT * FROM services WHERE is_active = true;
 ### Step 1: Check if RLS is Enabled
 
 **SQL Query** (run in Supabase Dashboard → SQL Editor):
-```sql
+\`\`\`sql
 SELECT tablename, rowsecurity 
 FROM pg_tables 
 WHERE schemaname = 'public' AND tablename = 'services';
-```
+\`\`\`
 
 **Expected Results**:
 - If `rowsecurity = true` → RLS is enabled
@@ -208,11 +208,11 @@ WHERE schemaname = 'public' AND tablename = 'services';
 ### Step 2: Check Existing Policies
 
 **SQL Query**:
-```sql
+\`\`\`sql
 SELECT schemaname, tablename, policyname, permissive, roles, cmd, qual
 FROM pg_policies
 WHERE tablename = 'services';
-```
+\`\`\`
 
 **Expected Results**:
 - If **NO rows returned** → No policies exist (THIS IS THE PROBLEM)
@@ -223,12 +223,12 @@ WHERE tablename = 'services';
 ### Step 3: Check Table Structure
 
 **SQL Query**:
-```sql
+\`\`\`sql
 SELECT column_name, data_type, is_nullable
 FROM information_schema.columns
 WHERE table_schema = 'public' AND table_name = 'services'
 ORDER BY ordinal_position;
-```
+\`\`\`
 
 **Expected Columns**:
 - `id` (uuid or text)
@@ -247,12 +247,12 @@ ORDER BY ordinal_position;
 ### Step 4: Check if Data Exists
 
 **SQL Query**:
-```sql
+\`\`\`sql
 -- Using service role (bypasses RLS)
 SELECT COUNT(*) as total_services, 
        COUNT(*) FILTER (WHERE is_active = true) as active_services
 FROM services;
-```
+\`\`\`
 
 **Expected Results**:
 - If `total_services = 0` → No data in table (need to seed)
@@ -267,7 +267,7 @@ FROM services;
 
 **Migration File**: `supabase/migrations/20251009000001_add_services_rls_policies.sql`
 
-```sql
+\`\`\`sql
 -- Enable RLS on services table (if not already enabled)
 ALTER TABLE services ENABLE ROW LEVEL SECURITY;
 
@@ -303,7 +303,7 @@ COMMENT ON POLICY "services_select_active_for_authenticated" ON services IS
 
 COMMENT ON POLICY "services_all_for_service_role" ON services IS
 'Allow admins (service role) full CRUD access to services';
-```
+\`\`\`
 
 **Why This Works**:
 - ✅ Anonymous users can SELECT active services (guest booking flow)
@@ -316,9 +316,9 @@ COMMENT ON POLICY "services_all_for_service_role" ON services IS
 ### Solution 2: Disable RLS (NOT RECOMMENDED)
 
 **SQL**:
-```sql
+\`\`\`sql
 ALTER TABLE services DISABLE ROW LEVEL SECURITY;
-```
+\`\`\`
 
 **Why NOT Recommended**:
 - ❌ Security vulnerability: Anyone can see inactive/draft services
@@ -331,7 +331,7 @@ ALTER TABLE services DISABLE ROW LEVEL SECURITY;
 ### Solution 3: Use Service Role Key (TEMPORARY WORKAROUND)
 
 **Changes to `services-step.tsx`**:
-```typescript
+\`\`\`typescript
 import { createAdminClient } from "@/lib/supabase/admin" // Service role
 
 const fetchServices = async () => {
@@ -340,7 +340,7 @@ const fetchServices = async () => {
     // ... rest of code
   }
 }
-```
+\`\`\`
 
 **Why NOT Recommended**:
 - ❌ **CRITICAL SECURITY ISSUE**: Exposes service role key to client-side
@@ -448,17 +448,17 @@ const fetchServices = async () => {
 ### After Fix Applied
 
 **Before**:
-```
+\`\`\`
 Step 2: Services
 ┌─────────────────────────────────────┐
 │   🛒                                 │
 │   Aucun service disponible pour     │
 │   le moment                          │
 └─────────────────────────────────────┘
-```
+\`\`\`
 
 **After**:
-```
+\`\`\`
 Step 2: Services
 ┌─────────────────────────────────────┐
 │ ✓ Repassage - 3.50 € / pièce       │
@@ -467,7 +467,7 @@ Step 2: Services
 │ ...                                  │
 └─────────────────────────────────────┘
 Total: 0.00 € (0 items)
-```
+\`\`\`
 
 ---
 

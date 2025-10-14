@@ -16,11 +16,11 @@ La page `/contact` n'existait pas dans le projet, mais plusieurs composants cont
 
 ### 1. **Header Desktop** (`components/layout/header.tsx`)
 **Avant** :
-```tsx
+\`\`\`tsx
 <Link href="/contact" className="text-sm font-medium hover:text-primary transition-colors">
   Contact
 </Link>
-```
+\`\`\`
 
 **Après** :
 - ❌ Lien "Contact" supprimé de la navigation principale
@@ -30,7 +30,7 @@ La page `/contact` n'existait pas dans le projet, mais plusieurs composants cont
 
 ### 2. **Navigation Mobile** (`components/layout/mobile-nav.tsx`)
 **Avant** :
-```tsx
+\`\`\`tsx
 const publicNavigation = [
   { name: "Accueil", href: "/", icon: Home },
   { name: "Services", href: "/services", icon: Wrench },
@@ -38,17 +38,17 @@ const publicNavigation = [
   { name: "À propos", href: "/a-propos", icon: Info },
   { name: "Contact", href: "/contact", icon: Phone },
 ]
-```
+\`\`\`
 
 **Après** :
-```tsx
+\`\`\`tsx
 const publicNavigation = [
   { name: "Accueil", href: "/", icon: Home },
   { name: "Services", href: "/services", icon: Wrench },
   { name: "Comment ça marche", href: "/comment-ca-marche", icon: HelpCircle },
   { name: "À propos", href: "/a-propos", icon: Info },
 ]
-```
+\`\`\`
 
 - ❌ Entrée "Contact" supprimée
 - ❌ Import `Phone` de lucide-react supprimé (non utilisé)
@@ -57,18 +57,18 @@ const publicNavigation = [
 
 ### 3. **Section Services** (`components/sections/services-section.tsx`)
 **Avant** :
-```tsx
+\`\`\`tsx
 <Button variant="outline" asChild>
   <Link href="/contact">Contactez-nous</Link>
 </Button>
-```
+\`\`\`
 
 **Après** :
-```tsx
+\`\`\`tsx
 <Button variant="outline" asChild>
   <a href="mailto:contact@ninowash.org">Contactez-nous par email</a>
 </Button>
-```
+\`\`\`
 
 - ✅ Lien remplacé par `mailto:` vers l'email de contact
 - ✅ Label modifié pour clarifier l'action
@@ -77,18 +77,18 @@ const publicNavigation = [
 
 ### 4. **Section Call-to-Action** (`components/sections/cta-section.tsx`)
 **Avant** :
-```tsx
+\`\`\`tsx
 <Button size="lg" variant="outline" asChild>
   <Link href="/contact">Nous contacter</Link>
 </Button>
-```
+\`\`\`
 
 **Après** :
-```tsx
+\`\`\`tsx
 <Button size="lg" variant="outline" asChild>
   <a href="mailto:contact@ninowash.org">Nous contacter par email</a>
 </Button>
-```
+\`\`\`
 
 - ✅ Lien remplacé par `mailto:`
 - ✅ Label modifié pour clarifier l'action
@@ -97,18 +97,18 @@ const publicNavigation = [
 
 ### 5. **Page Services** (`app/services/page.tsx`)
 **Avant** :
-```tsx
+\`\`\`tsx
 <Button asChild size="lg">
   <Link href="/contact">Nous contacter</Link>
 </Button>
-```
+\`\`\`
 
 **Après** :
-```tsx
+\`\`\`tsx
 <Button asChild size="lg">
   <a href="mailto:contact@ninowash.org">Nous contacter par email</a>
 </Button>
-```
+\`\`\`
 
 - ✅ Lien remplacé par `mailto:`
 - ✅ Label modifié pour clarifier l'action
@@ -117,18 +117,18 @@ const publicNavigation = [
 
 ### 6. **Page Erreur Abonnement** (`app/(authenticated)/subscription/error/page.tsx`)
 **Avant** :
-```tsx
+\`\`\`tsx
 <Button asChild variant="outline" size="lg">
   <Link href="/contact">Contacter le support</Link>
 </Button>
-```
+\`\`\`
 
 **Après** :
-```tsx
+\`\`\`tsx
 <Button asChild variant="outline" size="lg">
   <a href="mailto:contact@ninowash.org">Contacter le support</a>
 </Button>
-```
+\`\`\`
 
 - ✅ Lien remplacé par `mailto:`
 - ✅ Label adapté pour le contexte support
@@ -173,7 +173,7 @@ const publicNavigation = [
 Les utilisateurs peuvent toujours contacter l'entreprise via :
 
 ### Footer (`components/layout/footer.tsx`)
-```tsx
+\`\`\`tsx
 <div className="flex items-center gap-2">
   <Phone className="h-4 w-4" />
   <span>01 23 45 67 89</span>
@@ -186,7 +186,7 @@ Les utilisateurs peuvent toujours contacter l'entreprise via :
   <MapPin className="h-4 w-4 mt-0.5" />
   <span>Paris et petite couronne</span>
 </div>
-```
+\`\`\`
 
 ### Boutons "Nous contacter par email"
 - Ouvrent directement l'application mail par défaut
@@ -208,11 +208,11 @@ Les utilisateurs peuvent toujours contacter l'entreprise via :
 - [x] Footer : Informations de contact bien affichées
 
 ### Vérifications Techniques
-```bash
+\`\`\`bash
 # Recherche de références restantes
 grep -r "href=\"/contact\"" components/ app/
 # ✅ Aucun résultat
-```
+\`\`\`
 
 ### TypeScript
 - ✅ Aucune erreur TypeScript liée aux modifications
@@ -225,21 +225,21 @@ grep -r "href=\"/contact\"" components/ app/
 Si vous souhaitez créer une vraie page de contact plus tard :
 
 ### Option 1 : Page Contact avec Formulaire
-```
+\`\`\`
 app/contact/page.tsx
 - Formulaire de contact
 - Validation Zod
 - API route pour envoi d'email
 - Confirmation visuelle
-```
+\`\`\`
 
 ### Option 2 : Modal de Contact
-```
+\`\`\`
 components/contact/contact-modal.tsx
 - Modal déclenchable depuis n'importe où
 - Formulaire intégré
 - Ne nécessite pas de route dédiée
-```
+\`\`\`
 
 Pour l'instant, la solution `mailto:` est **simple, efficace et sans maintenance**.
 

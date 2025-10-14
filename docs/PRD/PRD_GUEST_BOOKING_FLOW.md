@@ -71,7 +71,7 @@ Créer un **parcours de réservation invité dédié**, complètement séparé d
 
 ### 🚀 Main Flow: Guest Booking
 
-```
+\`\`\`
 ┌─────────────────────────────────────────────────────────────────┐
 │                     PARCOURS INVITÉ (Guest)                      │
 └─────────────────────────────────────────────────────────────────┘
@@ -191,12 +191,12 @@ Créer un **parcours de réservation invité dédié**, complètement séparé d
    [Connexion avec email de bienvenue]
             ↓
    [/dashboard] (Compte créé, réservation visible)
-```
+\`\`\`
 
 ### 🔄 Alternative Flows
 
 #### Flow A: Email Already Exists
-```
+\`\`\`
 [ÉTAPE 0: Contact]
    User entre email existant
             ↓
@@ -205,10 +205,10 @@ Créer un **parcours de réservation invité dédié**, complètement séparé d
    [Modal: "Un compte existe avec cet email"]
             ↓
    [Se connecter] → /auth/signin?redirect=/reservation
-```
+\`\`\`
 
 #### Flow B: Payment Failed
-```
+\`\`\`
 [ÉTAPE 4: Paiement]
    Stripe payment fails
             ↓
@@ -217,10 +217,10 @@ Créer un **parcours de réservation invité dédié**, complètement séparé d
    [Bouton: Réessayer]
             ↓
    Reste sur l'étape 4 (données conservées)
-```
+\`\`\`
 
 #### Flow C: User Abandons Flow
-```
+\`\`\`
 [N'importe quelle étape]
    User quitte la page
             ↓
@@ -231,7 +231,7 @@ Créer un **parcours de réservation invité dédié**, complètement séparé d
    [Modal: "Reprendre où vous en étiez?"]
             ↓
    Option 2: [Non] → Reset + Étape 0
-```
+\`\`\`
 
 ---
 
@@ -239,7 +239,7 @@ Créer un **parcours de réservation invité dédié**, complètement séparé d
 
 ### 📂 File Structure (New Files Only)
 
-```
+\`\`\`
 app/
   reservation/
     guest/                          ← Nouvelle route dédiée invités
@@ -275,7 +275,7 @@ app/api/
         route.ts                    ← POST /api/bookings/guest/check-email
       create-account/
         route.ts                    ← POST /api/bookings/guest/create-account
-```
+\`\`\`
 
 ### 🔧 Technology Stack
 
@@ -338,7 +338,7 @@ app/api/
 #### Screen 1: ÉTAPE 0 - Contact
 
 **Layout:**
-```
+\`\`\`
 ┌────────────────────────────────────────────────────────┐
 │  [Progress: ●○○○○] 1/5 - Vos informations             │
 ├────────────────────────────────────────────────────────┤
@@ -363,7 +363,7 @@ app/api/
 │                                                        │
 │                          [Continuer →]                 │
 └────────────────────────────────────────────────────────┘
-```
+\`\`\`
 
 **Validations:**
 - Email: Format valide + vérification unicité (API call)
@@ -401,7 +401,7 @@ app/api/
 #### Screen 5: ÉTAPE 4 - Récapitulatif & Paiement
 
 **Layout:**
-```
+\`\`\`
 ┌────────────────────────────────────────────────────────┐
 │  [Progress: ●●●●●] 5/5 - Confirmation et paiement     │
 ├────────────────────────────────────────────────────────┤
@@ -436,7 +436,7 @@ app/api/
 │                                                        │
 │  [← Retour]              [Payer 28,00 € →]            │
 └────────────────────────────────────────────────────────┘
-```
+\`\`\`
 
 **Exclusions strictes:**
 - ❌ Section "Mes crédits disponibles"
@@ -455,26 +455,26 @@ app/api/
 **Purpose:** Vérifier si l'email existe déjà
 
 **Request:**
-```typescript
+\`\`\`typescript
 {
   email: string
 }
-```
+\`\`\`
 
 **Response:**
-```typescript
+\`\`\`typescript
 {
   exists: boolean
   suggestLogin?: boolean  // Si compte trouvé
 }
-```
+\`\`\`
 
 **Logic:**
-```typescript
+\`\`\`typescript
 1. Validate email format (Zod)
 2. Query Supabase: SELECT id FROM auth.users WHERE email = ?
 3. Return { exists: true/false }
-```
+\`\`\`
 
 ---
 
@@ -483,7 +483,7 @@ app/api/
 **Purpose:** Créer la réservation invité + compte + adresses
 
 **Request:**
-```typescript
+\`\`\`typescript
 {
   // Contact (Étape 0)
   guestContact: {
@@ -520,10 +520,10 @@ app/api/
   // Paiement (Étape 4)
   paymentIntentId: string  // Stripe Payment Intent ID
 }
-```
+\`\`\`
 
 **Response:**
-```typescript
+\`\`\`typescript
 {
   success: boolean
   booking: {
@@ -539,11 +539,11 @@ app/api/
   }
   message: string
 }
-```
+\`\`\`
 
 **Backend Logic (Orchestration):**
 
-```typescript
+\`\`\`typescript
 export async function POST(request: NextRequest) {
   // 1. Validation
   const body = await request.json()
@@ -681,7 +681,7 @@ export async function POST(request: NextRequest) {
       : "Réservation enregistrée avec succès."
   })
 }
-```
+\`\`\`
 
 ---
 
@@ -690,7 +690,7 @@ export async function POST(request: NextRequest) {
 **Purpose:** Créer un Payment Intent Stripe avant l'étape 4
 
 **Request:**
-```typescript
+\`\`\`typescript
 {
   items: Array<{ serviceId: string, quantity: number }>,
   metadata: {
@@ -698,15 +698,15 @@ export async function POST(request: NextRequest) {
     flow: "guest"
   }
 }
-```
+\`\`\`
 
 **Response:**
-```typescript
+\`\`\`typescript
 {
   clientSecret: string  // Pour Stripe Elements
   amount: number        // Total en cents
 }
-```
+\`\`\`
 
 ---
 
@@ -722,14 +722,14 @@ export async function POST(request: NextRequest) {
 **Pas de nouvelle table nécessaire** ✅
 
 **Colonnes supplémentaires (optionnel):**
-```sql
+\`\`\`sql
 -- Migration: Add guest tracking fields
 ALTER TABLE bookings
 ADD COLUMN created_from VARCHAR(20) DEFAULT 'authenticated';
 
 -- Index pour analytics
 CREATE INDEX idx_bookings_created_from ON bookings(created_from);
-```
+\`\`\`
 
 ---
 
@@ -763,7 +763,7 @@ CREATE INDEX idx_bookings_created_from ON bookings(created_from);
 ### ✅ Validation Schemas
 
 **Contact Schema (Zod):**
-```typescript
+\`\`\`typescript
 // lib/validations/guest-contact.ts
 import { z } from "zod"
 
@@ -802,10 +802,10 @@ export const guestContactSchema = z.object({
 })
 
 export type GuestContact = z.infer<typeof guestContactSchema>
-```
+\`\`\`
 
 **Full Booking Schema:**
-```typescript
+\`\`\`typescript
 // lib/validations/guest-booking.ts
 import { z } from "zod"
 import { guestContactSchema } from "./guest-contact"
@@ -821,7 +821,7 @@ export const guestBookingSchema = z.object({
   pickupTimeSlot: z.enum(["09:00-12:00", "14:00-17:00", "18:00-21:00"]),
   paymentIntentId: z.string().min(1)
 })
-```
+\`\`\`
 
 ---
 
@@ -830,7 +830,7 @@ export const guestBookingSchema = z.object({
 ### 💳 Stripe Payment Flow
 
 **Step 1: Create Payment Intent (Before Step 4)**
-```typescript
+\`\`\`typescript
 // When user reaches step 4
 const response = await fetch('/api/bookings/guest/create-payment-intent', {
   method: 'POST',
@@ -844,10 +844,10 @@ const response = await fetch('/api/bookings/guest/create-payment-intent', {
 })
 
 const { clientSecret } = await response.json()
-```
+\`\`\`
 
 **Step 2: Mount Stripe Elements (Step 4 UI)**
-```typescript
+\`\`\`typescript
 // components/booking/guest/guest-summary-step.tsx
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
@@ -924,10 +924,10 @@ function CheckoutForm({ bookingData, onComplete }) {
     </form>
   )
 }
-```
+\`\`\`
 
 **Step 3: Webhook Verification (Security)**
-```typescript
+\`\`\`typescript
 // app/api/webhooks/stripe/route.ts (existing, enhance)
 export async function POST(req: Request) {
   const sig = req.headers.get('stripe-signature')!
@@ -952,7 +952,7 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ received: true })
 }
-```
+\`\`\`
 
 ---
 
@@ -961,51 +961,51 @@ export async function POST(req: Request) {
 ### 🚨 Error Scenarios & Recovery
 
 **1. Email Already Exists (Step 0)**
-```
+\`\`\`
 Error: "Un compte existe déjà avec cet email"
 Recovery: 
   - Bouton "Se connecter" → /auth/signin?redirect=/reservation
   - Bouton "Continuer quand même" → Continue flow (skip account creation)
-```
+\`\`\`
 
 **2. Payment Failed (Step 4)**
-```
+\`\`\`
 Error: "Paiement refusé par votre banque"
 Recovery:
   - Afficher message Stripe
   - Bouton "Réessayer" → Recharger Payment Element
   - Bouton "Modifier services" → Retour Step 2
-```
+\`\`\`
 
 **3. Booking Creation Failed (Post-Payment)**
-```
+\`\`\`
 Error: "Réservation non enregistrée (mais paiement réussi)"
 Recovery:
   - Enregistrer dans table `failed_bookings` pour retry manuel
   - Email automatique au support
   - Afficher: "Erreur technique, nous vous contacterons sous 24h"
-```
+\`\`\`
 
 **4. Network Error (Any Step)**
-```
+\`\`\`
 Error: "Connexion perdue"
 Recovery:
   - SessionStorage conserve les données
   - Toast: "Vérifiez votre connexion et réessayez"
   - Bouton "Réessayer"
-```
+\`\`\`
 
 **5. Invalid Postal Code (Step 1)**
-```
+\`\`\`
 Error: "Code postal non couvert"
 Recovery:
   - Message: "Nous ne livrons pas encore dans cette zone"
   - Lien: "Être notifié de l'ouverture" (newsletter)
-```
+\`\`\`
 
 ### 📊 Error Logging
 
-```typescript
+\`\`\`typescript
 // lib/utils/error-logger.ts
 export function logGuestBookingError(step: string, error: Error, context: any) {
   console.error(`[Guest Booking - ${step}]`, {
@@ -1021,7 +1021,7 @@ export function logGuestBookingError(step: string, error: Error, context: any) {
     // sentry.captureException(error, { tags: { flow: 'guest_booking', step } })
   }
 }
-```
+\`\`\`
 
 ---
 
@@ -1148,7 +1148,7 @@ export function logGuestBookingError(step: string, error: Error, context: any) {
 ### 📈 Key Performance Indicators
 
 **Conversion Funnel:**
-```
+\`\`\`
 Marketing Page (100%)
   ↓ Click "Réserver maintenant"
 Step 0 - Contact (Target: 80%)
@@ -1162,7 +1162,7 @@ Step 3 - DateTime (Target: 95%)
 Step 4 - Payment (Target: 70%)
   ↓
 Booking Created (Target: 30% overall conversion)
-```
+\`\`\`
 
 **Success Criteria (3 months post-launch):**
 - [ ] Guest conversion rate ≥ 30% (click → booking)
@@ -1186,7 +1186,7 @@ Booking Created (Target: 30% overall conversion)
 ### 🔄 Orchestration Sequence (Critical Path)
 
 **Flow séquentiel bloquant:**
-```
+\`\`\`
 1. PAYMENT (Stripe) 
    ↓ [BLOCKS next step]
 2. ACCOUNT CREATION (Supabase Auth)
@@ -1194,7 +1194,7 @@ Booking Created (Target: 30% overall conversion)
 3. BOOKING CREATION (Database)
    ↓
 4. SUCCESS
-```
+\`\`\`
 
 **Principe:** Chaque étape DOIT réussir avant de passer à la suivante.
 
@@ -1211,7 +1211,7 @@ Booking Created (Target: 30% overall conversion)
   - ❌ **PAS de retry automatique** (décision user uniquement)
   
 **UI Behavior:**
-```typescript
+\`\`\`typescript
 if (paymentError) {
   toast.error(`Paiement refusé: ${stripeError.message}`)
   // User reste sur Step 4, peut:
@@ -1219,7 +1219,7 @@ if (paymentError) {
   // - Changer de carte
   // - Retourner à Step 2 (modifier services)
 }
-```
+\`\`\`
 
 ---
 
@@ -1230,15 +1230,15 @@ if (paymentError) {
   - ✅ **Retry automatique: 3 tentatives max** (exponential backoff: 1s, 3s, 5s)
   - ✅ Après 3 échecs → **Log en database** (`failed_account_creations` table)
   - ✅ **Toast discret** (non bloquant): 
-    ```
+    \`\`\`
     "Une erreur est survenue. Veuillez contacter contact@ninowash.org 
     avec votre numéro de paiement: [payment_intent_id]"
-    ```
+    \`\`\`
   - ✅ Webhook Stripe détecte l'échec → email automatique au support
   - ❌ **PAS de refund automatique** (gestion manuelle support)
 
 **Database Log Schema:**
-```sql
+\`\`\`sql
 CREATE TABLE failed_account_creations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   payment_intent_id TEXT NOT NULL,
@@ -1252,10 +1252,10 @@ CREATE TABLE failed_account_creations (
   resolved_at TIMESTAMPTZ,
   resolved_by TEXT
 );
-```
+\`\`\`
 
 **Backend Logic:**
-```typescript
+\`\`\`typescript
 // POST /api/bookings/guest
 let accountCreationAttempts = 0
 let userId: string | null = null
@@ -1291,7 +1291,7 @@ if (!userId) {
     payment_intent_id: paymentIntentId
   }, { status: 500 })
 }
-```
+\`\`\`
 
 ---
 
@@ -1302,15 +1302,15 @@ if (!userId) {
   - ✅ **Retry automatique: 3 tentatives max** (exponential backoff)
   - ✅ Après 3 échecs → **Log en database** (`failed_bookings` table)
   - ✅ **Toast visible** (bloquant):
-    ```
+    \`\`\`
     "Erreur lors de l'enregistrement de votre réservation. 
     Veuillez contacter contact@ninowash.org avec votre référence: [payment_intent_id]"
-    ```
+    \`\`\`
   - ✅ Support contacte le client sous 24h pour créer la réservation manuellement
   - ❌ **PAS de refund automatique**
 
 **Database Log Schema:**
-```sql
+\`\`\`sql
 CREATE TABLE failed_bookings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   payment_intent_id TEXT NOT NULL,
@@ -1329,10 +1329,10 @@ CREATE TABLE failed_bookings (
   resolved_by TEXT,
   resolution_notes TEXT
 );
-```
+\`\`\`
 
 **Backend Logic:**
-```typescript
+\`\`\`typescript
 let bookingCreationAttempts = 0
 let bookingId: string | null = null
 
@@ -1372,7 +1372,7 @@ if (!bookingId) {
     user_id: userId // User account created successfully
   }, { status: 500 })
 }
-```
+\`\`\`
 
 ---
 
@@ -1381,12 +1381,12 @@ if (!bookingId) {
 - **Probability:** Medium (20-30% des cas)
 - **Mitigation:**
   - ✅ **Modal explicite** à l'étape 0 (Contact):
-    ```
+    \`\`\`
     ⚠️ Un compte existe avec cet email
     
     [Se connecter] → Redirect to /auth/signin?redirect=/reservation
     [Continuer quand même] → Skip account creation, booking-only mode
-    ```
+    \`\`\`
   - ✅ En mode "booking-only": 
     - Associer la réservation à l'user_id existant
     - Pas de création de compte

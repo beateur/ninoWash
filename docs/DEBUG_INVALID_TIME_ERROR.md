@@ -2,10 +2,10 @@
 
 ## ❌ Erreur Rencontrée
 
-```
+\`\`\`
 RangeError: Invalid time value at Date.toISOString()
 collection-delivery-step.tsx:72
-```
+\`\`\`
 
 Cette erreur se produisait lors de la sélection d'un créneau de collecte.
 
@@ -23,37 +23,37 @@ PostgreSQL stocke les colonnes `TIME` au format **`HH:MM:SS`** (convention stand
 
 #### 1. `components/booking/collection-delivery-step.tsx`
 **Lignes 70-88** : Extraction de `HH:MM` avant construction de la date
-```typescript
+\`\`\`typescript
 let timeStr = selectedPickup.end_time
 // PostgreSQL retourne TIME avec secondes (HH:MM:SS)
 // On extrait uniquement HH:MM pour l'ISO format
 if (timeStr.length > 5) {
   timeStr = timeStr.substring(0, 5) // "12:00:00" -> "12:00"
 }
-```
+\`\`\`
 
 **Lignes 124** : Fallback aussi adapté
-```typescript
+\`\`\`typescript
 time: `${slot.start_time.substring(0, 5)} - ${slot.end_time.substring(0, 5)}`
-```
+\`\`\`
 
 #### 2. `lib/services/logistic-slots.ts`
 **Fonction `validateSlotDelay`** (lignes 113-119) : Extraction avant construction de dates
-```typescript
+\`\`\`typescript
 const pickupEndTime = pickupSlot.end_time.substring(0, 5)
 const deliveryStartTime = deliverySlot.start_time.substring(0, 5)
-```
+\`\`\`
 
 **Fonction `generateLegacyDatesFromSlots`** (lignes 212, 225) : Format legacy cohérent
-```typescript
+\`\`\`typescript
 const pickupTimeSlot = `${pickupSlot.start_time.substring(0, 5)}-${pickupSlot.end_time.substring(0, 5)}`
-```
+\`\`\`
 
 ## 📊 Vérification
 
 Le format PostgreSQL est maintenant géré automatiquement. Vous pouvez vérifier dans Supabase :
 
-```sql
+\`\`\`sql
 SELECT 
   id,
   role,
@@ -64,7 +64,7 @@ SELECT
 FROM logistic_slots
 WHERE is_open = TRUE
 LIMIT 5;
-```
+\`\`\`
 
 **Résultat attendu** : `iso_format` contient `2025-10-14T12:00:00` ✅
 
@@ -78,7 +78,7 @@ LIMIT 5;
 
 1. **Ouvrir Supabase Dashboard > SQL Editor**
 2. **Exécuter cette requête pour voir le format actuel** :
-   ```sql
+   \`\`\`sql
    SELECT 
      id,
      role,
@@ -91,7 +91,7 @@ LIMIT 5;
      pg_typeof(end_time) as end_type
    FROM logistic_slots
    LIMIT 5;
-   ```
+   \`\`\`
 
 3. **Vérifier les résultats** :
    - `slot_date` doit être de type `date` et format `YYYY-MM-DD` (ex: `2025-10-14`)
@@ -102,7 +102,7 @@ LIMIT 5;
 
 Si le format est incorrect (par exemple `HH:MM:SS` au lieu de `HH:MM`), exécuter :
 
-```sql
+\`\`\`sql
 -- Voir les données actuelles
 SELECT role, slot_date, start_time, end_time FROM logistic_slots;
 
@@ -111,14 +111,14 @@ UPDATE logistic_slots
 SET 
   start_time = SUBSTRING(start_time::text FROM 1 FOR 5),
   end_time = SUBSTRING(end_time::text FROM 1 FOR 5);
-```
+\`\`\`
 
 ### Solution 3 : Réinsérer les Slots de Test avec le Bon Format
 
 1. **Supprimer les slots existants** :
-   ```sql
+   \`\`\`sql
    DELETE FROM logistic_slots WHERE slot_date >= '2025-10-14';
-   ```
+   \`\`\`
 
 2. **Réexécuter le script de test** :
    - Fichier : `scripts/insert-test-slots.sql`
@@ -128,7 +128,7 @@ SET
 
 Ouvrir `supabase/migrations/20251013000000_create_logistic_slots.sql` et vérifier :
 
-```sql
+\`\`\`sql
 CREATE TABLE IF NOT EXISTS public.logistic_slots (
   ...
   slot_date DATE NOT NULL,
@@ -136,21 +136,21 @@ CREATE TABLE IF NOT EXISTS public.logistic_slots (
   end_time TIME NOT NULL,    -- Doit être TIME, pas TIMESTAMP
   ...
 );
-```
+\`\`\`
 
 Si les colonnes sont de type `TIMESTAMP` ou `TIMESTAMPTZ`, il faut corriger :
 
-```sql
+\`\`\`sql
 ALTER TABLE logistic_slots 
   ALTER COLUMN start_time TYPE TIME USING start_time::time,
   ALTER COLUMN end_time TYPE TIME USING end_time::time;
-```
+\`\`\`
 
 ## 🧪 Test Rapide
 
 Pour vérifier rapidement si les données sont correctes :
 
-```sql
+\`\`\`sql
 -- Cette requête doit retourner des dates valides
 SELECT 
   id,
@@ -159,7 +159,7 @@ SELECT
 FROM logistic_slots
 WHERE is_open = TRUE
 LIMIT 5;
-```
+\`\`\`
 
 **Résultat attendu** : Des chaînes comme `2025-10-14T17:00:00` (format ISO valide)
 
@@ -193,9 +193,9 @@ Le composant `CollectionDeliveryStep` a été modifié pour :
 
 1. **Copier les logs de la console** (avec les données du slot)
 2. **Exécuter cette requête dans Supabase** :
-   ```sql
+   \`\`\`sql
    SELECT * FROM logistic_slots WHERE role = 'pickup' AND is_open = TRUE;
-   ```
+   \`\`\`
 3. **Partager les résultats** pour diagnostic approfondi
 
 ## 📖 Ressources

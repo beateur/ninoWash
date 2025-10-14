@@ -8,7 +8,7 @@
 
 ## 🔴 Erreur Originale
 
-```
+\`\`\`
 [API] Address deletion error: {
   code: '23503',
   details: 'Key (id)=(d637c2d4-eb07-4afc-bf7d-138e69d5900f) is still referenced from table "bookings".',
@@ -16,7 +16,7 @@
   message: 'update or delete on table "user_addresses" violates foreign key constraint "bookings_pickup_address_id_fkey" on table "bookings"'
 }
 DELETE /api/addresses/d637c2d4-eb07-4afc-bf7d-138e69d5900f 500 in 1337ms
-```
+\`\`\`
 
 **Impact** : Mauvaise UX - Message d'erreur technique non compréhensible par l'utilisateur
 
@@ -28,7 +28,7 @@ DELETE /api/addresses/d637c2d4-eb07-4afc-bf7d-138e69d5900f 500 in 1337ms
 
 Ajout d'une vérification AVANT la tentative de suppression dans `app/api/addresses/[id]/route.ts` :
 
-```typescript
+\`\`\`typescript
 // Check if address is used in any bookings
 const { data: bookingsWithAddress, error: bookingCheckError } = await supabase
   .from("bookings")
@@ -45,13 +45,13 @@ if (bookingsWithAddress && bookingsWithAddress.length > 0) {
     { status: 400 } // 400 au lieu de 500
   )
 }
-```
+\`\`\`
 
 ### 2️⃣ **Fallback sur Erreur PostgreSQL**
 
 Si la vérification échoue et que PostgreSQL rejette quand même la suppression :
 
-```typescript
+\`\`\`typescript
 if (deleteError) {
   console.error("[API] Address deletion error:", deleteError)
   
@@ -71,13 +71,13 @@ if (deleteError) {
     { status: 500 }
   )
 }
-```
+\`\`\`
 
 ### 3️⃣ **Gestion des Erreurs Frontend**
 
 Mise à jour de `components/addresses/addresses-section.tsx` :
 
-```typescript
+\`\`\`typescript
 const handleDeleteConfirm = async () => {
   try {
     const response = await fetch(`/api/addresses/${deleteConfirm.address.id}`, {
@@ -102,7 +102,7 @@ const handleDeleteConfirm = async () => {
     setDeleteConfirm({ open: false, address: null })
   }
 }
-```
+\`\`\`
 
 **Avant** : `throw error` → erreur non gérée  
 **Après** : Toast d'erreur avec message clair
@@ -111,7 +111,7 @@ const handleDeleteConfirm = async () => {
 
 Ajout d'une prop `onSetDefault` au composant `AddressCard` :
 
-```tsx
+\`\`\`tsx
 // components/addresses/address-card.tsx
 interface AddressCardProps {
   address: Address
@@ -131,7 +131,7 @@ interface AddressCardProps {
     Définir par défaut
   </Button>
 )}
-```
+\`\`\`
 
 ---
 
@@ -139,7 +139,7 @@ interface AddressCardProps {
 
 ### Table `bookings`
 
-```sql
+\`\`\`sql
 ALTER TABLE bookings 
   ADD CONSTRAINT bookings_pickup_address_id_fkey 
   FOREIGN KEY (pickup_address_id) 
@@ -149,7 +149,7 @@ ALTER TABLE bookings
   ADD CONSTRAINT bookings_delivery_address_id_fkey 
   FOREIGN KEY (delivery_address_id) 
   REFERENCES user_addresses(id);
-```
+\`\`\`
 
 **Comportement** : Si une adresse est référencée dans `bookings.pickup_address_id` ou `bookings.delivery_address_id`, PostgreSQL **bloque la suppression** (code d'erreur `23503`).
 
@@ -157,7 +157,7 @@ ALTER TABLE bookings
 
 ## 🎯 Flux de Suppression (Après Fix)
 
-```
+\`\`\`
 User clicks "Supprimer"
   ↓
 Frontend sends DELETE /api/addresses/{id}
@@ -173,7 +173,7 @@ Backend: DELETE from database ✅
 PostgreSQL constraint error (fallback) ❌ → 400 (code 23503 détecté)
   ↓
 Frontend: Display toast with error message
-```
+\`\`\`
 
 ---
 
@@ -200,10 +200,10 @@ Au lieu de supprimer physiquement, on pourrait :
 - Pas de contrainte de clé étrangère à gérer
 
 **Migration SQL** :
-```sql
+\`\`\`sql
 ALTER TABLE user_addresses ADD COLUMN deleted_at TIMESTAMPTZ DEFAULT NULL;
 CREATE INDEX idx_user_addresses_deleted_at ON user_addresses(deleted_at);
-```
+\`\`\`
 
 ---
 

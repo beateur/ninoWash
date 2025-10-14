@@ -9,9 +9,9 @@
 ## 🔧 Qu'est-ce qui a été corrigé ?
 
 **Problème initial** : La migration essayait de modifier des tables qui n'existent pas (ex: `payments`), causant l'erreur :
-```
+\`\`\`
 ERROR: 42P01: relation "public.payments" does not exist
-```
+\`\`\`
 
 **Solution** : La migration vérifie maintenant l'existence de chaque table AVANT d'essayer de modifier ses contraintes.
 
@@ -33,7 +33,7 @@ ERROR: 42P01: relation "public.payments" does not exist
 3. **Cliquer "Run"**
 
 4. **Vérifier la sortie** :
-   ```
+   \`\`\`
    🔧 Starting foreign key constraint fixes...
    
    ✅ Fixed: user_addresses.user_id → auth.users(id)
@@ -58,7 +58,7 @@ ERROR: 42P01: relation "public.payments" does not exist
    ✅ user_addresses.user_id → auth.users
    
    🎉 All foreign keys correctly point to auth.users!
-   ```
+   \`\`\`
 
 ---
 
@@ -84,7 +84,7 @@ ERROR: 42P01: relation "public.payments" does not exist
 ## 🧪 Test Après Migration
 
 ### Test 1: Créer une Adresse
-```bash
+\`\`\`bash
 # 1. Ouvrir l'app
 open http://localhost:3000/addresses
 
@@ -93,10 +93,10 @@ open http://localhost:3000/addresses
 # 4. Cliquer "Enregistrer"
 
 # ✅ Résultat : Adresse créée sans erreur !
-```
+\`\`\`
 
 ### Test 2: Créer une Réservation
-```bash
+\`\`\`bash
 # 1. Ouvrir le booking flow
 open http://localhost:3000/reservation
 
@@ -105,14 +105,14 @@ open http://localhost:3000/reservation
 # 4. Confirmer la réservation
 
 # ✅ Résultat : Réservation créée sans erreur !
-```
+\`\`\`
 
 ### Test 3: Vérifier dans Supabase
-```sql
+\`\`\`sql
 -- Vérifier que les nouvelles lignes existent
 SELECT * FROM user_addresses ORDER BY created_at DESC LIMIT 3;
 SELECT * FROM bookings ORDER BY created_at DESC LIMIT 3;
-```
+\`\`\`
 
 ---
 
@@ -130,7 +130,7 @@ SELECT * FROM bookings ORDER BY created_at DESC LIMIT 3;
 
 ## 🔍 Code Clé Ajouté
 
-```sql
+\`\`\`sql
 -- Vérification d'existence avant modification
 SELECT EXISTS (
   SELECT FROM information_schema.tables 
@@ -144,7 +144,7 @@ ELSE
   -- Skipper avec message
   RAISE NOTICE '⏭️  Skipped: payments (table does not exist)';
 END IF;
-```
+\`\`\`
 
 Cette approche garantit que :
 1. ✅ La migration ne crash JAMAIS

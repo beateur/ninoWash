@@ -78,7 +78,7 @@
 ## ⚠️ Ce qui reste à faire
 
 ### 1. 🔴 **HIGH PRIORITY** - Application de la migration
-```bash
+\`\`\`bash
 # Via Supabase CLI
 cd /Users/bilel/Documents/websites/ninoWebsite/ninoWash
 supabase db push
@@ -86,7 +86,7 @@ supabase db push
 # OU via Supabase Studio
 # Copier le contenu de supabase/migrations/20251004_booking_cancellation_and_reports.sql
 # Exécuter dans SQL Editor
-```
+\`\`\`
 
 **Voir**: `supabase/migrations/MIGRATION_GUIDE.md` pour les instructions complètes.
 
@@ -167,17 +167,17 @@ Le endpoint API est prêt (`PUT /api/bookings/[id]`), mais l'UI manque :
 
 ### Étapes recommandées:
 1. **Local Testing**:
-   ```bash
+   \`\`\`bash
    # Appliquer migration locale
    supabase db push
    
    # Tester les endpoints
    pnpm dev
    # Tester manuellement via UI
-   ```
+   \`\`\`
 
 2. **Staging**:
-   ```bash
+   \`\`\`bash
    # Appliquer migration sur staging
    supabase db push --project-ref STAGING_PROJECT_REF
    
@@ -185,10 +185,10 @@ Le endpoint API est prêt (`PUT /api/bookings/[id]`), mais l'UI manque :
    git push staging feature/dashboard-sidebar-ui
    
    # Smoke tests
-   ```
+   \`\`\`
 
 3. **Production**:
-   ```bash
+   \`\`\`bash
    # Backup database
    # Appliquer migration
    supabase db push --project-ref PROD_PROJECT_REF
@@ -197,7 +197,7 @@ Le endpoint API est prêt (`PUT /api/bookings/[id]`), mais l'UI manque :
    git push production main
    
    # Monitor errors
-   ```
+   \`\`\`
 
 ---
 

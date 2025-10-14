@@ -39,14 +39,14 @@
 ## 🚀 Comment tester
 
 ### 1. Démarrer le serveur dev
-```bash
+\`\`\`bash
 pnpm dev
-```
+\`\`\`
 
 ### 2. Naviguer vers la route
-```
+\`\`\`
 http://localhost:3000/reservation/guest
-```
+\`\`\`
 
 ### 3. Tester Step 0 (Contact)
 - ✅ Remplir email, prénom, nom
@@ -57,10 +57,10 @@ http://localhost:3000/reservation/guest
 - ✅ Stepper montre "Step 1 completed"
 
 ### 4. Vérifier SessionStorage
-```javascript
+\`\`\`javascript
 // Dans la console navigateur
 JSON.parse(sessionStorage.getItem('ninowash_guest_booking'))
-```
+\`\`\`
 
 ### 5. Tester email existant
 - Entrer un email de compte existant
@@ -72,7 +72,7 @@ JSON.parse(sessionStorage.getItem('ninowash_guest_booking'))
 ## ⚠️ Actions requises AVANT Phase 1 Day 3-4
 
 ### 1. Appliquer la migration SQL
-```bash
+\`\`\`bash
 # Option A: Supabase Dashboard
 # 1. Aller dans SQL Editor
 # 2. Copier le contenu de supabase/migrations/20250109000001_add_failed_operations_tables.sql
@@ -81,10 +81,10 @@ JSON.parse(sessionStorage.getItem('ninowash_guest_booking'))
 # Option B: Script CLI
 cd supabase/migrations
 ./apply-migration.sh 20250109000001_add_failed_operations_tables.sql
-```
+\`\`\`
 
 ### 2. Vérifier les tables créées
-```sql
+\`\`\`sql
 -- Vérifier la structure
 \d+ failed_account_creations
 \d+ failed_bookings
@@ -93,17 +93,17 @@ cd supabase/migrations
 SELECT tablename, policyname 
 FROM pg_policies 
 WHERE tablename IN ('failed_account_creations', 'failed_bookings');
-```
+\`\`\`
 
 ### 3. Tester l'API check-email
-```bash
+\`\`\`bash
 curl -X POST http://localhost:3000/api/bookings/guest/check-email \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com"}'
 
 # Réponse attendue:
 # {"exists":false,"suggestLogin":false}
-```
+\`\`\`
 
 ---
 

@@ -184,19 +184,19 @@ Created 2 new tables for tracking guest booking failures:
 **Purpose**: Check if email already exists in Supabase Auth
 
 **Request Body**:
-```json
+\`\`\`json
 {
   "email": "user@example.com"
 }
-```
+\`\`\`
 
 **Response**:
-```json
+\`\`\`json
 {
   "exists": true,
   "suggestLogin": true
 }
-```
+\`\`\`
 
 **Logic**:
 1. Validate email format (Zod)
@@ -209,7 +209,7 @@ Created 2 new tables for tracking guest booking failures:
 
 ## 📂 File Structure Created
 
-```
+\`\`\`
 app/
   reservation/
     guest/
@@ -245,7 +245,7 @@ lib/
 supabase/
   migrations/
     20250109000001_add_failed_operations_tables.sql  ✅ Error tracking tables
-```
+\`\`\`
 
 ---
 
@@ -309,18 +309,18 @@ supabase/
 2. Copy content of `supabase/migrations/20250109000001_add_failed_operations_tables.sql`
 3. Paste and execute
 4. Verify tables created:
-   ```sql
+   \`\`\`sql
    SELECT * FROM pg_tables WHERE schemaname = 'public' AND tablename IN ('failed_account_creations', 'failed_bookings');
-   ```
+   \`\`\`
 
 ### Option 2: CLI Script
-```bash
+\`\`\`bash
 cd supabase/migrations
 ./apply-migration.sh 20250109000001_add_failed_operations_tables.sql
-```
+\`\`\`
 
 ### Verification Queries
-```sql
+\`\`\`sql
 -- Check table structures
 \d+ failed_account_creations
 \d+ failed_bookings
@@ -334,7 +334,7 @@ WHERE tablename IN ('failed_account_creations', 'failed_bookings');
 SELECT indexname, indexdef 
 FROM pg_indexes 
 WHERE tablename IN ('failed_account_creations', 'failed_bookings');
-```
+\`\`\`
 
 ---
 

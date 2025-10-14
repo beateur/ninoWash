@@ -25,7 +25,7 @@
 
 ### Caractéristiques Mensuel (99,99€/mois)
 
-```json
+\`\`\`json
 {
   "features": [
     "2 collectes par semaine",
@@ -42,11 +42,11 @@
     "loyalty_bonus": "1 collecte gratuite après 10 commandes"
   }
 }
-```
+\`\`\`
 
 ### Caractéristiques Trimestriel (249,99€/trimestre)
 
-```json
+\`\`\`json
 {
   "features": [
     "3 collectes par semaine",
@@ -65,7 +65,7 @@
     "free_storage_days": 7
   }
 }
-```
+\`\`\`
 
 ---
 
@@ -75,7 +75,7 @@
 
 **Fichier**: `scripts/03-create-database-schema-fixed.sql` (lignes 83-108)
 
-```sql
+\`\`\`sql
 CREATE TABLE IF NOT EXISTS bookings (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     booking_number VARCHAR(20) UNIQUE NOT NULL,
@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS bookings (
     cancelled_at TIMESTAMP,
     completed_at TIMESTAMP
 );
-```
+\`\`\`
 
 **❌ CONSTAT CRITIQUE**: **Il n'y a PAS de colonne `subscription_id`** dans la table `bookings` !
 
@@ -112,7 +112,7 @@ CREATE TABLE IF NOT EXISTS bookings (
 
 **Fichier**: `app/api/bookings/route.ts` (POST handler)
 
-```typescript
+\`\`\`typescript
 // Calcul du montant total (lignes 68-88)
 let totalAmount = 0
 const serviceIds = validatedData.items.map((item) => item.serviceId)
@@ -129,7 +129,7 @@ for (const item of validatedData.items) {
     totalAmount += service.base_price * item.quantity
   }
 }
-```
+\`\`\`
 
 **❌ CONSTAT**: **Aucune logique de vérification d'abonnement actif !**
 - Le calcul se fait **uniquement** sur `base_price * quantity`
@@ -141,18 +141,18 @@ for (const item of validatedData.items) {
 
 **Fichier**: `components/booking/summary-step.tsx`
 
-```typescript
+\`\`\`typescript
 const getTotalPrice = () => {
   return bookingData.items.reduce((total, item) => {
     const service = getServiceDetails(item.serviceId)
     return total + (service?.base_price || 0) * item.quantity
   }, 0)
 }
-```
+\`\`\`
 
 **Interface utilisateur** (lignes 344-360):
 
-```tsx
+\`\`\`tsx
 <div className="flex items-center justify-between text-lg font-semibold">
   <span>Total</span>
   <div className="flex items-center">
@@ -166,7 +166,7 @@ const getTotalPrice = () => {
     )}
   </div>
 </div>
-```
+\`\`\`
 
 **⚠️ INCOHÉRENCE FRONTEND/BACKEND**:
 - Le frontend affiche "Inclus dans l'abonnement" si `serviceType !== "classic"`
@@ -188,7 +188,7 @@ const getTotalPrice = () => {
 
 **Fichier**: `lib/validations/booking.ts`
 
-```typescript
+\`\`\`typescript
 export const createBookingSchema = z.object({
   pickupAddressId: z.string().uuid("Adresse de collecte requise").optional(),
   deliveryAddressId: z.string().uuid("Adresse de livraison requise").optional(),
@@ -202,7 +202,7 @@ export const createBookingSchema = z.object({
   guestDeliveryAddress: guestAddressSchema.optional(),
   guestContact: guestContactSchema.optional(),
 })
-```
+\`\`\`
 
 **❌ OBSERVATION**: Le champ `subscriptionId` existe dans le schéma mais **n'est jamais utilisé** dans le code backend !
 
@@ -265,7 +265,7 @@ export const createBookingSchema = z.object({
 
 Ce script montre une **tentative antérieure** de lier bookings et subscriptions :
 
-```sql
+\`\`\`sql
 -- User subscriptions table (lignes 26-35)
 CREATE TABLE user_subscriptions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -283,11 +283,11 @@ CREATE TABLE user_subscriptions (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     cancelled_at TIMESTAMP
 );
-```
+\`\`\`
 
 **Trigger prévu** (lignes 206-221):
 
-```sql
+\`\`\`sql
 -- Function to update subscription services remaining
 CREATE OR REPLACE FUNCTION update_subscription_services()
 RETURNS TRIGGER AS $$
@@ -308,7 +308,7 @@ CREATE TRIGGER update_subscription_services_trigger
     AFTER UPDATE ON bookings 
     FOR EACH ROW 
     EXECUTE FUNCTION update_subscription_services();
-```
+\`\`\`
 
 **❌ PROBLÈME**: Ce trigger référence `NEW.subscription_id` mais **cette colonne n'existe pas** dans la table `bookings` actuelle !
 
@@ -318,7 +318,7 @@ CREATE TRIGGER update_subscription_services_trigger
 
 ### Table `subscriptions` (depuis `002_subscription_billing.sql`)
 
-```sql
+\`\`\`sql
 CREATE TABLE IF NOT EXISTS public.subscriptions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -343,7 +343,7 @@ CREATE TABLE IF NOT EXISTS public.subscriptions (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
-```
+\`\`\`
 
 **❌ OBSERVATION**: Cette table gère l'abonnement Stripe mais **n'a aucun lien avec les réservations** !
 
@@ -354,16 +354,16 @@ CREATE TABLE IF NOT EXISTS public.subscriptions (
 ### 1. Frontend vs Backend
 
 **Frontend** (`summary-step.tsx`, ligne 356):
-```tsx
+\`\`\`tsx
 {serviceType === "classic" ? (
   <>{getTotalPrice().toFixed(2)}€</>
 ) : (
   <span className="text-green-600">Inclus dans l'abonnement</span>
 )}
-```
+\`\`\`
 
 **Backend** (`app/api/bookings/route.ts`, ligne 118):
-```typescript
+\`\`\`typescript
 const { data: booking, error: bookingError } = await supabase
   .from("bookings")
   .insert({
@@ -375,7 +375,7 @@ const { data: booking, error: bookingError } = await supabase
     payment_status: "pending",  // ❌ Paiement attendu !
     // ...
   })
-```
+\`\`\`
 
 **Résultat**: L'utilisateur croit que c'est "inclus" mais une facture est créée ! 🚨
 
@@ -392,15 +392,15 @@ const { data: booking, error: bookingError } = await supabase
 ### 3. Validation Schema vs Utilisation
 
 **Schema** (`lib/validations/booking.ts`, ligne 51):
-```typescript
+\`\`\`typescript
 subscriptionId: z.string().uuid().optional(),
-```
+\`\`\`
 
 **Utilisation dans l'API**: **Zéro occurrence !**
-```bash
+\`\`\`bash
 grep -r "subscriptionId" app/api/bookings/route.ts
 # Aucun résultat
-```
+\`\`\`
 
 ---
 
@@ -432,7 +432,7 @@ grep -r "subscriptionId" app/api/bookings/route.ts
 
 ### État de l'implémentation
 
-```
+\`\`\`
 Promesses Marketing   ≠   Réalité Technique
 ─────────────────────────────────────────────
 Tarifs préférentiels  →  Pas implémenté
@@ -440,7 +440,7 @@ Tarifs préférentiels  →  Pas implémenté
 Inclus dans l'abonnement → Toujours facturé
 Service client dédié  →  Pas de différence
 Priorité sur créneaux →  Pas de système
-```
+\`\`\`
 
 ### Recommandations Urgentes
 

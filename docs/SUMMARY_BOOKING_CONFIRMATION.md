@@ -49,7 +49,7 @@ Créer une page de confirmation intermédiaire après la création d'une réserv
 ## 🎨 Design de la Page
 
 ### Structure Visuelle
-```
+\`\`\`
 ┌────────────────────────────────────────┐
 │         🕐 Clock Icon (bleu)           │
 │                                        │
@@ -73,7 +73,7 @@ Créer une page de confirmation intermédiaire après la création d'une réserv
 └────────────────────────────────────────┘
 
   [Accéder au tableau de bord]  [Voir...]
-```
+\`\`\`
 
 ### Palette de Couleurs
 - **Fond card** : `bg-blue-50/50` (bleu très clair)
@@ -100,15 +100,15 @@ Créer une page de confirmation intermédiaire après la création d'une réserv
 ## 🔄 Flow Utilisateur
 
 ### Avant (Ancien Flow)
-```
+\`\`\`
 Clic "Confirmer" → API POST → Success
     ↓
 Utilisateur auth → /dashboard?success=true (toast)
 Invité → /?booking_success=true (banner)
-```
+\`\`\`
 
 ### Après (Nouveau Flow)
-```
+\`\`\`
 Clic "Confirmer" → API POST → Success
     ↓
 Tout le monde → /reservation/success?number=BOOK-12345
@@ -116,7 +116,7 @@ Tout le monde → /reservation/success?number=BOOK-12345
 Affiche page de confirmation détaillée
     ↓
 Clic CTA → /dashboard ou / (selon rôle)
-```
+\`\`\`
 
 ---
 
@@ -221,7 +221,7 @@ Clic CTA → /dashboard ou / (selon rôle)
 
 ## 🚀 Commandes Rapides
 
-```bash
+\`\`\`bash
 # Tester la page directement
 open http://localhost:3000/reservation/success?number=BOOK-12345
 
@@ -236,7 +236,7 @@ pnpm lint
 
 # Vérifier TypeScript (warnings attendus)
 pnpm tsc --noEmit
-```
+\`\`\`
 
 ---
 

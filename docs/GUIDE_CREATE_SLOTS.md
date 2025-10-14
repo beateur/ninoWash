@@ -15,10 +15,10 @@ Deux scripts sont disponibles pour créer des créneaux de collecte et livraison
 
 ### Prérequis
 - Variables d'environnement configurées dans `.env.local` :
-  ```bash
+  \`\`\`bash
   NEXT_PUBLIC_SUPABASE_URL=https://votre-projet.supabase.co
   SUPABASE_SERVICE_ROLE_KEY=votre-service-role-key
-  ```
+  \`\`\`
 
 ### Utilisation
 
@@ -26,7 +26,7 @@ Deux scripts sont disponibles pour créer des créneaux de collecte et livraison
 
 Ouvrir `scripts/create-slots.ts` et modifier la constante `SLOT_CONFIG` :
 
-```typescript
+\`\`\`typescript
 const SLOT_CONFIG: SlotConfig[] = [
   {
     date: "2025-10-21",           // Date du créneau (YYYY-MM-DD)
@@ -45,17 +45,17 @@ const SLOT_CONFIG: SlotConfig[] = [
   },
   // Ajouter autant de créneaux que nécessaire...
 ]
-```
+\`\`\`
 
 #### Étape 2 : Exécuter le script
 
-```bash
+\`\`\`bash
 pnpm tsx scripts/create-slots.ts
-```
+\`\`\`
 
 #### Sortie Attendue
 
-```
+\`\`\`
 🚀 Script de création de créneaux logistiques
 
 📋 Configuration:
@@ -78,7 +78,7 @@ pnpm tsx scripts/create-slots.ts
    2025-10-18: 2 collecte(s) + 2 livraison(s)
 
 🎉 Terminé! Les créneaux sont maintenant disponibles dans l'application.
-```
+\`\`\`
 
 ---
 
@@ -90,13 +90,13 @@ pnpm tsx scripts/create-slots.ts
 
 Ouvrir `scripts/create-slots-simple.sql` et éditer les blocs `INSERT INTO` :
 
-```sql
+\`\`\`sql
 -- Modifier la date, les horaires, le label selon vos besoins
 INSERT INTO public.logistic_slots (role, slot_date, start_time, end_time, label, is_open, capacity_limit, capacity_used, notes)
 VALUES 
   ('pickup', '2025-10-21', '09:00', '12:00', 'Matin', TRUE, 5, 0, 'Mon créneau personnalisé'),
   ('delivery', '2025-10-21', '09:00', '12:00', 'Matin', TRUE, 5, 0, 'Mon créneau personnalisé');
-```
+\`\`\`
 
 **Champs à personnaliser** :
 - `role` : `'pickup'` (collecte) ou `'delivery'` (livraison)
@@ -118,7 +118,7 @@ VALUES
 
 #### Sortie Attendue
 
-```
+\`\`\`
 ✅ Script exécuté avec succès!
 📊 Nombre de créneaux créés: 16
 
@@ -128,7 +128,7 @@ VALUES
    2025-10-18 : 2 collecte(s) + 2 livraison(s)
 
 🎉 Créneaux disponibles dans l'application!
-```
+\`\`\`
 
 ---
 
@@ -136,7 +136,7 @@ VALUES
 
 ### Créer une semaine complète de créneaux
 
-```typescript
+\`\`\`typescript
 // Dans create-slots.ts
 const DAYS = ["2025-10-21", "2025-10-23", "2025-10-25"] // Lun, Mer, Ven
 const TIMES = [
@@ -154,11 +154,11 @@ const SLOT_CONFIG = DAYS.flatMap(date =>
     createBoth: true,
   }))
 )
-```
+\`\`\`
 
 ### Créer uniquement des créneaux de collecte (sans livraison)
 
-```typescript
+\`\`\`typescript
 {
   date: "2025-10-21",
   startTime: "09:00",
@@ -166,24 +166,24 @@ const SLOT_CONFIG = DAYS.flatMap(date =>
   label: "Matin",
   createBoth: false,  // ← Pas de livraison
 }
-```
+\`\`\`
 
 ### Créer un créneau avec capacité limitée
 
 Modifier la constante `DEFAULT_CAPACITY` :
 
-```typescript
+\`\`\`typescript
 const DEFAULT_CAPACITY = 10 // Au lieu de 5
-```
+\`\`\`
 
 Ou directement dans le SQL :
 
-```sql
+\`\`\`sql
 INSERT INTO public.logistic_slots (role, slot_date, start_time, end_time, label, is_open, capacity_limit, ...)
 VALUES 
   ('pickup', '2025-10-21', '09:00', '12:00', 'Matin', TRUE, 10, 0, ...);
   --                                                          ↑ Capacité modifiée
-```
+\`\`\`
 
 ---
 
@@ -191,7 +191,7 @@ VALUES
 
 ### Voir tous les créneaux disponibles
 
-```sql
+\`\`\`sql
 SELECT 
   role,
   slot_date,
@@ -206,11 +206,11 @@ FROM logistic_slots
 WHERE slot_date >= CURRENT_DATE 
   AND is_open = TRUE
 ORDER BY slot_date, role, start_time;
-```
+\`\`\`
 
 ### Fermer un créneau (le rendre indisponible)
 
-```sql
+\`\`\`sql
 -- Fermer par date + horaire + rôle
 UPDATE logistic_slots 
 SET is_open = FALSE 
@@ -222,29 +222,29 @@ WHERE slot_date = '2025-10-21'
 UPDATE logistic_slots 
 SET is_open = FALSE 
 WHERE id = 'uuid-du-slot';
-```
+\`\`\`
 
 ### Rouvrir un créneau fermé
 
-```sql
+\`\`\`sql
 UPDATE logistic_slots 
 SET is_open = TRUE 
 WHERE slot_date = '2025-10-21' 
   AND start_time = '09:00';
-```
+\`\`\`
 
 ### Modifier la capacité d'un créneau
 
-```sql
+\`\`\`sql
 UPDATE logistic_slots 
 SET capacity_limit = 10 
 WHERE slot_date = '2025-10-21' 
   AND start_time = '09:00';
-```
+\`\`\`
 
 ### Supprimer des créneaux
 
-```sql
+\`\`\`sql
 -- Supprimer une date spécifique
 DELETE FROM logistic_slots 
 WHERE slot_date = '2025-10-21';
@@ -256,11 +256,11 @@ WHERE slot_date BETWEEN '2025-10-14' AND '2025-10-18';
 -- Supprimer tous les créneaux de test (ancien)
 DELETE FROM logistic_slots 
 WHERE slot_date < CURRENT_DATE;
-```
+\`\`\`
 
 ### Vérifier les créneaux les plus demandés
 
-```sql
+\`\`\`sql
 SELECT 
   slot_date,
   start_time,
@@ -275,7 +275,7 @@ WHERE slot_date >= CURRENT_DATE
   AND is_open = TRUE
 ORDER BY fill_rate_percent DESC
 LIMIT 10;
-```
+\`\`\`
 
 ---
 
@@ -336,9 +336,9 @@ Après exécution du script :
 ### Erreur "Variables d'environnement manquantes" (Script TS)
 
 Vérifier `.env.local` :
-```bash
+\`\`\`bash
 cat .env.local | grep SUPABASE
-```
+\`\`\`
 
 ### Erreur SQL "permission denied"
 
@@ -347,14 +347,14 @@ Utiliser la clé **service_role** (pas la clé anon) dans le script TypeScript.
 ### Les créneaux n'apparaissent pas dans l'interface
 
 1. Vérifier que `is_open = TRUE` :
-   ```sql
+   \`\`\`sql
    SELECT * FROM logistic_slots WHERE is_open = FALSE;
-   ```
+   \`\`\`
 
 2. Vérifier que la date est future :
-   ```sql
+   \`\`\`sql
    SELECT * FROM logistic_slots WHERE slot_date < CURRENT_DATE;
-   ```
+   \`\`\`
 
 3. Vérifier les RLS policies (Supabase Dashboard > Authentication > Policies)
 

@@ -123,7 +123,7 @@
 - [ ] Mettre à jour `docs/architecture.md` (section booking flow).
 
 ## 5. Data Flow
-```
+\`\`\`
 Utilisateur (guest/auth) → CollectionDeliveryStep → sélection slots
   ↓ (GET /api/logistic-slots?role=pickup/delivery)
 Front regroupe par date, applique règles délai
@@ -131,7 +131,7 @@ Front regroupe par date, applique règles délai
 Backend vérifie slots + délai, insère booking + slot_requests
   ↓ Réponse OK
 SummaryStep affiche slots sélectionnés
-```
+\`\`\`
 
 ## 6. Error Scenarios
 - Slot fermé entre temps → 409 Conflict, message utilisateur.
