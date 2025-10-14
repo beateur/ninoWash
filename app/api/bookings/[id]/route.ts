@@ -66,7 +66,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       )
     }
 
-    const { pickupDate, pickupTimeSlot, pickupAddressId, deliveryAddressId, specialInstructions } = validation.data
+    const { pickupDate, pickupTimeSlot, pickupAddressId, deliveryAddressId, specialInstructions, pickupSlotId, deliverySlotId } = validation.data
 
     // 2. Fetch existing booking
     const { data: booking, error: fetchError } = await supabase
@@ -114,28 +114,30 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       )
     }
 
-    // 5. Validate new pickup date is in the future (tomorrow minimum)
-    const tomorrow = new Date()
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    tomorrow.setHours(0, 0, 0, 0)
+    // 5. Validate new pickup date is in the future (tomorrow minimum) - only if pickupDate is provided
+    if (pickupDate) {
+      const tomorrow = new Date()
+      tomorrow.setDate(tomorrow.getDate() + 1)
+      tomorrow.setHours(0, 0, 0, 0)
 
-    const newPickupDate = new Date(pickupDate)
-    newPickupDate.setHours(0, 0, 0, 0)
+      const newPickupDate = new Date(pickupDate)
+      newPickupDate.setHours(0, 0, 0, 0)
 
-    console.log("[v0] Date validation:", {
-      tomorrow: tomorrow.toISOString(),
-      newPickupDate: newPickupDate.toISOString(),
-      isValid: newPickupDate >= tomorrow,
-    })
+      console.log("[v0] Date validation:", {
+        tomorrow: tomorrow.toISOString(),
+        newPickupDate: newPickupDate.toISOString(),
+        isValid: newPickupDate >= tomorrow,
+      })
 
-    if (newPickupDate < tomorrow) {
-      console.error("[v0] Date validation failed - pickup date is too soon")
-      return NextResponse.json(
-        {
-          error: "La date de collecte doit être au minimum demain",
-        },
-        { status: 400 }
-      )
+      if (newPickupDate < tomorrow) {
+        console.error("[v0] Date validation failed - pickup date is too soon")
+        return NextResponse.json(
+          {
+            error: "La date de collecte doit être au minimum demain",
+          },
+          { status: 400 }
+        )
+      }
     }
 
     // 6. Verify addresses belong to user
