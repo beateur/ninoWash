@@ -65,27 +65,40 @@ export function SummaryStep({ bookingData, onComplete }: SummaryStepProps) {
   }, [bookingData.items])
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString("fr-FR", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })
+    if (!dateString) return "Date non sélectionnée"
+    try {
+      const date = new Date(dateString)
+      if (isNaN(date.getTime())) return "Date invalide"
+      return date.toLocaleDateString("fr-FR", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    } catch (error) {
+      return "Date invalide"
+    }
   }
 
   const calculateDeliveryDate = (pickupDate: string): string => {
-    const delivery = new Date(pickupDate)
-    delivery.setDate(delivery.getDate() + 3) // 72h = 3 days
-    return delivery.toLocaleDateString("fr-FR", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-    })
+    if (!pickupDate) return "Date non disponible"
+    try {
+      const delivery = new Date(pickupDate)
+      if (isNaN(delivery.getTime())) return "Date invalide"
+      delivery.setDate(delivery.getDate() + 3) // 72h = 3 days
+      return delivery.toLocaleDateString("fr-FR", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+      })
+    } catch (error) {
+      return "Date invalide"
+    }
   }
 
   const getTimeSlotLabel = (value: string | null): string => {
-    return TIME_SLOTS.find((slot) => slot.value === value)?.label || value || ""
+    if (!value) return "Créneau non sélectionné"
+    return TIME_SLOTS.find((slot) => slot.value === value)?.label || value
   }
 
   return (

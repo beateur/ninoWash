@@ -92,22 +92,49 @@ export function SummaryStep({
   }
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString("fr-FR", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })
+    if (!dateString) return "Date non sélectionnée"
+    try {
+      const date = new Date(dateString)
+      if (isNaN(date.getTime())) return "Date invalide"
+      return date.toLocaleDateString("fr-FR", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    } catch (error) {
+      return "Date invalide"
+    }
   }
 
   const getTimeSlotLabel = (timeSlot: string) => {
+    if (!timeSlot) return "Créneau non sélectionné"
     const slots = {
       "09:00-12:00": "9h00 - 12h00",
       "14:00-17:00": "14h00 - 17h00",
       "18:00-21:00": "18h00 - 21h00",
     }
     return slots[timeSlot as keyof typeof slots] || timeSlot
+  }
+
+  const getDisplayDate = () => {
+    // Priorité : utiliser le slot si disponible
+    if (bookingData.pickupSlot?.slot_date) {
+      return formatDate(bookingData.pickupSlot.slot_date)
+    }
+    // Fallback : utiliser pickupDate
+    return formatDate(bookingData.pickupDate)
+  }
+
+  const getDisplayTimeSlot = () => {
+    // Priorité : utiliser le slot si disponible
+    if (bookingData.pickupSlot) {
+      const start = bookingData.pickupSlot.start_time?.substring(0, 5) || ""
+      const end = bookingData.pickupSlot.end_time?.substring(0, 5) || ""
+      return `${start} - ${end}`
+    }
+    // Fallback : utiliser pickupTimeSlot
+    return getTimeSlotLabel(bookingData.pickupTimeSlot)
   }
 
   const getServiceTypeInfo = () => {
@@ -253,7 +280,6 @@ export function SummaryStep({
               <h4 className="font-medium text-sm text-muted-foreground mb-1">COLLECTE</h4>
               {pickupAddress && (
                 <div>
-                  <p className="font-medium">{pickupAddress.label}</p>
                   <p className="text-sm text-muted-foreground">
                     {pickupAddress.street_address}
                     {(pickupAddress.buildingInfo || pickupAddress.building_info) && `, ${pickupAddress.buildingInfo || pickupAddress.building_info}`}
@@ -271,7 +297,6 @@ export function SummaryStep({
               <h4 className="font-medium text-sm text-muted-foreground mb-1">LIVRAISON</h4>
               {deliveryAddress && (
                 <div>
-                  <p className="font-medium">{deliveryAddress.label}</p>
                   <p className="text-sm text-muted-foreground">
                     {deliveryAddress.street_address}
                     {(deliveryAddress.buildingInfo || deliveryAddress.building_info) && `, ${deliveryAddress.buildingInfo || deliveryAddress.building_info}`}
@@ -296,12 +321,12 @@ export function SummaryStep({
           <CardContent className="space-y-4">
             <div>
               <h4 className="font-medium text-sm text-muted-foreground mb-1">DATE DE COLLECTE</h4>
-              <p className="font-medium">{formatDate(bookingData.pickupDate)}</p>
+              <p className="font-medium">{getDisplayDate()}</p>
             </div>
 
             <div>
               <h4 className="font-medium text-sm text-muted-foreground mb-1">CRÉNEAU HORAIRE</h4>
-              <p className="font-medium">{getTimeSlotLabel(bookingData.pickupTimeSlot)}</p>
+              <p className="font-medium">{getDisplayTimeSlot()}</p>
             </div>
 
             <div className="bg-muted p-3 rounded-lg">
