@@ -98,5 +98,3 @@ export default async function ReservationPage({ searchParams }: PageProps) {
   // Mode nouvelle réservation
   return <ReservationClient serviceType={serviceType} />
 }
-
-export { default as BookingFlow } from "./reservation-client"
