@@ -15,14 +15,14 @@
 ### Pattern de Modification Standard
 
 **AVANT (Link statique)** :
-```tsx
+\`\`\`tsx
 <Button size="lg" asChild>
   <Link href="/reservation/guest">Réserver maintenant</Link>
 </Button>
-```
+\`\`\`
 
 **APRÈS (Hook avec guard)** :
-```tsx
+\`\`\`tsx
 "use client"  // ← Ajouter en haut du fichier
 
 import { useBookingGuard } from "@/hooks/use-booking-guard"
@@ -40,7 +40,7 @@ export function Component() {
     </Button>
   )
 }
-```
+\`\`\`
 
 ---
 
@@ -60,12 +60,12 @@ export function Component() {
 **Fichier** : `components/layout/header.tsx`  
 **Ligne** : 55  
 **Code actuel** :
-```tsx
+\`\`\`tsx
 <Link href="/reservation/guest">Réserver maintenant</Link>
-```
+\`\`\`
 
 **Code modifié** :
-```tsx
+\`\`\`tsx
 "use client"
 import { useBookingGuard } from "@/hooks/use-booking-guard"
 
@@ -75,7 +75,7 @@ const { canBook, handleBookingClick } = useBookingGuard()
 <Button onClick={() => handleBookingClick("/reservation/guest")} disabled={!canBook}>
   Réserver maintenant
 </Button>
-```
+\`\`\`
 
 ---
 
@@ -83,14 +83,14 @@ const { canBook, handleBookingClick } = useBookingGuard()
 **Fichier** : `components/layout/mobile-nav.tsx`  
 **Ligne** : 85  
 **Code actuel** :
-```tsx
+\`\`\`tsx
 <Link href="/reservation/guest" onClick={() => setIsOpen(false)} className="block">
   <Button className="w-full">Réserver maintenant</Button>
 </Link>
-```
+\`\`\`
 
 **Code modifié** :
-```tsx
+\`\`\`tsx
 const { canBook, handleBookingClick } = useBookingGuard()
 
 <Button 
@@ -103,7 +103,7 @@ const { canBook, handleBookingClick } = useBookingGuard()
 >
   Réserver maintenant
 </Button>
-```
+\`\`\`
 
 ---
 
@@ -141,10 +141,10 @@ const { canBook, handleBookingClick } = useBookingGuard()
 ## 🧪 Tests à Effectuer
 
 ### Test 1 : Flag Activé (Normal)
-```bash
+\`\`\`bash
 # .env.local
 # NEXT_PUBLIC_BOOKINGS_ENABLED non défini (ou ="true")
-```
+\`\`\`
 
 **Résultat attendu** :
 - ✅ Tous les boutons "Réserver" fonctionnent normalement
@@ -154,10 +154,10 @@ const { canBook, handleBookingClick } = useBookingGuard()
 ---
 
 ### Test 2 : Flag Désactivé (Bloqué)
-```bash
+\`\`\`bash
 # .env.local
 NEXT_PUBLIC_BOOKINGS_ENABLED=false
-```
+\`\`\`
 
 **Résultat attendu** :
 - ❌ Tous les boutons "Réserver" sont désactivés (grisés)
@@ -211,7 +211,7 @@ NEXT_PUBLIC_BOOKINGS_ENABLED=false
 ## 📝 Communication Client
 
 ### Message Instagram Story (Suggestion)
-```
+\`\`\`
 🚨 Forte affluence !
 
 Nos créneaux de réservation sont temporairement complets.
@@ -221,10 +221,10 @@ Nos créneaux de réservation sont temporairement complets.
 Merci de votre patience ! ❤️
 
 #NinoWash #PressingDeLuxe
-```
+\`\`\`
 
 ### Réponse Type DM
-```
+\`\`\`
 Bonjour ! 👋
 
 Merci pour votre intérêt.
@@ -235,7 +235,7 @@ En attendant, nous notons votre demande et vous recontacterons dès qu'un créne
 
 À très vite ! 
 L'équipe Nino Wash 🧺✨
-```
+\`\`\`
 
 ---
 

@@ -47,7 +47,7 @@
 ## 🔍 Preuve Technique
 
 ### Backend : Aucune exemption de paiement
-```typescript
+\`\`\`typescript
 // app/api/bookings/route.ts (POST handler)
 
 // Ligne 68-81 : Calcul du montant
@@ -83,10 +83,10 @@ const { data: booking } = await supabase
     // ❌ Pas de is_subscription_booking
     // ❌ Pas de discount appliqué
   })
-```
+\`\`\`
 
 ### Frontend : Mensonge affiché
-```tsx
+\`\`\`tsx
 // components/booking/summary-step.tsx, ligne 344-360
 
 <div className="flex items-center justify-between">
@@ -104,14 +104,14 @@ const { data: booking } = await supabase
 </div>
 
 // Mais le backend charge quand même ! ❌
-```
+\`\`\`
 
 ---
 
 ## 🗄️ Structure Base de Données
 
 ### Table `bookings` (Actuelle)
-```sql
+\`\`\`sql
 CREATE TABLE bookings (
     id UUID,
     booking_number VARCHAR(20),
@@ -124,10 +124,10 @@ CREATE TABLE bookings (
     -- ❌ PAS DE is_included_in_subscription !
     -- ❌ PAS DE discount_from_subscription !
 );
-```
+\`\`\`
 
 ### Table `subscriptions` (Actuelle)
-```sql
+\`\`\`sql
 CREATE TABLE subscriptions (
     id UUID,
     user_id UUID REFERENCES auth.users(id),
@@ -141,7 +141,7 @@ CREATE TABLE subscriptions (
     -- ❌ Aucun lien vers bookings !
     -- ❌ Pas de compteur de services utilisés
 );
-```
+\`\`\`
 
 **Problème** : Les deux tables sont **complètement déconnectées** ! 🔥
 
@@ -149,7 +149,7 @@ CREATE TABLE subscriptions (
 
 ## 📊 Flux Utilisateur Actuel
 
-```
+\`\`\`
 ┌─────────────────────────────────────────────────────────────────┐
 │ 1. Utilisateur souscrit Abonnement Mensuel (99,99€)            │
 │    └─> Paye via Stripe                                          │
@@ -185,32 +185,32 @@ CREATE TABLE subscriptions (
 │                                                                  │
 │ Sans abonnement aurait coûté : 100€ seulement ❌                │
 └─────────────────────────────────────────────────────────────────┘
-```
+\`\`\`
 
 ---
 
 ## 🛠️ Ce Qui Devrait Se Passer (Idéalement)
 
 ### Option A : Services Inclus
-```
+\`\`\`
 Abonnement Mensuel (99,99€) = 8 services inclus/mois
 ├─> Service 1-8 : Gratuit (total_amount = 0, payment_status = "paid")
 └─> Service 9+  : Payant au tarif normal
-```
+\`\`\`
 
 ### Option B : Tarifs Réduits
-```
+\`\`\`
 Abonnement Mensuel (99,99€) = 20% de réduction
 ├─> Service normal : 24,99€ → 19,99€ (abonné)
 └─> Service express : 34,99€ → 27,99€ (abonné)
-```
+\`\`\`
 
 ### Option C : Crédits Mensuels
-```
+\`\`\`
 Abonnement Mensuel (99,99€) = 100€ de crédit/mois
 ├─> Utilise crédit d'abord (tant qu'il reste du crédit)
 └─> Puis paye le surplus si dépassement
-```
+\`\`\`
 
 ---
 

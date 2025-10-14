@@ -12,7 +12,7 @@ Refonte complète du dashboard avec une interface moderne inspirée de ChatGPT, 
 
 ## 📁 Structure des fichiers
 
-```
+\`\`\`
 app/(authenticated)/
 ├── layout.tsx                          # Layout avec sidebar (sans header/footer)
 └── dashboard/
@@ -26,7 +26,7 @@ components/
 │   └── dashboard-client.tsx           # Client Component principal
 └── booking/
     └── booking-card.tsx               # Card + Detail Panel
-```
+\`\`\`
 
 ---
 
@@ -51,12 +51,12 @@ components/
     - ✅ Se déconnecter
 
 **Props**:
-```typescript
+\`\`\`typescript
 interface DashboardSidebarProps {
   user: SupabaseUser            // User Supabase
   hasActiveSubscription?: boolean // Badge abonnement
 }
-```
+\`\`\`
 
 **Design**:
 - Largeur fixe: `w-64` (256px)
@@ -82,13 +82,13 @@ interface DashboardSidebarProps {
 - Icône ChevronRight pour indiquer cliquable
 
 **Props**:
-```typescript
+\`\`\`typescript
 interface BookingCardProps {
   booking: BookingWithAddresses
   isSelected?: boolean
   onClick?: () => void
 }
-```
+\`\`\`
 
 **Statuts supportés**:
 | Status | Label | Couleur |
@@ -135,12 +135,12 @@ interface BookingCardProps {
   - ✅ Bouton "Modifier les réservations futures" (Edit icon)
 
 **Props**:
-```typescript
+\`\`\`typescript
 interface BookingDetailPanelProps {
   booking: BookingWithAddresses
   onClose: () => void
 }
-```
+\`\`\`
 
 **État des formulaires**:
 - `showProblemForm`: Placeholder pour signalement
@@ -190,19 +190,19 @@ interface BookingDetailPanelProps {
   - Z-index élevé pour mobile overlay
 
 **Props**:
-```typescript
+\`\`\`typescript
 interface DashboardClientProps {
   user: User
   bookings: BookingWithAddresses[]
   addressCount: number
   hasActiveSubscription: boolean
 }
-```
+\`\`\`
 
 **État local**:
-```typescript
+\`\`\`typescript
 const [selectedBooking, setSelectedBooking] = useState<BookingWithAddresses | null>(null)
-```
+\`\`\`
 
 ---
 
@@ -210,7 +210,7 @@ const [selectedBooking, setSelectedBooking] = useState<BookingWithAddresses | nu
 
 ### Server → Client
 
-```
+\`\`\`
 app/(authenticated)/dashboard/page.tsx (Server Component)
          │
          ├─ requireAuth() → user, supabase
@@ -225,11 +225,11 @@ app/(authenticated)/dashboard/page.tsx (Server Component)
                     ├─ KPIs calculation
                     ├─ Bookings list rendering
                     └─ Selection state management
-```
+\`\`\`
 
 ### User Interaction Flow
 
-```
+\`\`\`
 1. User clicks on BookingCard
    └─→ setSelectedBooking(booking)
         └─→ BookingDetailPanel opens (right side)
@@ -245,7 +245,7 @@ app/(authenticated)/dashboard/page.tsx (Server Component)
              └─ User clicks close button
                  └─→ setSelectedBooking(null)
                       └─→ Panel closes
-```
+\`\`\`
 
 ---
 
@@ -253,7 +253,7 @@ app/(authenticated)/dashboard/page.tsx (Server Component)
 
 ### Couleurs des statuts
 
-```typescript
+\`\`\`typescript
 const statusColors = {
   pending: "bg-gray-100 text-gray-800",
   confirmed: "bg-blue-100 text-blue-800",
@@ -263,7 +263,7 @@ const statusColors = {
   delivered: "bg-green-600 text-white",
   cancelled: "bg-red-100 text-red-800"
 }
-```
+\`\`\`
 
 ### Spacing
 
@@ -287,50 +287,50 @@ const statusColors = {
 ### Phase 2 (Formulaires)
 
 1. **Signaler un problème**
-   ```typescript
+   \`\`\`typescript
    // components/booking/report-problem-form.tsx
    - Sélection type de problème (dropdown)
    - Description (textarea)
    - Upload photos (optionnel)
    - Bouton submit → API /api/bookings/{id}/report
-   ```
+   \`\`\`
 
 2. **Modifier réservations futures**
-   ```typescript
+   \`\`\`typescript
    // components/booking/modify-future-bookings-form.tsx
    - Explication du changement
    - Nouvelle adresse (sélection)
    - Nouveaux créneaux (si applicable)
    - Confirmation
    - Bouton submit → API /api/bookings/modify-future
-   ```
+   \`\`\`
 
 ### Phase 3 (Gestion paiements & adresses)
 
 3. **Page Modes de paiement**
-   ```
+   \`\`\`
    /profile#payment-methods
    - Liste des cartes enregistrées
    - Ajouter nouvelle carte
    - Définir carte par défaut
    - Supprimer carte
-   ```
+   \`\`\`
 
 4. **Page Gestion adresses**
-   ```
+   \`\`\`
    /profile#addresses
    - Liste des adresses
    - Ajouter nouvelle adresse
    - Modifier adresse existante
    - Définir adresse par défaut
    - Supprimer adresse
-   ```
+   \`\`\`
 
 ---
 
 ## 📊 API Routes nécessaires
 
-```typescript
+\`\`\`typescript
 // À créer
 
 POST /api/bookings/[id]/report
@@ -350,7 +350,7 @@ POST /api/payment-methods
 
 DELETE /api/payment-methods/[id]
   - Return: { success }
-```
+\`\`\`
 
 ---
 
@@ -386,7 +386,7 @@ DELETE /api/payment-methods/[id]
 
 ## 🧪 Tests suggérés
 
-```typescript
+\`\`\`typescript
 // Tests à implémenter
 
 describe("DashboardSidebar", () => {
@@ -416,7 +416,7 @@ describe("DashboardClient", () => {
   it("should open detail panel on booking click")
   it("should show empty state when no bookings")
 })
-```
+\`\`\`
 
 ---
 

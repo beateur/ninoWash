@@ -10,7 +10,7 @@
 
 Multiple errors when creating records:
 
-```
+\`\`\`
 Error 1 (Address Creation):
 code: '23503'
 message: 'insert or update on table "user_addresses" violates foreign key constraint "user_addresses_user_id_fkey"'
@@ -20,7 +20,7 @@ Error 2 (Booking Creation):
 code: '23503'
 message: 'insert or update on table "bookings" violates foreign key constraint "bookings_user_id_fkey"'
 details: 'Key (user_id)=(134d7be6-fdc5-4a45-89f9-4a0f5b21e474) is not present in table "users"'
-```
+\`\`\`
 
 ### Root Cause
 
@@ -47,7 +47,7 @@ Supabase stores authenticated users in `auth.users`, but the database constraint
 
 2. **Copy/Paste this SQL** (fixes all 8 tables):
 
-```sql
+\`\`\`sql
 -- =====================================================
 -- FIX ALL USER FOREIGN KEYS AT ONCE
 -- =====================================================
@@ -118,7 +118,7 @@ WHERE tc.constraint_type = 'FOREIGN KEY'
   AND tc.table_schema = 'public'
   AND tc.constraint_name LIKE '%_user_id_fkey'
 ORDER BY tc.table_name;
-```
+\`\`\`
 
 3. **Click "Run"** (or press `Ctrl+Enter`)
 
@@ -132,19 +132,19 @@ ORDER BY tc.table_name;
 ## 🧪 Testing After Fix
 
 ### Test 1: Create Address
-```bash
+\`\`\`bash
 pnpm dev
 open http://localhost:3000/addresses
 # Click "Ajouter une adresse" → Fill form → Save
 # ✅ Should work without error
-```
+\`\`\`
 
 ### Test 2: Create Booking
-```bash
+\`\`\`bash
 open http://localhost:3000/reservation
 # Select services → Add address → Confirm booking
 # ✅ Should create booking successfully
-```
+\`\`\`
 
 ### Test 3: Verify Database
 Go to Supabase Dashboard → Table Editor:
@@ -237,19 +237,19 @@ Possible causes:
 If issues persist after applying the migration:
 
 1. **Check constraint exists**:
-   ```sql
+   \`\`\`sql
    SELECT constraint_name, table_name
    FROM information_schema.table_constraints
    WHERE constraint_type = 'FOREIGN KEY'
      AND table_name IN ('user_addresses', 'bookings')
      AND constraint_name LIKE '%_user_id_fkey';
-   ```
+   \`\`\`
 
 2. **Check user exists**:
-   ```sql
+   \`\`\`sql
    SELECT id, email FROM auth.users
    WHERE id = '134d7be6-fdc5-4a45-89f9-4a0f5b21e474';
-   ```
+   \`\`\`
 
 3. **Check server logs**: Look for `[v0]` prefixed errors
 

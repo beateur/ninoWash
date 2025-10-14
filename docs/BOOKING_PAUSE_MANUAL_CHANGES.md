@@ -23,7 +23,7 @@
 **Ligne 1** : Ajouter `"use client"` en tout premier
 
 **Ligne 1-3** : Modifier les imports
-```tsx
+\`\`\`tsx
 // AVANT:
 import { ServicesSection } from "@/components/sections/services-section"
 import { Button } from "@/components/ui/button"
@@ -36,10 +36,10 @@ import { ServicesSection } from "@/components/sections/services-section"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useBookingGuard } from "@/hooks/use-booking-guard"
-```
+\`\`\`
 
 **Ligne 5** : Ajouter le hook dans le composant
-```tsx
+\`\`\`tsx
 // AVANT:
 export default function ServicesPage() {
   return (
@@ -49,10 +49,10 @@ export default function ServicesPage() {
   const { canBook, handleBookingClick } = useBookingGuard()
   
   return (
-```
+\`\`\`
 
 **Ligne ~16-18** : Modifier le bouton "Réserver maintenant"
-```tsx
+\`\`\`tsx
 // AVANT:
           <Button asChild size="lg">
             <Link href="/reservation/guest">Réserver maintenant</Link>
@@ -66,7 +66,7 @@ export default function ServicesPage() {
           >
             Réserver maintenant
           </Button>
-```
+\`\`\`
 
 ---
 
@@ -75,49 +75,49 @@ export default function ServicesPage() {
 
 #### CTA #1 (Hero Section - ligne ~17)
 **Avant** :
-```tsx
+\`\`\`tsx
 <Button asChild>
   <Link href="/reservation/guest">Réserver maintenant</Link>
 </Button>
-```
+\`\`\`
 
 **Après** :
-```tsx
+\`\`\`tsx
 <Button 
   onClick={() => handleBookingClick("/reservation/guest")}
   disabled={!canBook}
 >
   Réserver maintenant
 </Button>
-```
+\`\`\`
 
 #### CTA #2 (Fin de page - ligne ~33)
 **Avant** :
-```tsx
+\`\`\`tsx
 <Button asChild>
   <Link href="/reservation/guest">Réserver maintenant</Link>
 </Button>
-```
+\`\`\`
 
 **Après** :
-```tsx
+\`\`\`tsx
 <Button 
   onClick={() => handleBookingClick("/reservation/guest")}
   disabled={!canBook}
 >
   Réserver maintenant
 </Button>
-```
+\`\`\`
 
 **Imports à ajouter** :
-```tsx
+\`\`\`tsx
 "use client"  // en ligne 1
 
 import { useBookingGuard } from "@/hooks/use-booking-guard"  // dans les imports
 
 // Dans le composant:
 const { canBook, handleBookingClick } = useBookingGuard()
-```
+\`\`\`
 
 ---
 
@@ -126,31 +126,31 @@ const { canBook, handleBookingClick } = useBookingGuard()
 **Ligne** : ~191
 
 **Avant** :
-```tsx
+\`\`\`tsx
 <Button asChild>
   <Link href="/reservation/guest">Réserver maintenant</Link>
 </Button>
-```
+\`\`\`
 
 **Après** :
-```tsx
+\`\`\`tsx
 <Button 
   onClick={() => handleBookingClick("/reservation/guest")}
   disabled={!canBook}
 >
   Réserver maintenant
 </Button>
-```
+\`\`\`
 
 **Imports à ajouter** :
-```tsx
+\`\`\`tsx
 "use client"  // en ligne 1
 
 import { useBookingGuard } from "@/hooks/use-booking-guard"
 
 // Dans le composant:
 const { canBook, handleBookingClick } = useBookingGuard()
-```
+\`\`\`
 
 ---
 
@@ -159,24 +159,24 @@ const { canBook, handleBookingClick } = useBookingGuard()
 **Ligne** : ~18
 
 **Avant** :
-```tsx
+\`\`\`tsx
 <Button asChild>
   <Link href="/reservation/guest">Réserver maintenant</Link>
 </Button>
-```
+\`\`\`
 
 **Après** :
-```tsx
+\`\`\`tsx
 <Button 
   onClick={() => handleBookingClick("/reservation/guest")}
   disabled={!canBook}
 >
   Réserver maintenant
 </Button>
-```
+\`\`\`
 
 **Imports à ajouter** :
-```tsx
+\`\`\`tsx
 "use client"  // en ligne 1
 
 import { useBookingGuard } from "@/hooks/use-booking-guard"
@@ -189,7 +189,7 @@ export function CtaSection() {
     // ...
   )
 }
-```
+\`\`\`
 
 ---
 
@@ -200,26 +200,26 @@ export function CtaSection() {
 ⚠️ **ATTENTION** : Ce CTA est différent des autres car il redirige vers `/reservation?service=${service.id}` (utilisateurs authentifiés).
 
 **Avant** :
-```tsx
+\`\`\`tsx
 <Button asChild>
   <Link href={`/reservation?service=${service.id}`}>
     Choisir ce service
   </Link>
 </Button>
-```
+\`\`\`
 
 **Après** :
-```tsx
+\`\`\`tsx
 <Button 
   onClick={() => handleBookingClick(`/reservation?service=${service.id}`)}
   disabled={!canBook}
 >
   Choisir ce service
 </Button>
-```
+\`\`\`
 
 **Imports à ajouter** :
-```tsx
+\`\`\`tsx
 "use client"  // en ligne 1
 
 import { useBookingGuard } from "@/hooks/use-booking-guard"
@@ -232,7 +232,7 @@ export function ServicesSection() {
     // ...
   )
 }
-```
+\`\`\`
 
 ---
 
@@ -241,17 +241,17 @@ export function ServicesSection() {
 Pour chaque composant :
 
 ### Étape 1 : Ajouter "use client"
-```tsx
+\`\`\`tsx
 "use client"  // TOUJOURS en ligne 1, avant les imports
-```
+\`\`\`
 
 ### Étape 2 : Importer le hook
-```tsx
+\`\`\`tsx
 import { useBookingGuard } from "@/hooks/use-booking-guard"
-```
+\`\`\`
 
 ### Étape 3 : Utiliser le hook dans le composant
-```tsx
+\`\`\`tsx
 export function MonComposant() {
   const { canBook, handleBookingClick } = useBookingGuard()
   
@@ -259,10 +259,10 @@ export function MonComposant() {
     // JSX...
   )
 }
-```
+\`\`\`
 
 ### Étape 4 : Remplacer les boutons
-```tsx
+\`\`\`tsx
 // ❌ ANCIEN (avec Link):
 <Button asChild>
   <Link href="/reservation/guest">Réserver maintenant</Link>
@@ -275,19 +275,19 @@ export function MonComposant() {
 >
   Réserver maintenant
 </Button>
-```
+\`\`\`
 
 ---
 
 ## 🧪 Test Rapide
 
 1. **Vérifier la compilation** :
-   ```bash
+   \`\`\`bash
    pnpm tsc --noEmit
-   ```
+   \`\`\`
 
 2. **Tester en local** :
-   ```bash
+   \`\`\`bash
    # Dans .env.local, ajouter:
    NEXT_PUBLIC_BOOKINGS_ENABLED=false
    
@@ -296,15 +296,15 @@ export function MonComposant() {
    
    # Visiter les pages et cliquer sur "Réserver"
    # → Doit afficher le toast avec message Instagram
-   ```
+   \`\`\`
 
 3. **Réactiver** :
-   ```bash
+   \`\`\`bash
    # Dans .env.local, changer en:
    NEXT_PUBLIC_BOOKINGS_ENABLED=true
    
    # Ou supprimer la ligne complètement (par défaut = true)
-   ```
+   \`\`\`
 
 ---
 

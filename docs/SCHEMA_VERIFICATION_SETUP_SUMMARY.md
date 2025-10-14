@@ -42,13 +42,13 @@
 - 🔍 Checklist de vérification avant PR
 
 **Points clés :**
-```sql
+\`\`\`sql
 -- Toujours exécuter AVANT d'écrire du code :
 SELECT column_name, data_type, is_nullable, column_default
 FROM information_schema.columns
 WHERE table_schema = 'public' AND table_name = 'TABLE_NAME'
 ORDER BY ordinal_position;
-```
+\`\`\`
 
 ### 2. Mise à Jour des Instructions Copilot
 
@@ -62,11 +62,11 @@ ORDER BY ordinal_position;
 - 📚 "Key Files" inclut les nouveaux protocoles
 
 **Changements :**
-```markdown
+\`\`\`markdown
 Before completing any task:
 - [ ] **Schema Verified**: Database schema verified via Supabase SQL Editor ← NOUVEAU
 - [ ] **PRD Created**: Complete PRD covering Frontend + Backend + Database + DevOps
-```
+\`\`\`
 
 ### 3. Scripts de Vérification
 
@@ -74,7 +74,7 @@ Before completing any task:
 
 **Objectif :** Extraire TOUT le schéma `public.*` depuis Supabase
 
-```sql
+\`\`\`sql
 SELECT json_agg(
   json_build_object(
     'table_schema', table_schema,
@@ -87,7 +87,7 @@ SELECT json_agg(
 ) AS complete_schema
 FROM information_schema.columns
 WHERE table_schema = 'public';
-```
+\`\`\`
 
 **Usage :**
 1. Exécuter dans Supabase SQL Editor
@@ -111,26 +111,26 @@ WHERE table_schema = 'public';
 
 ### Avant
 
-```typescript
+\`\`\`typescript
 // ❌ Code basé sur vieux scripts
 const addressSchema = z.object({
   apartment: z.string(),              // N'existe PAS !
   deliveryInstructions: z.string(),   // N'existe PAS !
   accessCode: z.string()              // N'existe PAS !
 })
-```
+\`\`\`
 
 **Résultat :** Erreur runtime en production
 
 ### Après
 
-```typescript
+\`\`\`typescript
 // ✅ Code vérifié via Supabase SQL Editor
 const addressSchema = z.object({
   building_info: z.string().optional(),     // ✅ Existe
   access_instructions: z.string().optional() // ✅ Existe
 })
-```
+\`\`\`
 
 **Résultat :** Fonctionne du premier coup
 
@@ -140,7 +140,7 @@ const addressSchema = z.object({
 
 ### Pour toute modification touchant la DB :
 
-```mermaid
+\`\`\`mermaid
 graph TD
     A[Nouvelle Fonctionnalité] --> B[Ouvrir Supabase SQL Editor]
     B --> C[Exécuter Query information_schema]
@@ -150,11 +150,11 @@ graph TD
     F --> G[Implémenter API Routes]
     G --> H[Tester avec Vraies Données]
     H --> I[PR avec Preuve de Vérification]
-```
+\`\`\`
 
 ### Checklist de Pull Request
 
-```markdown
+\`\`\`markdown
 ## Checklist DB (Obligatoire)
 
 - [ ] Schéma vérifié via `information_schema` dans Supabase SQL Editor
@@ -166,7 +166,7 @@ graph TD
 - [ ] Types TypeScript alignés avec DB réelle
 - [ ] Tests passent avec vraies colonnes
 - [ ] `databaseschema.json` mis à jour si nécessaire
-```
+\`\`\`
 
 ---
 
@@ -250,12 +250,12 @@ graph TD
 
 1. ✅ Ouvrir Supabase SQL Editor
 2. ✅ Exécuter :
-   ```sql
+   \`\`\`sql
    SELECT column_name, data_type, is_nullable
    FROM information_schema.columns
    WHERE table_name = 'user_addresses'
    ORDER BY ordinal_position;
-   ```
+   \`\`\`
 3. ✅ Documenter les colonnes trouvées
 4. ✅ Créer schéma Zod avec noms vérifiés
 5. ✅ Implémenter API route

@@ -85,7 +85,7 @@ Ces routes nécessitent une authentification ET le rôle "admin".
 
 Les pages admin utilisent un pattern hybride pour la sécurité et l'interactivité :
 
-```typescript
+\`\`\`typescript
 // ✅ Server Component (page.tsx) - Vérifie les permissions
 import { requireAdmin } from "@/lib/auth/route-guards"
 import AdminDashboardClient from "./dashboard-client"
@@ -106,10 +106,10 @@ export default function AdminDashboardClient() {
   useEffect(() => { fetchStats() }, [])
   return <div>...</div>
 }
-```
+\`\`\`
 
 **Méthode de protection :**
-```typescript
+\`\`\`typescript
 // lib/auth/route-guards.ts (Server-side)
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
@@ -124,7 +124,7 @@ export async function requireAdmin() {
   
   return { user }
 }
-```
+\`\`\`
 
 **Fallback :** Redirection vers `/` (page d'accueil) si non admin
 

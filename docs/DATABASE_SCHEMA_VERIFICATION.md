@@ -19,15 +19,15 @@
 ### Before ANY database-related work:
 
 #### 1. Check if Table Exists
-```sql
+\`\`\`sql
 SELECT table_name 
 FROM information_schema.tables
 WHERE table_schema = 'public' 
   AND table_name = 'YOUR_TABLE_NAME';
-```
+\`\`\`
 
 #### 2. Get ALL Columns for a Table
-```sql
+\`\`\`sql
 SELECT 
   column_name, 
   data_type, 
@@ -38,10 +38,10 @@ FROM information_schema.columns
 WHERE table_schema = 'public' 
   AND table_name = 'YOUR_TABLE_NAME'
 ORDER BY ordinal_position;
-```
+\`\`\`
 
 #### 3. Check if Specific Column Exists
-```sql
+\`\`\`sql
 SELECT EXISTS (
   SELECT 1 
   FROM information_schema.columns
@@ -49,10 +49,10 @@ SELECT EXISTS (
     AND table_name = 'YOUR_TABLE_NAME'
     AND column_name = 'YOUR_COLUMN_NAME'
 ) AS column_exists;
-```
+\`\`\`
 
 #### 4. Get Foreign Key Relationships
-```sql
+\`\`\`sql
 SELECT
   tc.table_name AS from_table, 
   kcu.column_name AS from_column,
@@ -65,7 +65,7 @@ JOIN information_schema.constraint_column_usage AS ccu
   ON ccu.constraint_name = tc.constraint_name
 WHERE tc.constraint_type = 'FOREIGN KEY' 
   AND tc.table_name = 'YOUR_TABLE_NAME';
-```
+\`\`\`
 
 ## Common Schema Errors & Fixes
 
@@ -99,7 +99,7 @@ WHERE tc.constraint_type = 'FOREIGN KEY'
 ## Real Examples from This Project
 
 ### ✅ CORRECT: Verified from Live Database
-```typescript
+\`\`\`typescript
 // subscriptions table
 interface Subscription {
   id: string
@@ -122,10 +122,10 @@ interface UserAddress {
   building_info: string      // ✅ NOT "apartment"
   access_instructions: string // ✅ NOT "delivery_instructions"
 }
-```
+\`\`\`
 
 ### ❌ WRONG: Assumed from Old Scripts
-```typescript
+\`\`\`typescript
 // ❌ This column doesn't exist!
 interface Subscription {
   plan_type: string  // WRONG - column is "plan_id"
@@ -137,13 +137,13 @@ interface UserAddress {
   delivery_instructions: string // WRONG - column is "access_instructions"
   access_code: string         // WRONG - doesn't exist
 }
-```
+\`\`\`
 
 ## Emergency Schema Check
 
 If you're unsure about ANY table structure, run this comprehensive query:
 
-```sql
+\`\`\`sql
 -- Get complete schema for a table with all constraints
 SELECT 
   c.column_name,
@@ -163,17 +163,17 @@ LEFT JOIN information_schema.table_constraints tc
 WHERE c.table_schema = 'public' 
   AND c.table_name = 'YOUR_TABLE_NAME'
 ORDER BY c.ordinal_position;
-```
+\`\`\`
 
 ## Automated Schema Export
 
 Use the provided script to export current schema:
 
-```bash
+\`\`\`bash
 # Execute in Supabase SQL Editor
 cat scripts/get-real-schema.sql
 # Copy output and save as documentation
-```
+\`\`\`
 
 ## Prevention Checklist
 

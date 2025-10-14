@@ -180,7 +180,7 @@ Réutiliser les helpers Stripe existants ou en créer si nécessaire :
 ## 5. Data Flow
 
 ### Affichage des cartes
-```
+\`\`\`
 User loads /payment-methods
   → requireAuth() (SSR)
   → Component mounts
@@ -189,10 +189,10 @@ User loads /payment-methods
   → Supabase query payment_methods table (RLS filter)
   → Return JSON { paymentMethods: [...] }
   → Render <PaymentMethodCard /> for each
-```
+\`\`\`
 
 ### Ajout d'une carte
-```
+\`\`\`
 User clicks "Ajouter une carte"
   → Open dialog with Stripe CardElement
   → User enters card details
@@ -203,20 +203,20 @@ User clicks "Ajouter une carte"
   → Server: Insert into payment_methods table
   → Return success
   → Client: Close dialog + refresh list + toast success
-```
+\`\`\`
 
 ### Définir carte par défaut
-```
+\`\`\`
 User clicks "Définir par défaut"
   → PATCH /api/payments/methods/[id] { isDefault: true }
   → Server: UPDATE payment_methods SET is_default = false WHERE user_id = X
   → Server: UPDATE payment_methods SET is_default = true WHERE id = Y
   → Return success
   → Client: Refresh list + toast
-```
+\`\`\`
 
 ### Supprimer une carte
-```
+\`\`\`
 User clicks "Supprimer"
   → Open confirmation dialog
   → User confirms
@@ -225,7 +225,7 @@ User clicks "Supprimer"
   → Stripe: Detach payment method via API
   → Return success
   → Client: Remove from UI + toast
-```
+\`\`\`
 
 ---
 

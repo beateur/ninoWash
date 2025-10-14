@@ -11,14 +11,14 @@
 ### 1. **Code Backend** (`app/actions/stripe.ts`)
 
 **Avant** :
-```typescript
+\`\`\`typescript
 // Annulation immédiate systématique
 await stripe.subscriptions.cancel(old_sub_id)
 // ❌ Perte d'argent pour l'utilisateur
-```
+\`\`\`
 
 **Après** :
-```typescript
+\`\`\`typescript
 // Détection intelligente upgrade vs downgrade
 const isUpgrade = newPrice > oldPrice
 
@@ -36,7 +36,7 @@ if (isUpgrade) {
   // ✅ User garde son abonnement payé jusqu'à la fin
   return JSON.stringify({ type: 'scheduled_downgrade', ... })
 }
-```
+\`\`\`
 
 **Lignes modifiées** : 62-170
 
@@ -47,13 +47,13 @@ if (isUpgrade) {
 **Nouvelles fonctionnalités** :
 
 1. **Détection downgrade planifié** :
-   ```typescript
+   \`\`\`typescript
    const parsed = JSON.parse(result)
    if (parsed.type === 'scheduled_downgrade') {
      setScheduledDowngrade(parsed)
      // Affiche message au lieu du checkout
    }
-   ```
+   \`\`\`
 
 2. **UI Message Downgrade** :
    - ✅ Icône calendrier
@@ -76,11 +76,11 @@ if (isUpgrade) {
 - ✅ RLS policies - sécurité
 
 **Traitement automatique** :
-```sql
+\`\`\`sql
 -- Trouve subscriptions avec cancel_at_period_end = TRUE et current_period_end < NOW()
 -- Marque cancelled = TRUE
 -- Crée audit log
-```
+\`\`\`
 
 ---
 
@@ -159,29 +159,29 @@ if (isUpgrade) {
 3. Exécuter
 
 **Via CLI** :
-```bash
+\`\`\`bash
 cd supabase/migrations
 psql $DATABASE_URL -f 20250107000000_setup_scheduled_downgrade_cron.sql
 psql $DATABASE_URL -f 20250107000001_scheduled_downgrade_notification.sql
-```
+\`\`\`
 
 ### 2. Vérifier Extension pg_cron
 
-```sql
+\`\`\`sql
 CREATE EXTENSION IF NOT EXISTS pg_cron;
 
 -- Vérifier cron job créé
 SELECT * FROM cron.job WHERE jobname = 'process-scheduled-downgrades';
-```
+\`\`\`
 
 ### 3. Variables d'environnement (déjà configurées)
 
-```bash
+\`\`\`bash
 # .env.local
 STRIPE_WEBHOOK_SECRET=whsec_3ff1dcb9... # ✅ Déjà configuré
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_... # ✅ Déjà configuré
 STRIPE_SECRET_KEY=sk_test_... # ✅ Déjà configuré
-```
+\`\`\`
 
 ---
 
@@ -190,10 +190,10 @@ STRIPE_SECRET_KEY=sk_test_... # ✅ Déjà configuré
 ### Test Rapide (30 min)
 
 1. **Setup**
-   ```bash
+   \`\`\`bash
    pnpm dev
    stripe listen --forward-to localhost:3000/api/webhooks/stripe
-   ```
+   \`\`\`
 
 2. **Test Upgrade**
    - Créer abonnement mensuel
@@ -224,15 +224,15 @@ Suivre le guide détaillé : `docs/TESTING_PRORATION.md`
 - **Churn rate** : Avant vs Après implémentation
 
 ### Logs à Monitorer
-```typescript
+\`\`\`typescript
 // Logs importants dans console
 [v0] Change type: UPGRADE { oldPrice, newPrice, daysRemaining }
 [v0] Downgrade scheduled for: [DATE]
 [v0] Upgrade proration info: { daysRemaining, note: "Proration will be applied" }
-```
+\`\`\`
 
 ### Queries Supabase
-```sql
+\`\`\`sql
 -- Downgrades en attente
 SELECT COUNT(*) FROM subscriptions
 WHERE cancel_at_period_end = TRUE AND cancelled = FALSE;
@@ -240,7 +240,7 @@ WHERE cancel_at_period_end = TRUE AND cancelled = FALSE;
 -- Audit trail
 SELECT action, COUNT(*) FROM subscription_audit_log
 GROUP BY action;
-```
+\`\`\`
 
 ---
 

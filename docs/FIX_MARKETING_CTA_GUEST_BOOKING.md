@@ -151,7 +151,7 @@
 
 ### User Journey (Before Fix)
 
-```
+\`\`\`
 Anonymous User
     ↓ Click "Réserver maintenant"
     ↓
@@ -160,11 +160,11 @@ Anonymous User
     ↓
 /auth/signin (BLOCKED)
     ❌ Cannot access guest booking flow
-```
+\`\`\`
 
 ### User Journey (After Fix)
 
-```
+\`\`\`
 Anonymous User
     ↓ Click "Réserver maintenant"
     ↓
@@ -178,7 +178,7 @@ Account created + Booking created
     ↓
 /reservation/guest/success
     ✅ Guest booking completed successfully
-```
+\`\`\`
 
 ---
 

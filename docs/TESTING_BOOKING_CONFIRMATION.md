@@ -34,10 +34,10 @@
 ## 🧪 Plan de Test
 
 ### Test 1 : Affichage de la Page (Standalone)
-```bash
+\`\`\`bash
 # URL à tester
 http://localhost:3000/reservation/success?number=BOOK-12345
-```
+\`\`\`
 
 **✅ Vérifications** :
 - [ ] Page charge sans erreur
@@ -56,9 +56,9 @@ http://localhost:3000/reservation/success?number=BOOK-12345
 ### Test 2 : CTA Utilisateur Authentifié
 **Prérequis** : Être connecté
 
-```bash
+\`\`\`bash
 http://localhost:3000/reservation/success?number=BOOK-12345
-```
+\`\`\`
 
 **✅ Vérifications** :
 - [ ] Bouton 1 : "Accéder au tableau de bord" → Redirige vers `/dashboard`
@@ -68,9 +68,9 @@ http://localhost:3000/reservation/success?number=BOOK-12345
 ### Test 3 : CTA Invité
 **Prérequis** : Ne PAS être connecté (navigation privée)
 
-```bash
+\`\`\`bash
 http://localhost:3000/reservation/success?number=BOOK-12345
-```
+\`\`\`
 
 **✅ Vérifications** :
 - [ ] Bouton 1 : "Retour à l'accueil" → Redirige vers `/`
@@ -78,9 +78,9 @@ http://localhost:3000/reservation/success?number=BOOK-12345
 - [ ] Les deux boutons sont visibles
 
 ### Test 4 : Sans Query Param
-```bash
+\`\`\`bash
 http://localhost:3000/reservation/success
-```
+\`\`\`
 
 **✅ Vérifications** :
 - [ ] Page charge sans erreur
@@ -114,9 +114,9 @@ http://localhost:3000/reservation/success
 ### Test 7 : Responsive Mobile
 **Outil** : Chrome DevTools → Device Toolbar (iPhone 12/13)
 
-```bash
+\`\`\`bash
 http://localhost:3000/reservation/success?number=BOOK-12345
-```
+\`\`\`
 
 **✅ Vérifications** :
 - [ ] Card prend toute la largeur (avec padding)
@@ -129,9 +129,9 @@ http://localhost:3000/reservation/success?number=BOOK-12345
 ### Test 8 : Responsive Tablet/Desktop
 **Outil** : Chrome DevTools → iPad / Desktop (1920x1080)
 
-```bash
+\`\`\`bash
 http://localhost:3000/reservation/success?number=BOOK-12345
-```
+\`\`\`
 
 **✅ Vérifications** :
 - [ ] Card centrée avec `max-w-2xl`
@@ -142,9 +142,9 @@ http://localhost:3000/reservation/success?number=BOOK-12345
 ### Test 9 : Accessibilité
 **Outil** : Chrome DevTools → Lighthouse (Accessibility audit)
 
-```bash
+\`\`\`bash
 http://localhost:3000/reservation/success?number=BOOK-12345
-```
+\`\`\`
 
 **✅ Vérifications** :
 - [ ] Score Lighthouse Accessibility > 90
@@ -174,9 +174,9 @@ http://localhost:3000/reservation/success?number=BOOK-12345
 - [ ] Pas de crash
 
 ### Erreur 3 : Numéro invalide dans URL
-```bash
+\`\`\`bash
 http://localhost:3000/reservation/success?number=INVALID-123-XYZ
-```
+\`\`\`
 
 **✅ Comportement attendu** :
 - [ ] Page affiche le numéro tel quel (pas de validation côté page)
@@ -213,7 +213,7 @@ http://localhost:3000/reservation/success?number=INVALID-123-XYZ
 
 ## 🚀 Commandes Rapides
 
-```bash
+\`\`\`bash
 # Démarrer le serveur dev (si pas déjà lancé)
 pnpm dev
 
@@ -228,7 +228,7 @@ pnpm tsc --noEmit
 
 # Créer une vraie réservation pour tester
 # → Aller à http://localhost:3000/reservation
-```
+\`\`\`
 
 ---
 

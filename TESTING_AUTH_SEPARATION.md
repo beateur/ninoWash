@@ -189,10 +189,10 @@ Toutes les pages nécessitant authentification sont maintenant dans `app/(authen
 ### Si Erreur "Module not found: mobile-auth-nav"
 - **Cause:** Cache TypeScript
 - **Solution:** 
-  ```bash
+  \`\`\`bash
   rm -rf .next
   pnpm dev
-  ```
+  \`\`\`
 
 ### Si Redirection Infinie
 - **Cause:** Middleware détecte user et redirige en boucle

@@ -35,7 +35,7 @@
 
 ### 🔍 Commandes de Debug qui Auraient Détecté l'Erreur
 
-```bash
+\`\`\`bash
 # ❌ Ce qu'on a fait (insuffisant) :
 grep -r "AuthenticatedHeader" app/ --include="*.tsx"
 # Résultat : Import trouvé ✅ (faux positif)
@@ -50,7 +50,7 @@ grep -A 20 "export default.*Layout" app/(authenticated)/layout.tsx | grep "Heade
 
 # ✅ Vérification manuelle :
 # Ouvrir localhost:3000 en mobile mode → Vérifier hamburger menu visible
-```
+\`\`\`
 
 ### 📚 Leçons Apprises (Intégrées dans DEVELOPMENT_CHECKLIST.md)
 
@@ -111,7 +111,7 @@ Le composant `MobileAuthNav` dans `components/layout/mobile-auth-nav.tsx` implé
 ### 1. `MobileAuthNav` (components/layout/mobile-auth-nav.tsx)
 
 #### ✅ Points Forts
-```tsx
+\`\`\`tsx
 // Structure déjà conforme au pattern ChatGPT
 <Sheet open={isOpen} onOpenChange={setIsOpen}>
   <SheetTrigger asChild>
@@ -123,7 +123,7 @@ Le composant `MobileAuthNav` dans `components/layout/mobile-auth-nav.tsx` implé
     {/* User Info + Navigation + Sign Out */}
   </SheetContent>
 </Sheet>
-```
+\`\`\`
 
 **Conformité avec CONTRIBUTING.md** :
 - ✅ **Nommage** : `MobileAuthNav` (PascalCase) ✅
@@ -141,7 +141,7 @@ Le composant `MobileAuthNav` dans `components/layout/mobile-auth-nav.tsx` implé
 - ✅ Responsive : `w-80` (320px) conforme au PRD
 
 #### ⚠️ Points d'Amélioration
-```diff
+\`\`\`diff
 // Manque dans la version actuelle vs PRD
 
 - Avatar utilisateur dans header (actuellement juste texte)
@@ -158,10 +158,10 @@ Le composant `MobileAuthNav` dans `components/layout/mobile-auth-nav.tsx` implé
 
 - Fermeture sur clic overlay (déjà géré par Sheet ✅)
 - Animations personnalisées (Sheet gère déjà ✅)
-```
+\`\`\`
 
 #### 🔄 Code Réutilisable de `DashboardSidebar`
-```tsx
+\`\`\`tsx
 // À réutiliser :
 const userInitials = user.user_metadata?.first_name && user.user_metadata?.last_name
   ? `${user.user_metadata.first_name[0]}${user.user_metadata.last_name[0]}`
@@ -183,7 +183,7 @@ const navItems = [
   { label: "Mes adresses", href: "/profile#addresses", icon: MapPin },
   { label: "Modes de paiement", href: "/profile#payment-methods", icon: CreditCard },
 ]
-```
+\`\`\`
 
 ---
 
@@ -205,11 +205,11 @@ const navItems = [
 - ✅ **Accessibility** : ARIA géré par Radix ✅
 
 **Modification nécessaire** :
-```diff
+\`\`\`diff
 // Ajuster overlay pour correspondre au PRD
 - bg-black/50
 + bg-black/40 backdrop-blur-sm
-```
+\`\`\`
 
 ---
 
@@ -223,7 +223,7 @@ const navItems = [
 4. **Redondance** : Items dupliqués avec MobileAuthNav
 
 **Navigation actuelle** :
-```tsx
+\`\`\`tsx
 const navigation = [
   { name: "Accueil", href: "/", icon: Home },
   { name: "Réserver", href: "/reservation", icon: Calendar },
@@ -231,7 +231,7 @@ const navigation = [
   { name: "Abonnement", href: "/subscription", icon: Crown, highlight: true },
   { name: "Profil", href: "/profile", icon: User },
 ]
-```
+\`\`\`
 
 **Action** : Fusionner ces items dans `MobileAuthNav` amélioré
 
@@ -240,17 +240,17 @@ const navigation = [
 ### 4. `AuthenticatedLayout` (app/(authenticated)/layout.tsx)
 
 #### ⚠️ Code Actuel
-```tsx
+\`\`\`tsx
 {/* Mobile Bottom Navigation */}
 <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
   <MobileAuthNav />
 </div>
-```
+\`\`\`
 
 **Problème** : Affiche `MobileAuthNav` en bas (fixed bottom) alors que c'est un Sheet (sidebar overlay)
 
 #### ✅ Code Correct (déjà en place partiellement)
-```tsx
+\`\`\`tsx
 {/* Desktop Sidebar */}
 <div className="hidden md:block">
   <DashboardSidebar user={user} hasActiveSubscription={!!subscription} />
@@ -260,7 +260,7 @@ const navigation = [
 <main className="flex-1 overflow-y-auto bg-background">
   {children}
 </main>
-```
+\`\`\`
 
 **Action** : Supprimer la div `fixed bottom-0` qui contient `MobileAuthNav`
 
@@ -269,13 +269,13 @@ const navigation = [
 ### 5. `AuthenticatedHeader` (components/layout/authenticated-header.tsx)
 
 #### ✅ Déjà Correct !
-```tsx
+\`\`\`tsx
 <div className="hidden md:flex items-center space-x-4">
   {/* Desktop navigation */}
 </div>
 
 {/* Mobile devrait avoir le hamburger ici */}
-```
+\`\`\`
 
 **Action** : Ajouter le bouton hamburger visible uniquement sur mobile
 
@@ -294,7 +294,7 @@ const navigation = [
 | Constants | UPPER_SNAKE | N/A | ✅ |
 
 #### Structure
-```tsx
+\`\`\`tsx
 // ✅ Ordre correct dans MobileAuthNav
 import { useState } from "react"           // 1. React
 import Link from "next/link"               // 2. Next.js
@@ -313,10 +313,10 @@ const handleSignOut = async () => {}
 
 // ✅ Return JSX
 return (/* ... */)
-```
+\`\`\`
 
 #### Styling
-```tsx
+\`\`\`tsx
 // ✅ Classes Tailwind bien ordonnées
 className={cn(
   "flex items-center gap-3",           // Layout
@@ -326,10 +326,10 @@ className={cn(
   "transition-colors",                 // Effects
   isActive ? "bg-primary" : "hover:bg-muted"  // Conditional
 )}
-```
+\`\`\`
 
 #### TypeScript
-```tsx
+\`\`\`tsx
 // ✅ Types stricts
 interface MobileAuthNavProps {
   user: SupabaseUser
@@ -341,7 +341,7 @@ const handleSignOut = async (): Promise<void> => {
   await signOut()
   setIsOpen(false)
 }
-```
+\`\`\`
 
 ---
 
@@ -350,9 +350,9 @@ const handleSignOut = async (): Promise<void> => {
 ### 1. ❌ Dépendance à @headlessui/react dans PRD
 
 **PRD Original** :
-```tsx
+\`\`\`tsx
 import { Dialog, Transition } from '@headlessui/react'
-```
+\`\`\`
 
 **Problème** :
 - Le projet utilise **shadcn/ui** avec **Radix UI**
@@ -381,11 +381,11 @@ import { Dialog, Transition } from '@headlessui/react'
 ### 3. ❌ Gestion Manuelle du Focus Trap
 
 **PRD Original** :
-```tsx
+\`\`\`tsx
 function useFocusTrap(isOpen: boolean) {
   // 50 lignes de code custom
 }
-```
+\`\`\`
 
 **Problème** :
 - Radix UI gère déjà le focus trap automatiquement
@@ -397,14 +397,14 @@ function useFocusTrap(isOpen: boolean) {
 ### 4. ❌ Prevent Body Scroll Personnalisé
 
 **PRD Original** :
-```tsx
+\`\`\`tsx
 useEffect(() => {
   if (isOpen) {
     document.body.style.overflow = 'hidden'
     // ...
   }
 }, [isOpen])
-```
+\`\`\`
 
 **Problème** :
 - Radix UI gère déjà le body scroll lock
@@ -418,22 +418,22 @@ useEffect(() => {
 ## 📦 Dépendances
 
 ### ✅ Déjà Installées
-```json
+\`\`\`json
 {
   "@radix-ui/react-dialog": "^1.0.x",  // Via Sheet
   "lucide-react": "^0.x",
   "next": "14.2.x",
   "react": "19.x"
 }
-```
+\`\`\`
 
 ### ❌ NON Nécessaires (contrairement au PRD)
-```json
+\`\`\`json
 {
   "@headlessui/react": "^1.7.19",  // ❌ Pas besoin (Radix fait tout)
   "@heroicons/react": "^2.1.1"     // ❌ On utilise Lucide Icons
 }
-```
+\`\`\`
 
 ---
 
@@ -496,7 +496,7 @@ useEffect(() => {
 ### 1. `mobile-auth-nav.tsx` (Amélioration)
 
 #### Avant (actuel)
-```tsx
+\`\`\`tsx
 {/* User Info */}
 {user && (
   <div className="mb-6 p-3 bg-muted rounded-lg">
@@ -506,10 +506,10 @@ useEffect(() => {
     <p className="text-xs text-muted-foreground truncate">{user.email}</p>
   </div>
 )}
-```
+\`\`\`
 
 #### Après (avec Avatar)
-```tsx
+\`\`\`tsx
 {/* User Info avec Avatar */}
 {user && (
   <div className="mb-6 p-4 bg-muted/30 rounded-lg border border-border">
@@ -531,11 +531,11 @@ useEffect(() => {
     </div>
   </div>
 )}
-```
+\`\`\`
 
 ### 2. Ajouter Zone CTA
 
-```tsx
+\`\`\`tsx
 {/* CTA Nouvelle réservation */}
 <div className="mb-4 p-4 bg-primary/5 rounded-lg border border-primary/10">
   <Button asChild className="w-full" size="lg" onClick={() => setIsOpen(false)}>
@@ -545,11 +545,11 @@ useEffect(() => {
     </Link>
   </Button>
 </div>
-```
+\`\`\`
 
 ### 3. Compléter Nav Items
 
-```tsx
+\`\`\`tsx
 const authenticatedNavigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Mes réservations", href: "/bookings", icon: Package },
@@ -558,21 +558,21 @@ const authenticatedNavigation = [
   { name: "Mes adresses", href: "/profile#addresses", icon: MapPin },
   { name: "Modes de paiement", href: "/profile#payment-methods", icon: CreditCard },
 ]
-```
+\`\`\`
 
 ### 4. Badge Abonnement Actif
 
-```tsx
+\`\`\`tsx
 {hasActiveSubscription && item.name === "Abonnement" && (
   <span className="ml-auto text-xs bg-green-500/10 text-green-600 px-2 py-0.5 rounded-full font-medium">
     Actif
   </span>
 )}
-```
+\`\`\`
 
 ### 5. Ajuster Overlay dans `sheet.tsx`
 
-```tsx
+\`\`\`tsx
 // components/ui/sheet.tsx
 function SheetOverlay({ className, ...props }) {
   return (
@@ -587,7 +587,7 @@ function SheetOverlay({ className, ...props }) {
     />
   )
 }
-```
+\`\`\`
 
 ---
 

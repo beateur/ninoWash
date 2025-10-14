@@ -29,7 +29,7 @@ Ce guide explique comment appliquer la migration SQL pour activer les fonctionna
    - Vérifier qu'il n'y a pas d'erreurs
 
 5. **Vérifier les changements**
-   ```sql
+   \`\`\`sql
    -- Vérifier les nouvelles colonnes
    SELECT column_name, data_type 
    FROM information_schema.columns 
@@ -45,93 +45,93 @@ Ce guide explique comment appliquer la migration SQL pour activer les fonctionna
    SELECT tablename, policyname 
    FROM pg_policies 
    WHERE tablename IN ('booking_modifications', 'booking_reports');
-   ```
+   \`\`\`
 
 ### Option 2: Via Supabase CLI (Recommandé pour développement local)
 
 1. **Installer Supabase CLI** (si pas déjà fait)
-   ```bash
+   \`\`\`bash
    brew install supabase/tap/supabase
-   ```
+   \`\`\`
 
 2. **Se connecter à votre projet**
-   ```bash
+   \`\`\`bash
    supabase login
    supabase link --project-ref YOUR_PROJECT_REF
-   ```
+   \`\`\`
 
 3. **Appliquer la migration**
-   ```bash
+   \`\`\`bash
    cd /Users/bilel/Documents/websites/ninoWebsite/ninoWash
    supabase db push
-   ```
+   \`\`\`
 
 4. **Vérifier le statut**
-   ```bash
+   \`\`\`bash
    supabase db status
-   ```
+   \`\`\`
 
 ### Option 3: Via Script psql (Pour experts)
 
-```bash
+\`\`\`bash
 psql "postgresql://postgres:[YOUR_PASSWORD]@[YOUR_PROJECT_REF].supabase.co:5432/postgres" \
   -f supabase/migrations/20251004_booking_cancellation_and_reports.sql
-```
+\`\`\`
 
 ## ✅ Tests de Validation
 
 Après l'application de la migration, exécutez ces requêtes pour valider :
 
 ### 1. Test des colonnes de cancellation
-```sql
+\`\`\`sql
 -- Doit retourner 3 lignes
 SELECT column_name 
 FROM information_schema.columns 
 WHERE table_name = 'bookings' 
 AND column_name IN ('cancellation_reason', 'cancelled_at', 'cancelled_by');
-```
+\`\`\`
 
 ### 2. Test de la table booking_modifications
-```sql
+\`\`\`sql
 -- Doit retourner la structure de la table
 SELECT column_name, data_type, is_nullable
 FROM information_schema.columns 
 WHERE table_name = 'booking_modifications'
 ORDER BY ordinal_position;
-```
+\`\`\`
 
 ### 3. Test de la table booking_reports
-```sql
+\`\`\`sql
 -- Doit retourner la structure de la table
 SELECT column_name, data_type, is_nullable
 FROM information_schema.columns 
 WHERE table_name = 'booking_reports'
 ORDER BY ordinal_position;
-```
+\`\`\`
 
 ### 4. Test des indexes
-```sql
+\`\`\`sql
 -- Doit retourner 6 indexes
 SELECT indexname 
 FROM pg_indexes 
 WHERE tablename IN ('bookings', 'booking_modifications', 'booking_reports')
 AND indexname LIKE 'idx_%';
-```
+\`\`\`
 
 ### 5. Test des RLS policies
-```sql
+\`\`\`sql
 -- Doit retourner au moins 7 policies
 SELECT tablename, policyname, cmd
 FROM pg_policies 
 WHERE tablename IN ('booking_modifications', 'booking_reports')
 ORDER BY tablename, policyname;
-```
+\`\`\`
 
 ## 🔄 Rollback (en cas de problème)
 
 Si vous devez annuler les changements :
 
-```sql
+\`\`\`sql
 -- 1. Drop triggers
 DROP TRIGGER IF EXISTS booking_reports_updated_at ON booking_reports;
 
@@ -147,22 +147,22 @@ ALTER TABLE bookings
 
 -- 4. Drop function
 DROP FUNCTION IF EXISTS update_booking_reports_updated_at();
-```
+\`\`\`
 
 ## 🎯 Tests Fonctionnels
 
 Après la migration, testez les fonctionnalités :
 
 ### 1. Test d'annulation
-```bash
+\`\`\`bash
 curl -X POST http://localhost:3000/api/bookings/[BOOKING_ID]/cancel \
   -H "Content-Type: application/json" \
   -d '{"reason": "Test cancellation reason with at least 10 characters"}' \
   -H "Cookie: [YOUR_SESSION_COOKIE]"
-```
+\`\`\`
 
 ### 2. Test de signalement
-```bash
+\`\`\`bash
 curl -X POST http://localhost:3000/api/bookings/[BOOKING_ID]/report \
   -H "Content-Type: application/json" \
   -d '{
@@ -170,10 +170,10 @@ curl -X POST http://localhost:3000/api/bookings/[BOOKING_ID]/report \
     "description": "Test report with at least twenty characters to pass validation"
   }' \
   -H "Cookie: [YOUR_SESSION_COOKIE]"
-```
+\`\`\`
 
 ### 3. Test de modification
-```bash
+\`\`\`bash
 curl -X PUT http://localhost:3000/api/bookings/[BOOKING_ID] \
   -H "Content-Type: application/json" \
   -d '{
@@ -182,7 +182,7 @@ curl -X PUT http://localhost:3000/api/bookings/[BOOKING_ID] \
     "pickupTimeSlot": "09:00-12:00"
   }' \
   -H "Cookie: [YOUR_SESSION_COOKIE]"
-```
+\`\`\`
 
 ## 📊 Monitoring Post-Migration
 
@@ -194,21 +194,21 @@ Surveillez ces métriques après le déploiement :
    - `/api/bookings/[id]` (PUT)
 
 2. **Performance des requêtes** (doit rester < 200ms)
-   ```sql
+   \`\`\`sql
    -- Vérifier que les indexes sont utilisés
    EXPLAIN ANALYZE 
    SELECT * FROM bookings WHERE cancelled_at IS NOT NULL;
-   ```
+   \`\`\`
 
 3. **Volume de cancellations** (alerte si > 10% des bookings)
-   ```sql
+   \`\`\`sql
    SELECT 
      COUNT(*) FILTER (WHERE status = 'cancelled') as cancelled,
      COUNT(*) as total,
      ROUND(100.0 * COUNT(*) FILTER (WHERE status = 'cancelled') / COUNT(*), 2) as cancel_rate
    FROM bookings
    WHERE created_at > NOW() - INTERVAL '7 days';
-   ```
+   \`\`\`
 
 ## 🆘 Troubleshooting
 

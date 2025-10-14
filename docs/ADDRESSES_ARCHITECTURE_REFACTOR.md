@@ -15,18 +15,18 @@ Séparer les composants liés aux **adresses** (page dédiée `/addresses`) des 
 
 ### Avant (Structure mélangée)
 
-```
+\`\`\`
 components/
 ├── profile/
 │   ├── address-card.tsx                # ❌ Mélangé avec profil
 │   ├── address-delete-confirm.tsx      # ❌ Mélangé avec profil
 │   ├── address-form-dialog.tsx         # ❌ Mélangé avec profil
 │   └── addresses-section.tsx           # ❌ Mélangé avec profil
-```
+\`\`\`
 
 ### Après (Architecture claire)
 
-```
+\`\`\`
 components/
 ├── addresses/                           # ✅ Nouveau dossier dédié
 │   ├── address-card.tsx
@@ -37,14 +37,14 @@ components/
 ├── profile/                             # ✅ Maintenant vide (prêt pour composants profil)
 └── forms/
     └── address-form.tsx                 # ✅ Reste ici (parcours réservation)
-```
+\`\`\`
 
 ---
 
 ## 🚀 Pages Impactées
 
 ### `/addresses` (Route Indépendante)
-```tsx
+\`\`\`tsx
 // app/(authenticated)/addresses/page.tsx
 import { AddressesSection } from "@/components/addresses/addresses-section" // ✅ Nouveau chemin
 
@@ -52,10 +52,10 @@ export default async function AddressesPage() {
   await requireAuth()
   return <AddressesSection />
 }
-```
+\`\`\`
 
 ### `/profile` (Nettoyé)
-```tsx
+\`\`\`tsx
 // app/(authenticated)/profile/page.tsx
 // ✅ Supprimé : import { AddressesSection } from "@/components/profile/addresses-section"
 // ✅ Supprimé : <AddressesSection /> dans le JSX
@@ -67,25 +67,25 @@ export default async function ProfilePage() {
     </Card>
   )
 }
-```
+\`\`\`
 
 ---
 
 ## 🔗 Navigation (Sidebar)
 
 ### Avant
-```tsx
+\`\`\`tsx
 <Link href="/profile#addresses"> {/* ❌ Fragment d'URL */}
   Mes adresses
 </Link>
-```
+\`\`\`
 
 ### Après
-```tsx
+\`\`\`tsx
 <Link href="/addresses"> {/* ✅ Route dédiée */}
   Mes adresses
 </Link>
-```
+\`\`\`
 
 **Fichier modifié** : `components/layout/dashboard-sidebar.tsx` (2 occurrences : Desktop + Mobile)
 
@@ -95,7 +95,7 @@ export default async function ProfilePage() {
 
 Ajout de la route `/addresses` dans les routes protégées :
 
-```typescript
+\`\`\`typescript
 // middleware.ts
 const PROTECTED_ROUTES = {
   auth: [
@@ -107,7 +107,7 @@ const PROTECTED_ROUTES = {
   ],
   // ...
 }
-```
+\`\`\`
 
 ---
 
@@ -121,11 +121,11 @@ const PROTECTED_ROUTES = {
 | `addresses-section.tsx` | `components/profile/` | `components/addresses/` |
 
 **Commandes exécutées** :
-```bash
+\`\`\`bash
 mkdir components/addresses
 mv components/profile/address-*.tsx components/addresses/
 mv components/profile/addresses-section.tsx components/addresses/
-```
+\`\`\`
 
 ---
 
@@ -161,12 +161,12 @@ mv components/profile/addresses-section.tsx components/addresses/
 
 ## 🎯 Architecture Finale
 
-```
+\`\`\`
 /profile               → Informations personnelles uniquement
 /addresses             → Gestion complète des adresses (CRUD)
 /subscription/manage   → Gestion abonnement
 /reservation           → Parcours de réservation (utilise forms/address-form.tsx)
-```
+\`\`\`
 
 ---
 

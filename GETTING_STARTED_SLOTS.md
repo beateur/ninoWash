@@ -22,12 +22,12 @@ L'interface de sélection de créneaux Collecte & Livraison est maintenant **com
    - Cliquer sur **"Run"** (ou Cmd+Enter / Ctrl+Enter)
 
 3. **Vérifier que les slots sont créés** :
-   ```sql
+   \`\`\`sql
    SELECT role, slot_date, start_time, end_time, label, is_open 
    FROM public.logistic_slots 
    WHERE slot_date >= CURRENT_DATE 
    ORDER BY slot_date, role, start_time;
-   ```
+   \`\`\`
    
    **Résultat attendu** : 8 lignes affichées
    - 4 slots pour mardi 14 octobre 2025 (2 pickup + 2 delivery)
@@ -38,9 +38,9 @@ L'interface de sélection de créneaux Collecte & Livraison est maintenant **com
 ### Étape 2 : Tester l'Interface Utilisateur
 
 1. **Lancer le serveur de développement** (si pas déjà fait) :
-   ```bash
+   \`\`\`bash
    pnpm dev
-   ```
+   \`\`\`
 
 2. **Ouvrir le navigateur** :
    - Aller sur `http://localhost:3000/reservation/guest`
@@ -75,7 +75,7 @@ L'interface de sélection de créneaux Collecte & Livraison est maintenant **com
    - Dans Network, chercher la requête `POST /api/bookings`
    - Cliquer dessus et aller dans l'onglet "Payload" ou "Request"
    - Vous devriez voir :
-     ```json
+     \`\`\`json
      {
        "pickupSlotId": 1,
        "deliverySlotId": 2,
@@ -83,7 +83,7 @@ L'interface de sélection de créneaux Collecte & Livraison est maintenant **com
        "guestContact": {...},
        ...
      }
-     ```
+     \`\`\`
 
 ---
 
@@ -136,10 +136,10 @@ Pour plus de détails, consultez :
 **R** : Les RLS policies Supabase ne sont peut-être pas actives.
 
 **Vérification** :
-```sql
+\`\`\`sql
 -- Dans Supabase SQL Editor
 SELECT * FROM public.logistic_slots WHERE is_open = TRUE;
-```
+\`\`\`
 Si ça fonctionne en mode SQL Editor mais pas depuis l'app, c'est un problème de RLS.
 
 **Solution** : Re-exécuter la migration complète `supabase/migrations/20251013000000_create_logistic_slots.sql`.
@@ -153,11 +153,11 @@ Si ça fonctionne en mode SQL Editor mais pas depuis l'app, c'est un problème d
 **R** : Cache Next.js ou erreur de compilation.
 
 **Solution** :
-```bash
+\`\`\`bash
 # Arrêter le serveur (Ctrl+C)
 rm -rf .next
 pnpm dev
-```
+\`\`\`
 
 ---
 
@@ -179,9 +179,9 @@ pnpm dev
 ## 🆘 Besoin d'Aide ?
 
 ### Erreurs de Compilation TypeScript
-```bash
+\`\`\`bash
 pnpm tsc --noEmit
-```
+\`\`\`
 Affiche toutes les erreurs TypeScript dans le terminal.
 
 ### Vérifier les Logs Supabase
@@ -191,10 +191,10 @@ Affiche toutes les erreurs TypeScript dans le terminal.
 
 ### Réinitialiser l'État du Wizard
 Ouvrir la console DevTools (F12) et taper :
-```javascript
+\`\`\`javascript
 sessionStorage.clear()
 location.reload()
-```
+\`\`\`
 
 ---
 

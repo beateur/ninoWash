@@ -40,7 +40,7 @@ Offrir une expérience fluide et élégante pour gérer ses adresses. Chaque int
 
 ### 3.1 Vue Liste (État par défaut)
 
-```
+\`\`\`
 ┌─────────────────────────────────────────────────────────┐
 │  Mes Adresses                                     [+ Nouvelle adresse]
 │
@@ -61,12 +61,12 @@ Offrir une expérience fluide et élégante pour gérer ses adresses. Chaque int
 │  └──────────────────────────────────────────────┘
 │
 └─────────────────────────────────────────────────────────┘
-```
+\`\`\`
 
 ### 3.2 Composants UI
 
 #### Card Adresse
-```typescript
+\`\`\`typescript
 interface AddressCardProps {
   address: Address
   isDefault: boolean
@@ -74,7 +74,7 @@ interface AddressCardProps {
   onSetDefault: () => void
   onDelete: () => void
 }
-```
+\`\`\`
 
 **Design**:
 - Border subtil (gray-200)
@@ -86,7 +86,7 @@ interface AddressCardProps {
   - Badge "Par défaut": bg-primary/10, text-primary
 
 #### Dialog Ajout/Modification
-```typescript
+\`\`\`typescript
 <DialogContent className="sm:max-w-lg">
   <DialogHeader>
     <DialogTitle className="text-2xl font-light">
@@ -98,7 +98,7 @@ interface AddressCardProps {
   </DialogHeader>
   <AddressForm />
 </DialogContent>
-```
+\`\`\`
 
 **Champs** (dans cet ordre):
 1. **Libellé** : "Domicile", "Bureau", "Chez mes parents"... (input libre)
@@ -123,7 +123,7 @@ interface AddressCardProps {
 ### 3.4 États Spéciaux
 
 #### Liste Vide (Première visite)
-```
+\`\`\`
 ┌─────────────────────────────────────────────────────────┐
 │                                                          │
 │              📍                                          │
@@ -135,7 +135,7 @@ interface AddressCardProps {
 │         [+ Ajouter ma première adresse]                  │
 │                                                          │
 └─────────────────────────────────────────────────────────┘
-```
+\`\`\`
 
 #### Loading
 - Skeleton cards (3 cartes grises animées)
@@ -152,13 +152,13 @@ interface AddressCardProps {
 ### 4.1 Frontend
 
 **Fichiers à créer**:
-```
+\`\`\`
 components/profile/
   ├── addresses-section.tsx          ← Section principale
   ├── address-card.tsx               ← Card individuelle
   ├── address-form-dialog.tsx        ← Dialog add/edit
   └── address-delete-confirm.tsx     ← Dialog confirmation
-```
+\`\`\`
 
 **Intégration**:
 - Modifier `app/(authenticated)/profile/page.tsx`
@@ -166,12 +166,12 @@ components/profile/
 - Gérer scroll smooth vers section si hash présent
 
 **State Management**:
-```typescript
+\`\`\`typescript
 const [addresses, setAddresses] = useState<Address[]>([])
 const [selectedAddress, setSelectedAddress] = useState<Address | null>(null)
 const [isDialogOpen, setIsDialogOpen] = useState(false)
 const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-```
+\`\`\`
 
 ### 4.2 Backend
 
@@ -182,7 +182,7 @@ const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 - `DELETE /api/addresses` - Supprimer une adresse
 
 **Validation Zod** (déjà existante dans `lib/validations/booking.ts`):
-```typescript
+\`\`\`typescript
 export const addressSchema = z.object({
   type: z.enum(["home", "work", "other"]).default("home"),
   label: z.string().min(1, "Libellé requis"),
@@ -194,7 +194,7 @@ export const addressSchema = z.object({
   accessCode: z.string().optional(),
   isDefault: z.boolean().default(false),
 })
-```
+\`\`\`
 
 ### 4.3 Database
 
@@ -214,7 +214,7 @@ Colonnes déjà présentes :
 
 ### 5.1 Couleurs & Styles
 
-```typescript
+\`\`\`typescript
 // Card normale
 className="border border-gray-200 bg-white rounded-xl p-6 transition-all hover:shadow-md"
 
@@ -238,11 +238,11 @@ className="bg-primary/10 text-primary text-xs font-medium px-2.5 py-1 rounded-fu
     </Button>
   </DropdownMenuTrigger>
 </DropdownMenu>
-```
+\`\`\`
 
 ### 5.2 Animations
 
-```typescript
+\`\`\`typescript
 // Apparition des cards
 <motion.div
   initial={{ opacity: 0, y: 10 }}
@@ -257,7 +257,7 @@ className="bg-primary/10 text-primary text-xs font-medium px-2.5 py-1 rounded-fu
     animate={{ opacity: 1, scale: 1 }}
     transition={{ duration: 0.15 }}
   >
-```
+\`\`\`
 
 ### 5.3 Micro-interactions
 
@@ -272,7 +272,7 @@ className="bg-primary/10 text-primary text-xs font-medium px-2.5 py-1 rounded-fu
 
 ### 6.1 Ajouter une Adresse
 
-```
+\`\`\`
 1. User clique "+ Nouvelle adresse"
 2. Dialog s'ouvre avec animation douce
 3. User remplit les champs (label + adresse minimum)
@@ -281,20 +281,20 @@ className="bg-primary/10 text-primary text-xs font-medium px-2.5 py-1 rounded-fu
 6. Dialog se ferme
 7. Nouvelle card apparaît en haut de liste (animation)
 8. Toast "Adresse ajoutée avec succès" (3s)
-```
+\`\`\`
 
 ### 6.2 Définir par Défaut
 
-```
+\`\`\`
 1. User clique toggle "Définir par défaut" ou menu "•••"
 2. Badge "Par défaut" se déplace instantanément
 3. Card devient highlighted (border-primary)
 4. Toast discret "Adresse par défaut mise à jour"
-```
+\`\`\`
 
 ### 6.3 Supprimer une Adresse
 
-```
+\`\`\`
 1. User clique menu "•••" → "Supprimer"
 2. Dialog confirmation élégant:
    "Supprimer l'adresse {label} ?"
@@ -303,7 +303,7 @@ className="bg-primary/10 text-primary text-xs font-medium px-2.5 py-1 rounded-fu
 4. Card fait fade-out (300ms)
 5. Toast avec bouton "Annuler" pendant 5s
 6. Si "Annuler" : card réapparaît (fade-in)
-```
+\`\`\`
 
 ---
 
@@ -321,7 +321,7 @@ className="bg-primary/10 text-primary text-xs font-medium px-2.5 py-1 rounded-fu
 
 ### Messages d'Erreur (Ton Premium)
 
-```typescript
+\`\`\`typescript
 const errorMessages = {
   loadFailed: "Impossible de charger vos adresses. Veuillez réessayer.",
   createFailed: "L'ajout de l'adresse a échoué. Réessayez dans un instant.",
@@ -329,7 +329,7 @@ const errorMessages = {
   deleteFailed: "La suppression a échoué. Veuillez réessayer.",
   network: "Connexion perdue. Vérifiez votre réseau.",
 }
-```
+\`\`\`
 
 ---
 
@@ -359,12 +359,12 @@ const errorMessages = {
 - ✅ Screen reader friendly
 - ✅ Contraste WCAG AA minimum
 
-```typescript
+\`\`\`typescript
 <button
   aria-label="Modifier l'adresse Domicile"
   className="focus:ring-2 focus:ring-primary"
 >
-```
+\`\`\`
 
 ---
 

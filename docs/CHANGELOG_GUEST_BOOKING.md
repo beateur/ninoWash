@@ -200,7 +200,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Stripe payment**: ✅ **INTEGRATED** in Phase 2 Day 1-2
 - **Dev-only test button**: Simulates completion for testing
 
-```
+\`\`\`
 
 #### Container Integration (`guest-booking-container.tsx`)
 - **Step imports**: All 5 components imported

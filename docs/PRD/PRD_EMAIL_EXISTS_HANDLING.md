@@ -10,14 +10,14 @@ Lors du flow de réservation invité (Guest Booking), si un utilisateur paie ave
 
 ### Problème observé
 
-```
+\`\`\`
 [v0] Retry attempt 1/4 after 2000ms: A user with this email address has already been registered
 [v0] User creation retry 1/3: A user with this email address has already been registered
 [v0] Retry attempt 2/4 after 4000ms: A user with this email address has already been registered
 [v0] User creation retry 2/3: A user with this email address has already been registered
 [v0] Retry attempt 3/4 after 8000ms: A user with this email address has already been registered
 [v0] User creation retry 3/3: A user with this email address has already been registered
-```
+\`\`\`
 
 **Impact utilisateur**:
 - Délai de 14+ secondes avant l'échec (2s + 4s + 8s)
@@ -49,7 +49,7 @@ Lors du flow de réservation invité (Guest Booking), si un utilisateur paie ave
 4. ✅ Sinon, appliquer retry pour erreurs transitoires (timeout, rate limit)
 
 **Code pattern**:
-```typescript
+\`\`\`typescript
 // First attempt (no retry)
 const initialResult = await supabase.auth.admin.createUser({...})
 
@@ -69,7 +69,7 @@ if (initialResult.error &&
 if (initialResult.error) {
   const userData = await withRetry(...)
 }
-```
+\`\`\`
 
 ### Frontend
 
@@ -82,7 +82,7 @@ if (initialResult.error) {
 4. ✅ Rediriger vers `/auth/signin?email=...&message=...` après 2 secondes
 
 **Code pattern**:
-```typescript
+\`\`\`typescript
 const orchestrationData = await orchestrationResponse.json()
 
 // Check for email exists (409 Conflict)
@@ -94,7 +94,7 @@ if (orchestrationResponse.status === 409 && orchestrationData.error === "EMAIL_E
   }, 2000)
   return
 }
-```
+\`\`\`
 
 **Fichier**: `app/auth/signin/page.tsx`
 
@@ -103,7 +103,7 @@ if (orchestrationResponse.status === 409 && orchestrationData.error === "EMAIL_E
 2. ✅ Passer ces props au composant `<AuthForm />`
 
 **Code**:
-```typescript
+\`\`\`typescript
 export default function SignInPage({
   searchParams,
 }: {
@@ -117,7 +117,7 @@ export default function SignInPage({
     />
   )
 }
-```
+\`\`\`
 
 **Fichier**: `components/forms/auth-form.tsx`
 
@@ -127,7 +127,7 @@ export default function SignInPage({
 3. ✅ Afficher `infoMessage` dans une Alert bleue avant le formulaire
 
 **Code**:
-```tsx
+\`\`\`tsx
 interface AuthFormProps {
   mode: "signin" | "signup"
   onSuccess?: () => void
@@ -147,7 +147,7 @@ defaultValues: {
     <AlertDescription>{infoMessage}</AlertDescription>
   </Alert>
 )}
-```
+\`\`\`
 
 ### Validation
 
@@ -189,7 +189,7 @@ defaultValues: {
 
 ## 5. Data Flow
 
-```
+\`\`\`
 1. Guest remplit formulaire + paie via Stripe ✅
    ↓
 2. Stripe Payment Success → API Orchestration ✅
@@ -216,7 +216,7 @@ defaultValues: {
 9. Page de connexion: Email pré-rempli + Message bleu affiché ✅
    ↓
 10. User se connecte → Dashboard
-```
+\`\`\`
 
 ## 6. Error Scenarios
 
@@ -339,12 +339,12 @@ defaultValues: {
 Si le nouveau workflow cause des problèmes :
 
 1. **Rollback simple** (Git):
-   ```bash
+   \`\`\`bash
    git revert <commit-hash>
-   ```
+   \`\`\`
 
 2. **Feature flag** (si implémenté plus tard):
-   ```typescript
+   \`\`\`typescript
    const ENABLE_EMAIL_EXISTS_REDIRECT = process.env.NEXT_PUBLIC_ENABLE_EMAIL_EXISTS_REDIRECT === 'true'
    
    if (ENABLE_EMAIL_EXISTS_REDIRECT && status === 409) {
@@ -352,7 +352,7 @@ Si le nouveau workflow cause des problèmes :
    } else {
      // Ancien comportement (retry + fail)
    }
-   ```
+   \`\`\`
 
 3. **Monitoring**: Surveiller les erreurs 409 et le taux de signin après redirect
 

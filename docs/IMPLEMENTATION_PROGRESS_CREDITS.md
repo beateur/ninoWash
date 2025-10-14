@@ -162,7 +162,7 @@ Implémentation du système de crédits hebdomadaires pour abonnés permettant d
 ## 🧪 Testable Maintenant
 
 ### Test 1 : Vérifier Crédits (API)
-```bash
+\`\`\`bash
 # Récupérer crédits actuels
 curl -H "Authorization: Bearer YOUR_TOKEN" \
   https://localhost:3000/api/subscriptions/credits
@@ -176,10 +176,10 @@ curl -H "Authorization: Bearer YOUR_TOKEN" \
     "resetAt": "2025-10-12T00:00:00Z"
   }
 }
-```
+\`\`\`
 
 ### Test 2 : Créer Réservation avec Crédit
-```bash
+\`\`\`bash
 # Créer booking (10kg) avec crédit
 curl -X POST \
   -H "Authorization: Bearer YOUR_TOKEN" \
@@ -198,7 +198,7 @@ curl -X POST \
 # - used_subscription_credit = true
 # - credit_discount_amount = 35.70€ (10kg × 3.57€)
 # - Crédit consommé (remaining passe à 1)
-```
+\`\`\`
 
 ### Test 3 : Dashboard Affichage Crédits
 1. Se connecter en tant qu'abonné
@@ -246,7 +246,7 @@ curl -X POST \
 **Estimation** : 2 heures
 
 **Modifications nécessaires** :
-```tsx
+\`\`\`tsx
 // Dans summary-step.tsx
 import { CreditUsageBadge } from "@/components/subscription/credit-usage-badge"
 
@@ -261,7 +261,7 @@ import { CreditUsageBadge } from "@/components/subscription/credit-usage-badge"
     }}
   />
 )}
-```
+\`\`\`
 
 ### Priorité 5 : Tests (Unit + Integration + E2E) 🟢
 **Estimation** : 1-2 jours
@@ -277,13 +277,13 @@ import { CreditUsageBadge } from "@/components/subscription/credit-usage-badge"
 
 ### 1. Migration Database Non Appliquée
 ⚠️ **Action requise** : Appliquer la migration SQL sur Supabase local/staging
-```bash
+\`\`\`bash
 # En local
 supabase migration up
 
 # Ou via Supabase Dashboard :
 # SQL Editor → Coller contenu de 20251005000000_add_subscription_credits_system.sql → Run
-```
+\`\`\`
 
 ### 2. Poids Réservation Hardcodé
 ⚠️ **Limitation temporaire** : `bookingWeightKg = 10` dans `bookings/route.ts` ligne 93
@@ -291,7 +291,7 @@ supabase migration up
 
 ### 3. Cron Job Manuel Temporairement
 ⚠️ **Workaround** : Exécuter manuellement le reset chaque lundi via SQL :
-```sql
+\`\`\`sql
 -- Reset manuel (à exécuter chaque lundi)
 SELECT initialize_weekly_credits(
   user_id, 
@@ -300,7 +300,7 @@ SELECT initialize_weekly_credits(
 )
 FROM subscriptions
 WHERE status IN ('active', 'trialing');
-```
+\`\`\`
 
 ### 4. Aucun Test Automatisé
 ⚠️ **Risque** : Pas de tests unitaires/intégration pour les crédits

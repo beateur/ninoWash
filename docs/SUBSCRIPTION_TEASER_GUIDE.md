@@ -10,10 +10,10 @@ This system allows launching the app with **subscriptions as teasers** (locked/b
 
 ### MVP Launch (Subscriptions Locked)
 
-```bash
+\`\`\`bash
 # .env.local or .env.production
 NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=false
-```
+\`\`\`
 
 **Result**:
 - ✅ Classic service: Fully functional (CTA clickable, booking works)
@@ -22,10 +22,10 @@ NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=false
 
 ### Production Activation (Subscriptions Live)
 
-```bash
+\`\`\`bash
 # .env.local or .env.production
 NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=true
-```
+\`\`\`
 
 **Result**:
 - ✅ All services fully functional
@@ -42,15 +42,15 @@ NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=true
 ### Files Modified
 
 1. **`lib/flags.ts`** - Feature flag definition
-   ```typescript
+   \`\`\`typescript
    export const SUBSCRIPTIONS_ENABLED: boolean =
      process.env.NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED === "true"
-   ```
+   \`\`\`
 
 2. **`env.d.ts`** - TypeScript environment types
-   ```typescript
+   \`\`\`typescript
    NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED?: "true" | "false"
-   ```
+   \`\`\`
 
 3. **`components/sections/services-section.tsx`** - UI with teaser logic
    - Imports `SUBSCRIPTIONS_ENABLED` flag
@@ -59,11 +59,11 @@ NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=true
    - "Bientôt disponible" badge
 
 4. **`app/reservation/page.tsx`** - Server-side guard
-   ```typescript
+   \`\`\`typescript
    if (isSubscription && !SUBSCRIPTIONS_ENABLED) {
      redirect("/pricing?locked=1")
    }
-   ```
+   \`\`\`
 
 5. **`middleware.ts`** - URL protection
    - Checks query param `?service=monthly|quarterly`
@@ -79,20 +79,20 @@ NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=true
 - Detects subscription services: `isSubscription = service.id !== "classic"`
 - Checks lock state: `isLocked = isSubscription && !SUBSCRIPTIONS_ENABLED`
 - Renders conditionally:
-  ```tsx
+  \`\`\`tsx
   {isLocked ? (
     <Button disabled aria-disabled onClick={preventDefault}>S'abonner</Button>
   ) : (
     <Link href={`/reservation?service=${service.id}`}>...</Link>
   )}
-  ```
+  \`\`\`
 
 **Blur Overlay**:
-```tsx
+\`\`\`tsx
 <div className="absolute inset-0 rounded-xl backdrop-blur-[2px] bg-background/40">
   <p>Bientôt disponible</p>
 </div>
-```
+\`\`\`
 
 ### Server Layer (Protected)
 
@@ -112,16 +112,16 @@ NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=true
 ## User Flows
 
 ### Flow 1: Click Disabled CTA (Flag OFF)
-```
+\`\`\`
 User → Clicks "S'abonner" on Monthly card
        ↓
        Button onClick → preventDefault()
        ↓
        Nothing happens (cursor: not-allowed)
-```
+\`\`\`
 
 ### Flow 2: Direct URL Access (Flag OFF)
-```
+\`\`\`
 User → Types /reservation?service=monthly
        ↓
        Middleware intercepts request
@@ -129,19 +129,19 @@ User → Types /reservation?service=monthly
        Checks: isSubscription && !SUBSCRIPTIONS_ENABLED
        ↓
        Redirects to /pricing?locked=1
-```
+\`\`\`
 
 ### Flow 3: Classic Service (Always Works)
-```
+\`\`\`
 User → Clicks "Réserver" on Classic card
        ↓
        <Link> navigates to /reservation?service=classic
        ↓
        Page loads normally (no flag check for classic)
-```
+\`\`\`
 
 ### Flow 4: Admin Activates Flag (Flag ON)
-```
+\`\`\`
 Admin → Sets NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=true
         ↓
         Deploys to production
@@ -153,7 +153,7 @@ Admin → Sets NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=true
         - Links rendered instead of disabled buttons
         - Blur overlays not rendered
         - Middleware allows subscription URLs
-```
+\`\`\`
 
 ---
 
@@ -183,22 +183,22 @@ Search for comment: `// TEASER LAYER`
 
 ### Step 2: Simplify Component
 **Before** (with teaser):
-```tsx
+\`\`\`tsx
 {isLocked ? (
   <Button disabled>S'abonner</Button>
 ) : (
   <Link href={...}>S'abonner</Link>
 )}
-```
+\`\`\`
 
 **After** (cleanup):
-```tsx
+\`\`\`tsx
 <Button asChild>
   <Link href={...}>
     {service.id === "classic" ? "Réserver" : "S'abonner"}
   </Link>
 </Button>
-```
+\`\`\`
 
 ### Step 3: Remove Guards (Optional)
 - Keep middleware guard if you want permanent fallback
@@ -236,17 +236,17 @@ Search for comment: `// TEASER LAYER`
 
 ### TypeScript Validation
 
-```bash
+\`\`\`bash
 pnpm tsc --noEmit
 # Expected: 0 errors
-```
+\`\`\`
 
 ### Bundle Size
 
-```bash
+\`\`\`bash
 pnpm build:analyze
 # Expected: <2KB increase (Lock icon + flag check logic)
-```
+\`\`\`
 
 ---
 
@@ -256,36 +256,36 @@ pnpm build:analyze
 
 **Solution**:
 1. Verify `.env.local` or `.env.production` has exact syntax:
-   ```bash
+   \`\`\`bash
    NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=true
-   ```
+   \`\`\`
    (no quotes, no spaces)
 
 2. Restart dev server:
-   ```bash
+   \`\`\`bash
    pnpm dev
-   ```
+   \`\`\`
 
 3. Check browser console for flag value:
-   ```javascript
+   \`\`\`javascript
    console.log(process.env.NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED)
    // Should output: "true"
-   ```
+   \`\`\`
 
 4. Clear Next.js cache:
-   ```bash
+   \`\`\`bash
    rm -rf .next
    pnpm dev
-   ```
+   \`\`\`
 
 ### Issue: Direct URL still accessible (middleware not blocking)
 
 **Solution**:
 1. Verify middleware.ts updated with flag check
 2. Check middleware logs in terminal:
-   ```
+   \`\`\`
    [v0] Middleware - subscription access blocked (flag OFF): monthly
-   ```
+   \`\`\`
 3. Ensure `matcher` config includes `/reservation` path
 
 ### Issue: TypeScript error on env var
@@ -294,11 +294,11 @@ pnpm build:analyze
 1. Verify `env.d.ts` exists at project root
 2. Restart TypeScript server in VSCode: `Cmd+Shift+P` → "Restart TS Server"
 3. Check `tsconfig.json` includes `env.d.ts`:
-   ```json
+   \`\`\`json
    {
      "include": ["env.d.ts", "**/*.ts", "**/*.tsx"]
    }
-   ```
+   \`\`\`
 
 ---
 
@@ -316,17 +316,17 @@ pnpm build:analyze
 
 1. Site Configuration → Environment Variables
 2. Add:
-   ```
+   \`\`\`
    NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=false
-   ```
+   \`\`\`
 3. Trigger deploy
 
 ### Docker
 
-```dockerfile
+\`\`\`dockerfile
 # Dockerfile
 ENV NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=false
-```
+\`\`\`
 
 ---
 
@@ -336,7 +336,7 @@ ENV NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=false
 
 Track teaser interactions:
 
-```typescript
+\`\`\`typescript
 // In services-section.tsx disabled button onClick
 onClick={(e) => {
   e.preventDefault()
@@ -348,7 +348,7 @@ onClick={(e) => {
     })
   }
 }}
-```
+\`\`\`
 
 ### Metrics to Watch
 
@@ -368,13 +368,13 @@ A: No. Features remain in DOM (under blur), so Google indexes full content. CTAs
 
 **Q: Can I test both states locally?**
 A: Yes. Change `.env.local` and restart dev server:
-```bash
+\`\`\`bash
 # Test locked state
 NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=false pnpm dev
 
 # Test active state
 NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=true pnpm dev
-```
+\`\`\`
 
 **Q: Is the Classic service affected by the flag?**
 A: No. Classic is explicitly excluded from all flag checks (`service.id !== "classic"`).

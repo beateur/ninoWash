@@ -77,7 +77,7 @@
   - French locale for all labels
 
 **State Management**:
-```typescript
+\`\`\`typescript
 // Pickup address
 const handlePickupComplete = (data: GuestAddress) => {
   updateAddresses({ pickup: data, delivery: useSameAddress ? data : state.addresses?.delivery })
@@ -87,7 +87,7 @@ const handlePickupComplete = (data: GuestAddress) => {
 const handleDeliveryComplete = (data: GuestAddress) => {
   updateAddresses({ pickup: state.addresses?.pickup!, delivery: data })
 }
-```
+\`\`\`
 
 **Dependencies**:
 - React Hook Form: Form state management
@@ -113,9 +113,9 @@ const handleDeliveryComplete = (data: GuestAddress) => {
   - Disabled at 50 (max limit)
 
 - **Real-time total calculation**:
-  ```typescript
+  \`\`\`typescript
   const total = selectedServices.reduce((sum, item) => sum + (item.quantity * item.base_price), 0)
-  ```
+  \`\`\`
   - Updates instantly on quantity change
   - Displayed in summary bar (bottom of screen)
 
@@ -130,7 +130,7 @@ const handleDeliveryComplete = (data: GuestAddress) => {
   - Service cards: Image, name, description, price, quantity selector
 
 **State Management**:
-```typescript
+\`\`\`typescript
 const handleComplete = () => {
   if (selectedServices.length === 0) {
     toast.error("Sélectionnez au moins un service")
@@ -139,7 +139,7 @@ const handleComplete = () => {
   updateServices(selectedServices, specialInstructions)
   goToStep(3) // Next: DateTime
 }
-```
+\`\`\`
 
 **Dependencies**:
 - Supabase: Service data fetch
@@ -179,7 +179,7 @@ const handleComplete = () => {
   - Visual design: Card with icon + formatted text
 
 **State Management**:
-```typescript
+\`\`\`typescript
 const handleComplete = () => {
   if (!selectedDate || !selectedTime) {
     toast.error("Sélectionnez une date et un créneau")
@@ -192,7 +192,7 @@ const handleComplete = () => {
   })
   goToStep(4) // Next: Summary
 }
-```
+\`\`\`
 
 **Date Formatting**:
 - `format(date, "EEEE d MMMM yyyy", { locale: fr })` → "lundi 10 janvier 2025"
@@ -252,13 +252,13 @@ const handleComplete = () => {
   - Label: "🧪 Test: Simuler complétion"
 
 **State Management**:
-```typescript
+\`\`\`typescript
 const handlePaymentComplete = (paymentIntentId: string) => {
   // Phase 2: Will be implemented with Stripe
   updatePayment(paymentIntentId)
   onComplete() // Trigger booking creation API
 }
-```
+\`\`\`
 
 **Phase 2 Integration Points**:
 - Replace disabled button with Stripe Elements
@@ -280,18 +280,18 @@ const handlePaymentComplete = (paymentIntentId: string) => {
 **Changes Made**:
 
 1. **Imports added**:
-   ```typescript
+   \`\`\`typescript
    import AddressesStep from "./steps/addresses-step"
    import ServicesStep from "./steps/services-step"
    import DateTimeStep from "./steps/datetime-step"
    import SummaryStep from "./steps/summary-step"
    import type { GuestAddress, GuestBookingItem } from "@/lib/hooks/use-guest-booking"
-   ```
+   \`\`\`
 
 2. **Replaced placeholders** (4 `<div>` → 4 real components):
 
    **Step 1 (Addresses)**:
-   ```tsx
+   \`\`\`tsx
    {currentStep === 1 && (
      <AddressesStep
        onComplete={(pickupAddress: GuestAddress, deliveryAddress: GuestAddress) => {
@@ -302,10 +302,10 @@ const handlePaymentComplete = (paymentIntentId: string) => {
        initialDelivery={state.addresses?.delivery}
      />
    )}
-   ```
+   \`\`\`
 
    **Step 2 (Services)**:
-   ```tsx
+   \`\`\`tsx
    {currentStep === 2 && (
      <ServicesStep
        onComplete={(items: GuestBookingItem[], instructions?: string) => {
@@ -316,10 +316,10 @@ const handlePaymentComplete = (paymentIntentId: string) => {
        initialInstructions={state.specialInstructions}
      />
    )}
-   ```
+   \`\`\`
 
    **Step 3 (DateTime)**:
-   ```tsx
+   \`\`\`tsx
    {currentStep === 3 && (
      <DateTimeStep
        onComplete={(pickupDate: string, pickupTime: string, deliveryDate: string) => {
@@ -330,10 +330,10 @@ const handlePaymentComplete = (paymentIntentId: string) => {
        initialTime={state.dateTime?.pickupTime}
      />
    )}
-   ```
+   \`\`\`
 
    **Step 4 (Summary)**:
-   ```tsx
+   \`\`\`tsx
    {currentStep === 4 && (
      <SummaryStep
        contact={state.contact!}
@@ -346,7 +346,7 @@ const handlePaymentComplete = (paymentIntentId: string) => {
        }}
      />
    )}
-   ```
+   \`\`\`
 
 3. **Type safety**:
    - All callback parameters explicitly typed
@@ -384,24 +384,24 @@ const handlePaymentComplete = (paymentIntentId: string) => {
 #### Commit 1: `fix(typescript): resolve strict mode errors in existing components`
 
 1. **`app/api/admin/stats/route.ts`**:
-   ```typescript
+   \`\`\`typescript
    - const monthlyRevenue = payments?.reduce((sum, payment) => ...)
    + const monthlyRevenue = payments?.reduce((sum: number, payment: any) => ...)
-   ```
+   \`\`\`
 
 2. **`app/api/subscriptions/sync/route.ts`**:
-   ```typescript
+   \`\`\`typescript
    - current_period_start: new Date(subscription.current_period_start * 1000)
    + current_period_start: new Date((subscription as any).current_period_start * 1000)
-   ```
+   \`\`\`
 
 3. **`components/booking/datetime-step.tsx`**:
-   ```typescript
+   \`\`\`typescript
    - onSelect={handleDateSelect}
    - locale="fr"
    + onSelect={handleDateSelect as any}
    + locale={"fr" as any}
-   ```
+   \`\`\`
 
 4. **`components/forms/address-form.tsx`**:
    - Renamed fields to match `addressSchema`:
@@ -410,41 +410,41 @@ const handlePaymentComplete = (paymentIntentId: string) => {
      - Removed `accessCode` field
 
 5. **`components/forms/auth-form.tsx`**:
-   ```typescript
+   \`\`\`typescript
    - {form.formState.errors.firstName && (...)}
    + {(form.formState.errors as any).firstName && (...)}
-   ```
+   \`\`\`
 
 6. **`components/theme-provider.tsx`**:
-   ```typescript
+   \`\`\`typescript
    - export function ThemeProvider({ children, ...props }: ThemeProviderProps)
    + export function ThemeProvider({ children, ...props }: ThemeProviderProps & { children: React.ReactNode })
-   ```
+   \`\`\`
 
 7. **`components/ui/breadcrumb.tsx`**:
-   ```typescript
+   \`\`\`typescript
    - {...props}
    + {...props as any}
-   ```
+   \`\`\`
 
 #### Commit 2: `fix(typescript): resolve remaining Slot component type errors`
 
 8. **`components/ui/button.tsx`**:
-   ```typescript
+   \`\`\`typescript
    - {...props}
    + {...props as any}
-   ```
+   \`\`\`
 
 9. **`components/ui/sidebar.tsx`**:
    - Auto-replaced 7 occurrences: `{...props}` → `{...props as any}`
 
 10. **`lib/monitoring.ts`**:
-    ```typescript
+    \`\`\`typescript
     - if (typeof window !== "undefined" && window.gtag)
     - window.gtag("event", ...)
     + if (typeof window !== "undefined" && (window as any).gtag)
     + (window as any).gtag("event", ...)
-    ```
+    \`\`\`
 
 ### Result
 
@@ -464,9 +464,9 @@ const handlePaymentComplete = (paymentIntentId: string) => {
 ## 📝 Git Commits Summary
 
 ### Commit 1: Feature Implementation
-```
+\`\`\`
 645adc5 feat(guest-booking): Phase 1 Day 3-4 - Steps 1-4 (Addresses, Services, DateTime, Summary)
-```
+\`\`\`
 
 **Files Changed**:
 - ✅ `components/booking/guest/steps/addresses-step.tsx` (new file, 356 lines)
@@ -478,9 +478,9 @@ const handlePaymentComplete = (paymentIntentId: string) => {
 **Total**: 5 files changed, 1132 insertions(+), 20 deletions(-)
 
 ### Commit 2: TypeScript Fixes (Batch 1)
-```
+\`\`\`
 e830527 fix(typescript): resolve strict mode errors in existing components
-```
+\`\`\`
 
 **Files Changed**:
 - `app/api/admin/stats/route.ts`
@@ -494,9 +494,9 @@ e830527 fix(typescript): resolve strict mode errors in existing components
 **Total**: 7 files changed, 24 insertions(+), 31 deletions(-)
 
 ### Commit 3: TypeScript Fixes (Batch 2)
-```
+\`\`\`
 a573605 fix(typescript): resolve remaining Slot component type errors
-```
+\`\`\`
 
 **Files Changed**:
 - `components/ui/button.tsx`
@@ -506,13 +506,13 @@ a573605 fix(typescript): resolve remaining Slot component type errors
 **Total**: 3 files changed, 28 insertions(+), 28 deletions(-)
 
 ### Commit History
-```
+\`\`\`
 a573605 (HEAD -> dev) fix(typescript): resolve remaining Slot component type errors
 e830527 fix(typescript): resolve strict mode errors in existing components
 645adc5 feat(guest-booking): Phase 1 Day 3-4 - Steps 1-4 (Addresses, Services, DateTime, Summary)
 a19199c docs(guest-booking): add quick start guide for Phase 1 Day 3-4
 0e2dfb2 docs(guest-booking): add Phase 1 completion summary and changelog
-```
+\`\`\`
 
 **Total Commits**: 5 (3 today + 2 from Day 1-2)
 
@@ -593,13 +593,13 @@ a19199c docs(guest-booking): add quick start guide for Phase 1 Day 3-4
 ### SessionStorage Verification
 
 **Commands**:
-```javascript
+\`\`\`javascript
 // In browser console
 localStorage.getItem('ninowash_guest_booking') // Should return booking data JSON
-```
+\`\`\`
 
 **Expected Data Structure**:
-```json
+\`\`\`json
 {
   "currentStep": 4,
   "contact": { "fullName": "...", "email": "...", "phone": "...", "rgpdConsent": true },
@@ -617,7 +617,7 @@ localStorage.getItem('ninowash_guest_booking') // Should return booking data JSO
   },
   "expiresAt": "2025-01-11T12:00:00.000Z"
 }
-```
+\`\`\`
 
 ### API Testing (Phase 2)
 
@@ -650,9 +650,9 @@ localStorage.getItem('ninowash_guest_booking') // Should return booking data JSO
 **Day 1-2: Stripe Setup**
 
 1. **Install Stripe packages**:
-   ```bash
+   \`\`\`bash
    pnpm add @stripe/stripe-js @stripe/react-stripe-js
-   ```
+   \`\`\`
 
 2. **Create Payment Intent API route**:
    - **File**: `app/api/bookings/guest/create-payment-intent/route.ts`
@@ -688,10 +688,10 @@ localStorage.getItem('ninowash_guest_booking') // Should return booking data JSO
    - **Error Handling**: Database logging (failed_account_creations, failed_bookings)
 
 2. **Apply SQL migration**:
-   ```bash
+   \`\`\`bash
    cd supabase/migrations
    ./apply-migration.sh 20250109000001_add_failed_operations_tables.sql
-   ```
+   \`\`\`
 
 3. **Test error scenarios**:
    - Payment succeeds, account creation fails → Log + retry

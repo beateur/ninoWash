@@ -36,7 +36,7 @@ Transformation de la navigation mobile pour adopter le **pattern ChatGPT** :
 - ✅ **APRÈS** : Sidebar overlay avec menu hamburger (`MobileAuthNav`)
 
 ### 🎯 Pattern Implémenté
-```
+\`\`\`
 Mobile (< 768px)                Desktop (>= 768px)
 ┌─────────────────────┐        ┌──────┬──────────────┐
 │ ☰ [Logo]      🔔 👤 │        │      │              │
@@ -59,7 +59,7 @@ Clic sur ☰ →
 │ Réserv.  │ ░        │
 │ Profil   │ ░        │
 └──────────┴──────────┘
-```
+\`\`\`
 
 ---
 
@@ -68,7 +68,7 @@ Clic sur ☰ →
 ### 1. ✏️ `components/layout/mobile-auth-nav.tsx` (AMÉLIORÉ)
 
 #### Ajouts Principaux
-```tsx
+\`\`\`tsx
 // ✅ Nouveau : Props interface
 interface MobileAuthNavProps {
   hasActiveSubscription?: boolean
@@ -91,10 +91,10 @@ const authenticatedNavigation = [
 const userInitials = user?.user_metadata?.first_name && user?.user_metadata?.last_name
   ? `${user.user_metadata.first_name[0]}${user.user_metadata.last_name[0]}`
   : user?.email?.[0]?.toUpperCase() || "U"
-```
+\`\`\`
 
 #### Structure Réorganisée
-```tsx
+\`\`\`tsx
 <SheetContent side="left" className="w-80 p-0">
   <div className="flex h-full flex-col">
     {/* 1. Header avec logo */}
@@ -131,7 +131,7 @@ const userInitials = user?.user_metadata?.first_name && user?.user_metadata?.las
     </div>
   </div>
 </SheetContent>
-```
+\`\`\`
 
 #### Design Amélioré
 - ✅ Avatar avec `ring-2 ring-primary/20` (effet haut de gamme)
@@ -147,7 +147,7 @@ const userInitials = user?.user_metadata?.first_name && user?.user_metadata?.las
 ### 2. ✏️ `components/layout/authenticated-header.tsx` (MODIFIÉ)
 
 #### Ajouts
-```tsx
+\`\`\`tsx
 // ✅ Nouveau : Props interface
 interface AuthenticatedHeaderProps {
   hasActiveSubscription?: boolean
@@ -162,23 +162,23 @@ export function AuthenticatedHeader({ hasActiveSubscription }: AuthenticatedHead
     <MobileAuthNav hasActiveSubscription={hasActiveSubscription} /> {/* ← Props ajoutées */}
   </div>
 }
-```
+\`\`\`
 
 #### Commentaires Mis à Jour
-```tsx
+\`\`\`tsx
 /**
  * Pattern Navigation Mobile (ChatGPT) :
  * - Mobile : Affiche MobileAuthNav (hamburger menu → sidebar overlay)
  * - Desktop : Affiche navigation horizontale + user dropdown
  */
-```
+\`\`\`
 
 ---
 
 ### 3. ✏️ `components/ui/sheet.tsx` (MODIFIÉ)
 
 #### Overlay Ajusté
-```diff
+\`\`\`diff
 function SheetOverlay() {
   return (
     <SheetPrimitive.Overlay
@@ -190,7 +190,7 @@ function SheetOverlay() {
     />
   )
 }
-```
+\`\`\`
 
 **Effet Visuel** :
 - Overlay moins opaque (40% vs 50%)
@@ -202,7 +202,7 @@ function SheetOverlay() {
 ### 4. ✏️ `app/(authenticated)/layout.tsx` (SIMPLIFIÉ)
 
 #### Avant
-```tsx
+\`\`\`tsx
 import { BottomNav } from "@/components/mobile/bottom-nav"
 import { MobileAuthNav } from "@/components/layout/mobile-auth-nav"
 
@@ -210,10 +210,10 @@ import { MobileAuthNav } from "@/components/layout/mobile-auth-nav"
 <div className="fixed bottom-0 left-0 right-0 z-50">
   <MobileAuthNav />
 </div>
-```
+\`\`\`
 
 #### Après
-```tsx
+\`\`\`tsx
 // ✅ Import BottomNav supprimé
 // ✅ MobileAuthNav géré par AuthenticatedHeader
 
@@ -222,7 +222,7 @@ import { MobileAuthNav } from "@/components/layout/mobile-auth-nav"
 </main>
 
 {/* Mobile Navigation: MobileAuthNav is triggered from AuthenticatedHeader via hamburger button */}
-```
+\`\`\`
 
 **Simplification** :
 - Plus de `fixed bottom-0` (pattern obsolète)
@@ -234,22 +234,22 @@ import { MobileAuthNav } from "@/components/layout/mobile-auth-nav"
 ### 5. ✏️ `app/(main)/layout.tsx` (NETTOYÉ)
 
 #### Avant
-```tsx
+\`\`\`tsx
 import { BottomNav } from "@/components/mobile/bottom-nav"
 
 <main className="flex-1 pb-16 md:pb-0">{children}</main>  {/* pb-16 pour BottomNav */}
 <Footer />
 <BottomNav />
-```
+\`\`\`
 
 #### Après
-```tsx
+\`\`\`tsx
 // ✅ Import BottomNav supprimé
 
 <main className="flex-1">{children}</main>  {/* pb-16 retiré */}
 <Footer />
 {/* BottomNav supprimé */}
-```
+\`\`\`
 
 **Gain d'Espace** :
 - Suppression de `pb-16` (64px de padding bottom)
@@ -273,7 +273,7 @@ import { BottomNav } from "@/components/mobile/bottom-nav"
 ## 🎨 Design System Appliqué
 
 ### Couleurs & États
-```css
+\`\`\`css
 /* Active state */
 bg-primary text-primary-foreground shadow-sm
 
@@ -292,10 +292,10 @@ bg-green-500/10 text-green-600
 
 /* Badge Premium */
 bg-primary/10 text-primary
-```
+\`\`\`
 
 ### Spacing
-```css
+\`\`\`css
 /* Generous padding */
 p-6       /* Header, user section */
 p-4       /* CTA, footer */
@@ -304,10 +304,10 @@ px-4 py-3 /* Nav items (plus confortables) */
 /* Gaps */
 gap-3     /* Avatar + user info */
 space-y-1 /* Nav items */
-```
+\`\`\`
 
 ### Typography
-```css
+\`\`\`css
 /* User name */
 text-sm font-medium
 
@@ -319,10 +319,10 @@ text-sm font-medium
 
 /* Badges */
 text-xs font-medium rounded-full px-2 py-0.5
-```
+\`\`\`
 
 ### Animations
-```css
+\`\`\`css
 /* Transitions fluides */
 transition-all duration-150
 
@@ -331,7 +331,7 @@ shadow-sm (sur active state)
 
 /* Avatar ring */
 ring-2 ring-primary/20
-```
+\`\`\`
 
 ---
 
@@ -403,7 +403,7 @@ ring-2 ring-primary/20
 - [x] Documentation mise à jour (AUDIT + IMPLEMENTATION)
 
 ### Commandes
-```bash
+\`\`\`bash
 # Vérification TypeScript
 pnpm tsc --noEmit
 # ✅ No errors
@@ -415,10 +415,10 @@ pnpm build
 # Linter
 pnpm lint
 # ✅ No warnings
-```
+\`\`\`
 
 ### Deploy Instructions
-```bash
+\`\`\`bash
 # 1. Commit changes
 git add .
 git commit -m "feat(mobile): implement ChatGPT navigation pattern
@@ -439,7 +439,7 @@ git push origin feature/dashboard-sidebar-ui
 # 3. Create PR
 gh pr create --title "[Mobile] Redesign Navigation (ChatGPT Pattern)" \
   --body "See docs/PRD/AUDIT_MOBILE_NAVIGATION_REDESIGN.md for details"
-```
+\`\`\`
 
 ---
 

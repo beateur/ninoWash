@@ -27,7 +27,7 @@ Ce dossier contient tous les composants liés à la gestion des moyens de paieme
 
 ## Data Flow
 
-```
+\`\`\`
 User visits /payment-methods
   → PaymentMethodsList fetches GET /api/payments/methods
   → Displays PaymentMethodCard[] with actions
@@ -37,11 +37,11 @@ User visits /payment-methods
     → Submit → Stripe Setup Intent confirmation
     → POST /api/payments/methods with payment method ID
     → Success → Refresh list + close dialog
-```
+\`\`\`
 
 ## Usage
 
-```tsx
+\`\`\`tsx
 import { PaymentMethodsList } from "@/components/payment-methods/payment-methods-list"
 
 export default function PaymentMethodsPage() {
@@ -52,13 +52,13 @@ export default function PaymentMethodsPage() {
     </div>
   )
 }
-```
+\`\`\`
 
 ## Types
 
 Les types sont définis dans la validation Zod (`lib/validations/payment.ts`) :
 
-```typescript
+\`\`\`typescript
 {
   id: string
   user_id: string
@@ -74,7 +74,7 @@ Les types sont définis dans la validation Zod (`lib/validations/payment.ts`) :
   created_at: string
   updated_at: string
 }
-```
+\`\`\`
 
 ## Security
 
@@ -91,12 +91,12 @@ Les types sont définis dans la validation Zod (`lib/validations/payment.ts`) :
 
 ## Testing
 
-```bash
+\`\`\`bash
 # Test cards (Stripe test mode)
 4242 4242 4242 4242  # Visa success
 4000 0000 0000 0002  # Card declined
 4000 0000 0000 9995  # Insufficient funds
-```
+\`\`\`
 
 ## TODO (Future Iterations)
 

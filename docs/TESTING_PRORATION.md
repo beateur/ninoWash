@@ -9,7 +9,7 @@
 
 ### 1. Démarrer les Services
 
-```bash
+\`\`\`bash
 # Terminal 1 : Dev server
 cd /Users/bilel/Documents/websites/ninoWebsite/ninoWash
 pnpm dev
@@ -19,7 +19,7 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
 
 # Terminal 3 : Logs Supabase (optionnel)
 # Ouvrir Supabase Dashboard → Logs
-```
+\`\`\`
 
 ### 2. Vérifier Configuration
 
@@ -42,7 +42,7 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
    - ✅ Vérifier redirection vers `/subscription/success`
 
 2. **Vérifier dans Database**
-   ```sql
+   \`\`\`sql
    SELECT 
      id,
      plan_id,
@@ -53,7 +53,7 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
    FROM subscriptions
    WHERE user_id = 'YOUR_USER_ID'
    ORDER BY created_at DESC;
-   ```
+   \`\`\`
    - ✅ `cancelled = false`
    - ✅ `status = 'active'`
    - ✅ `total_amount = 99.99`
@@ -64,13 +64,13 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
    - ✅ Observer formulaire Stripe Checkout s'affiche
 
 4. **Vérifier Logs Server**
-   ```
+   \`\`\`
    [v0] User is changing subscription from plan [mensuel_id] to [trimestriel_id]
    [v0] Change type: UPGRADE
    [v0] Upgrade proration info: { daysRemaining: 23, ... }
    [v0] Old subscription cancelled for upgrade
    [v0] Checkout session created
-   ```
+   \`\`\`
 
 5. **Compléter Paiement Test**
    - Utiliser carte test : `4242 4242 4242 4242`
@@ -86,7 +86,7 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
    - ✅ Total facturé < 299.99€ (ex: 223.33€)
 
 7. **Vérifier Database Finale**
-   ```sql
+   \`\`\`sql
    SELECT 
      id,
      plan_id,
@@ -97,7 +97,7 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
    FROM subscriptions
    WHERE user_id = 'YOUR_USER_ID'
    ORDER BY created_at DESC;
-   ```
+   \`\`\`
    - ✅ 2 lignes : Ancien `cancelled = true`, Nouveau `cancelled = false`
    - ✅ Nouveau : `total_amount = 299.99`, `status = 'active'`
 
@@ -123,7 +123,7 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
    - ✅ Vérifier redirection vers `/subscription/success`
 
 2. **Vérifier Database**
-   ```sql
+   \`\`\`sql
    SELECT 
      id,
      plan_id,
@@ -134,7 +134,7 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
      current_period_end
    FROM subscriptions
    WHERE user_id = 'YOUR_USER_ID';
-   ```
+   \`\`\`
    - ✅ `cancelled = false`
    - ✅ `cancel_at_period_end = false`
    - ✅ `current_period_end` dans ~3 mois
@@ -153,15 +153,15 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
    - ✅ Boutons : "Retour à mes abonnements" + "Retour au tableau de bord"
 
 5. **Vérifier Logs Server**
-   ```
+   \`\`\`
    [v0] User is changing subscription from plan [trimestriel_id] to [mensuel_id]
    [v0] Change type: DOWNGRADE
    [v0] Processing downgrade: scheduling change at period end
    [v0] Downgrade scheduled for: 2025-04-07T...
-   ```
+   \`\`\`
 
 6. **Vérifier Database Après Planification**
-   ```sql
+   \`\`\`sql
    SELECT 
      id,
      plan_id,
@@ -172,7 +172,7 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
      current_period_end
    FROM subscriptions
    WHERE user_id = 'YOUR_USER_ID';
-   ```
+   \`\`\`
    - ✅ `cancelled = false` (toujours actif !)
    - ✅ `cancel_at_period_end = true` (planifié)
    - ✅ `status = 'active'` (continue de fonctionner)
@@ -191,20 +191,20 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
 8. **Simuler Fin de Période (Optionnel)**
    
    **Option A - Modifier manuellement la date** :
-   ```sql
+   \`\`\`sql
    UPDATE subscriptions
    SET current_period_end = NOW() - INTERVAL '1 hour'
    WHERE user_id = 'YOUR_USER_ID'
      AND cancel_at_period_end = TRUE;
-   ```
+   \`\`\`
    
    **Option B - Exécuter cron job manuellement** :
-   ```sql
+   \`\`\`sql
    SELECT process_scheduled_downgrades();
-   ```
+   \`\`\`
 
 9. **Vérifier Traitement Automatique**
-   ```sql
+   \`\`\`sql
    -- Vérifier subscription marquée cancelled
    SELECT 
      id,
@@ -225,7 +225,7 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
    WHERE user_id = 'YOUR_USER_ID'
    ORDER BY created_at DESC
    LIMIT 1;
-   ```
+   \`\`\`
    - ✅ `cancelled = true`
    - ✅ `status = 'canceled'`
    - ✅ `canceled_at` = maintenant
@@ -246,7 +246,7 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
 
 ### Vérifier Cron Job Existe
 
-```sql
+\`\`\`sql
 -- Lister tous les cron jobs
 SELECT 
   jobid,
@@ -255,18 +255,18 @@ SELECT
   command
 FROM cron.job
 WHERE jobname = 'process-scheduled-downgrades';
-```
+\`\`\`
 
 **Résultat attendu** :
-```
+\`\`\`
 jobid | jobname                          | schedule   | command
 ------+----------------------------------+------------+---------------------------
 123   | process-scheduled-downgrades     | 0 * * * *  | SELECT process_scheduled...
-```
+\`\`\`
 
 ### Vérifier Historique Exécution
 
-```sql
+\`\`\`sql
 -- Dernières exécutions
 SELECT 
   jobid,
@@ -282,18 +282,18 @@ WHERE jobid = (
 )
 ORDER BY start_time DESC
 LIMIT 10;
-```
+\`\`\`
 
 ### Exécuter Manuellement
 
-```sql
+\`\`\`sql
 -- Forcer exécution immédiate (pour test)
 SELECT process_scheduled_downgrades();
-```
+\`\`\`
 
 ### Vérifier Résultats
 
-```sql
+\`\`\`sql
 -- Subscriptions traitées
 SELECT COUNT(*) as processed_count
 FROM subscription_audit_log
@@ -313,7 +313,7 @@ JOIN subscriptions s ON sal.subscription_id = s.id
 WHERE sal.action = 'scheduled_downgrade_processed'
 ORDER BY sal.created_at DESC
 LIMIT 5;
-```
+\`\`\`
 
 ---
 
@@ -377,9 +377,9 @@ LIMIT 5;
 ### Cron job ne s'exécute pas
 **Cause** : Extension `pg_cron` pas activée  
 **Solution** : 
-```sql
+\`\`\`sql
 CREATE EXTENSION IF NOT EXISTS pg_cron;
-```
+\`\`\`
 
 ### Proration pas appliquée
 **Cause** : Nouveau customer créé au lieu de réutiliser l'ancien  

@@ -36,7 +36,7 @@ Tous les composants décrits dans ce document sont du **dead code** :
 Transformation réussie de la navigation mobile pour adopter le **pattern ChatGPT** :
 
 ### Avant → Après
-```
+\`\`\`
 ❌ AVANT                        ✅ APRÈS
 ┌─────────────────┐            ┌─────────────────┐
 │                 │            │ ☰ [Logo]    🔔👤│
@@ -50,7 +50,7 @@ Transformation réussie de la navigation mobile pour adopter le **pattern ChatGP
 │ ⬜ ⬜ ⬜ ⬜ ⬜   │            
 └─────────────────┘            Clic ☰ → Sidebar
 Barre fixe 64px                overlay slide-in
-```
+\`\`\`
 
 ---
 
@@ -84,7 +84,7 @@ Barre fixe 64px                overlay slide-in
 - ✅ Transitions fluides (150ms)
 
 ### Navigation Complète
-```tsx
+\`\`\`tsx
 const authenticatedNavigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Mes réservations", href: "/bookings", icon: Package },
@@ -93,20 +93,20 @@ const authenticatedNavigation = [
   { name: "Mes adresses", href: "/profile#addresses", icon: MapPin },        // NOUVEAU
   { name: "Modes de paiement", href: "/profile#payment-methods", icon: CreditCard }, // NOUVEAU
 ]
-```
+\`\`\`
 
 ---
 
 ## ✅ Tests & Validation
 
 ### TypeScript
-```bash
+\`\`\`bash
 ✅ mobile-auth-nav.tsx      : No errors
 ✅ authenticated-header.tsx : No errors
 ✅ authenticated layout     : No errors
 ✅ main layout              : No errors
 ✅ sheet.tsx                : No errors
-```
+\`\`\`
 
 ### Responsive
 - ✅ Mobile 375px (iPhone SE)
@@ -152,7 +152,7 @@ const authenticatedNavigation = [
 ## 🚀 Prêt à Déployer
 
 ### Commit Message
-```bash
+\`\`\`bash
 feat(mobile): implement ChatGPT navigation pattern
 
 - Enhance MobileAuthNav with avatar, CTA, complete nav items
@@ -170,7 +170,7 @@ Benefits:
 - Cleaner codebase (-110 lines obsolete code)
 
 Refs: docs/PRD/AUDIT_MOBILE_NAVIGATION_REDESIGN.md
-```
+\`\`\`
 
 ### Deploy Checklist
 - [x] ✅ TypeScript compilation successful (0 errors dans nos fichiers)

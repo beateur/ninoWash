@@ -61,7 +61,7 @@ This provides better separation of concerns, improved security, and clearer user
   - Redirects should preserve the current path when possible
 
 ### Environment Variables
-```bash
+\`\`\`bash
 # Required new variables
 NEXT_PUBLIC_APP_URL=https://app.ninowash.com         # User-facing app
 NEXT_PUBLIC_ADMIN_URL=https://gestion.ninowash.com   # Admin dashboard
@@ -69,7 +69,7 @@ NEXT_PUBLIC_ADMIN_URL=https://gestion.ninowash.com   # Admin dashboard
 # For local development
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_ADMIN_URL=http://localhost:3000  # Same domain in dev
-```
+\`\`\`
 
 ### Security
 - **Cookie Configuration:**
@@ -93,10 +93,10 @@ NEXT_PUBLIC_ADMIN_URL=http://localhost:3000  # Same domain in dev
 - **Local Development:**
   - Use `localhost:3000` for both (no subdomain in dev)
   - Or configure `/etc/hosts` for local subdomain testing:
-    ```
+    \`\`\`
     127.0.0.1 app.localhost
     127.0.0.1 gestion.localhost
-    ```
+    \`\`\`
 
 ## 4. Technical Implementation Plan
 
@@ -107,7 +107,7 @@ NEXT_PUBLIC_ADMIN_URL=http://localhost:3000  # Same domain in dev
 
 ### Step 2: Middleware Subdomain Routing
 - [x] Modify `middleware.ts`:
-  ```typescript
+  \`\`\`typescript
   // Extract hostname and determine subdomain
   const hostname = request.headers.get("host") || ""
   const isAdminSubdomain = hostname.startsWith("gestion.") || hostname.includes("admin.")
@@ -126,11 +126,11 @@ NEXT_PUBLIC_ADMIN_URL=http://localhost:3000  # Same domain in dev
     appUrl.pathname = "/dashboard"
     return NextResponse.redirect(appUrl)
   }
-  ```
+  \`\`\`
 
 ### Step 3: Auth Callback Redirect
 - [x] Update `app/auth/callback/route.ts`:
-  ```typescript
+  \`\`\`typescript
   const { data: { user } } = await supabase.auth.getUser()
   const isAdmin = user?.user_metadata?.role === "admin" || user?.app_metadata?.role === "admin"
   
@@ -139,11 +139,11 @@ NEXT_PUBLIC_ADMIN_URL=http://localhost:3000  # Same domain in dev
     : process.env.NEXT_PUBLIC_APP_URL || "/dashboard"
   
   return NextResponse.redirect(new URL(redirectUrl))
-  ```
+  \`\`\`
 
 ### Step 4: Cookie Configuration
 - [x] Update Supabase client cookie options:
-  ```typescript
+  \`\`\`typescript
   cookies: {
     domain: process.env.NODE_ENV === "production" 
       ? ".ninowash.com"  // Shared across subdomains
@@ -152,18 +152,18 @@ NEXT_PUBLIC_ADMIN_URL=http://localhost:3000  # Same domain in dev
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax"
   }
-  ```
+  \`\`\`
 
 ### Step 5: CORS Configuration
 - [x] Update `lib/config/cors.ts`:
-  ```typescript
+  \`\`\`typescript
   const allowedOrigins = [
     process.env.NEXT_PUBLIC_APP_URL,
     process.env.NEXT_PUBLIC_ADMIN_URL,
     "http://localhost:3000",
     "http://localhost:3001"
   ].filter(Boolean)
-  ```
+  \`\`\`
 
 ### Step 6: Testing
 - [x] Test local development (same domain)
@@ -180,7 +180,7 @@ NEXT_PUBLIC_ADMIN_URL=http://localhost:3000  # Same domain in dev
 
 ## 5. Data Flow
 
-```
+\`\`\`
 User Login
   ↓
 Auth Callback (/auth/callback)
@@ -197,7 +197,7 @@ Middleware checks:
   ├─ Admin on app.domain? → Redirect to gestion.domain
   ├─ User on gestion.domain? → Redirect to app.domain
   └─ Match? → Allow through
-```
+\`\`\`
 
 ## 6. Error Scenarios
 

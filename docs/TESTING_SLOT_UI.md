@@ -26,21 +26,21 @@ L'interface de sélection de créneaux Collecte & Livraison est maintenant **com
 
 ### Pré-requis
 1. **Insérer les slots de test dans Supabase** :
-   ```bash
+   \`\`\`bash
    # Copier le contenu du fichier
    cat scripts/insert-test-slots.sql
    
    # Puis dans Supabase Dashboard > SQL Editor > Nouvelle requête
    # Coller et exécuter le script
-   ```
+   \`\`\`
 
 2. **Vérifier que les slots sont créés** :
-   ```sql
+   \`\`\`sql
    SELECT role, slot_date, start_time, end_time, label, is_open 
    FROM public.logistic_slots 
    WHERE slot_date IN ('2025-10-14', '2025-10-16')
    ORDER BY slot_date, role, start_time;
-   ```
+   \`\`\`
    
    **Résultat attendu** : 8 lignes
    - 4 slots pour le mardi 14 octobre (2 pickup + 2 delivery)
@@ -146,9 +146,9 @@ Pour tester le cas où l'API échoue :
 **Cause** : Slots pas insérés dans Supabase OU date des slots dépassée
 **Solution** :
 1. Vérifier dans Supabase SQL Editor :
-   ```sql
+   \`\`\`sql
    SELECT * FROM logistic_slots WHERE is_open = TRUE AND slot_date >= CURRENT_DATE;
-   ```
+   \`\`\`
 2. Si vide, exécuter `scripts/insert-test-slots.sql`
 3. Si les dates sont dans le passé, modifier le script avec des dates futures
 
@@ -157,25 +157,25 @@ Pour tester le cas où l'API échoue :
 **Solution** :
 1. Vérifier dans Supabase Dashboard > Authentication > Policies
 2. La table `logistic_slots` doit avoir une policy SELECT pour `anon` :
-   ```sql
+   \`\`\`sql
    CREATE POLICY "Public read access for available slots"
    ON public.logistic_slots FOR SELECT
    TO anon, authenticated
    USING (is_open = TRUE AND slot_date >= CURRENT_DATE);
-   ```
+   \`\`\`
 
 ### ❌ Problème : Interface "ancienne" (calendrier visible)
 **Cause** : Cache de Next.js ou erreur de compilation
 **Solution** :
 1. Arrêter le serveur dev (Ctrl+C)
 2. Supprimer le cache :
-   ```bash
+   \`\`\`bash
    rm -rf .next
-   ```
+   \`\`\`
 3. Redémarrer :
-   ```bash
+   \`\`\`bash
    pnpm dev
-   ```
+   \`\`\`
 
 ### ❌ Problème : Bouton "Continuer" reste désactivé malgré les sélections
 **Cause** : État des slots non synchronisé
@@ -195,7 +195,7 @@ Une fois l'interface validée, tester le parcours complet :
 3. Cliquer sur "Confirmer la réservation"
 4. Rechercher la requête `POST /api/bookings`
 5. **Vérifier le payload** :
-   ```json
+   \`\`\`json
    {
      "pickupSlotId": 1,
      "deliverySlotId": 2,
@@ -203,15 +203,15 @@ Une fois l'interface validée, tester le parcours complet :
      "guestContact": {...},
      ...
    }
-   ```
+   \`\`\`
 6. **Réponse attendue** : 201 Created avec l'objet booking
 
 ### Test Validation - Délais 24h/72h
 1. Créer un slot avec une date dans moins de 24h :
-   ```sql
+   \`\`\`sql
    INSERT INTO logistic_slots (role, slot_date, start_time, end_time, label, is_open)
    VALUES ('pickup', CURRENT_DATE + INTERVAL '12 hours', '14:00', '17:00', 'Test', TRUE);
-   ```
+   \`\`\`
 2. Essayer de réserver un service Express avec ce slot
 3. **Attendu** : Erreur 400 "Le créneau de collecte doit être dans au moins 24h"
 

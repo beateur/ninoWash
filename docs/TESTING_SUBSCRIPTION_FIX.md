@@ -27,29 +27,29 @@
 ### Étape 1: Redémarrer le Serveur Next.js
 
 **Terminal 1 - Arrêter et redémarrer Next.js:**
-```bash
+\`\`\`bash
 # Arrêter le serveur actuel (Ctrl+C)
 pnpm dev
-```
+\`\`\`
 
 ### Étape 2: Lancer Stripe CLI (Nouveau Terminal)
 
 **Terminal 2 - Webhook listener:**
-```bash
+\`\`\`bash
 stripe listen --forward-to localhost:3000/api/webhooks/stripe
-```
+\`\`\`
 
 Vous devriez voir :
-```
+\`\`\`
 > Ready! You are using Stripe API Version [2025-08-27.basil]. 
 Your webhook signing secret is whsec_3ff1d... (^C to quit)
-```
+\`\`\`
 
 ### Étape 3: Exécuter le Script SQL de Nettoyage
 
 **Dans Supabase SQL Editor**, exécutez :
 
-```sql
+\`\`\`sql
 BEGIN;
 
 -- 1. Cancel old monthly subscription
@@ -86,15 +86,15 @@ DO UPDATE SET
   updated_at = NOW();
 
 COMMIT;
-```
+\`\`\`
 
 **Vérifiez ensuite:**
-```sql
+\`\`\`sql
 SELECT stripe_subscription_id, stripe_customer_id, status, plan_id
 FROM subscriptions 
 WHERE user_id = '4253ed6b-0e53-4187-ac30-7731744189e4'
 ORDER BY created_at DESC;
-```
+\`\`\`
 
 Résultat attendu : 2 lignes (1 canceled, 1 active)
 
@@ -103,34 +103,34 @@ Résultat attendu : 2 lignes (1 canceled, 1 active)
 1. **Ouvrir l'app** : `http://localhost:3000/subscription`
 2. **Choisir un plan différent** (par exemple, revenir au mensuel)
 3. **Observer les logs dans Terminal 1** (Next.js) :
-   ```
+   \`\`\`
    [v0] getOrCreateStripeCustomer called for user: ...
    [v0] Using existing Stripe customer from subscription: cus_TBgMH9MKtLLTij
    [v0] User is changing subscription, canceling old subscription: sub_1SFbag...
    [v0] Old subscription canceled successfully
    [v0] Checkout session created: { sessionId: ..., clientSecret: "present", ... }
-   ```
+   \`\`\`
 
 4. **Observer les logs dans Terminal 2** (Stripe CLI) :
-   ```
+   \`\`\`
    2025-10-07 ... --> checkout.session.completed [evt_...]
    2025-10-07 ... <-- [200] POST http://localhost:3000/api/webhooks/stripe
-   ```
+   \`\`\`
 
 5. **Remplir les informations de paiement** (utiliser carte test Stripe : `4242 4242 4242 4242`)
 
 6. **Après paiement réussi** :
    - ✅ Redirection vers `/subscription/success`
    - ✅ Vérifier dans Terminal 1 les logs du webhook :
-     ```
+     \`\`\`
      [v0] Webhook event type: checkout.session.completed
      [v0] Found existing subscriptions to replace: 1
      [v0] Subscription created successfully for user: ...
-     ```
+     \`\`\`
 
 ### Étape 5: Vérifier la Base de Données
 
-```sql
+\`\`\`sql
 -- Vérifier les subscriptions
 SELECT 
   stripe_subscription_id, 
@@ -141,7 +141,7 @@ SELECT
 FROM subscriptions 
 WHERE user_id = '4253ed6b-0e53-4187-ac30-7731744189e4'
 ORDER BY created_at DESC;
-```
+\`\`\`
 
 **Résultat attendu:**
 | subscription_id | customer_id | status | plan | created_at |
@@ -160,27 +160,27 @@ ORDER BY created_at DESC;
 ## 🔍 Logs à Surveiller
 
 ### Terminal 1 (Next.js - `pnpm dev`)
-```
+\`\`\`
 [v0] getOrCreateStripeCustomer called for user: 4253ed6b-...
 [v0] Using existing Stripe customer from subscription: cus_TBgMH9MKtLLTij
 [v0] User is changing subscription, canceling old subscription: sub_1SFbag...
 [v0] Checkout session created: { sessionId: cs_..., clientSecret: "present" }
-```
+\`\`\`
 
 ### Terminal 2 (Stripe CLI)
-```
+\`\`\`
 2025-10-07 ... --> checkout.session.completed [evt_1ABC...]
 2025-10-07 ... <-- [200] POST http://localhost:3000/api/webhooks/stripe
-```
+\`\`\`
 
 ### Après Webhook Reçu (Terminal 1)
-```
+\`\`\`
 [v0] Webhook received, signature present: true
 [v0] Webhook event type: checkout.session.completed
 [v0] Checkout session completed: { sessionId: ..., customerId: cus_TBgMH... }
 [v0] Found existing subscriptions to replace: 1
 [v0] Subscription created successfully for user: 4253ed6b-...
-```
+\`\`\`
 
 ---
 
@@ -189,12 +189,12 @@ ORDER BY created_at DESC;
 ### Problème : Webhook non reçu
 **Cause:** Stripe CLI pas lancé OU mauvais port  
 **Solution:**
-```bash
+\`\`\`bash
 # Vérifier que Stripe CLI écoute
 stripe listen --forward-to localhost:3000/api/webhooks/stripe
 
 # Vérifier le port de Next.js (devrait être 3000)
-```
+\`\`\`
 
 ### Problème : Erreur 401 "Invalid signature"
 **Cause:** `STRIPE_WEBHOOK_SECRET` pas à jour  
@@ -206,18 +206,18 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
 ### Problème : Subscription pas créée en DB
 **Cause:** Metadata manquant dans checkout session  
 **Solution:** Vérifier les logs webhook :
-```
+\`\`\`
 [v0] Missing userId or planId in session metadata
-```
+\`\`\`
 
 ### Problème : Duplicate customer créé quand même
 **Cause:** Ancien code toujours en cache  
 **Solution:**
-```bash
+\`\`\`bash
 # Hard restart
 rm -rf .next
 pnpm dev
-```
+\`\`\`
 
 ---
 
@@ -254,7 +254,7 @@ Avant de déployer en production :
 
 ## 📝 Commandes Rapides
 
-```bash
+\`\`\`bash
 # Terminal 1 - Next.js
 pnpm dev
 
@@ -263,6 +263,6 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
 
 # Terminal 3 - Vérifier DB
 # (Ouvrir Supabase SQL Editor et exécuter les requêtes ci-dessus)
-```
+\`\`\`
 
 **N'oubliez pas de REDÉMARRER le serveur Next.js après avoir ajouté le webhook secret !** 🔄

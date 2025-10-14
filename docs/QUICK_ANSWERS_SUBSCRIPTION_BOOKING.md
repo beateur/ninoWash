@@ -11,7 +11,7 @@
 
 **Preuve dans le code** (`app/api/bookings/route.ts`, ligne 68-88):
 
-```typescript
+\`\`\`typescript
 // Calculate total amount
 let totalAmount = 0
 for (const item of validatedData.items) {
@@ -26,7 +26,7 @@ await supabase.from("bookings").insert({
   total_amount: totalAmount,
   payment_status: "pending",  // 🚨 Paiement requis !
 })
-```
+\`\`\`
 
 **Aucune vérification d'abonnement actif n'est faite** ❌
 
@@ -41,13 +41,13 @@ await supabase.from("bookings").insert({
 - Plan trimestriel : `"collections_per_week": 3`
 
 **Ce qui est implémenté**:
-```typescript
+\`\`\`typescript
 // app/api/bookings/route.ts - Aucune vérification de quota !
 // Pas de:
 // - Comptage des réservations par semaine
 // - Vérification du nombre de collectes utilisées
 // - Blocage si quota dépassé
-```
+\`\`\`
 
 **Vous pouvez réserver autant que vous voulez** ✅ (bug/feature non finalisée)
 
@@ -86,7 +86,7 @@ await supabase.from("bookings").insert({
 
 ## 📊 Structure de Données Actuelle
 
-```mermaid
+\`\`\`mermaid
 graph TD
     A[User] -->|Crée| B[Subscription]
     A -->|Crée| C[Booking]
@@ -95,7 +95,7 @@ graph TD
     C -->|Calcule| E[total_amount = base_price × quantity]
     B -->|Paye| F[Stripe 99.99€/mois]
     C -->|Paye aussi| G[Stripe 24.99€-39.99€/booking]
-```
+\`\`\`
 
 **Problème**: Les deux systèmes de paiement sont **déconnectés** !
 
@@ -104,24 +104,24 @@ graph TD
 ## 🚨 Incohérence Majeure
 
 ### Frontend dit :
-```tsx
+\`\`\`tsx
 // components/booking/summary-step.tsx, ligne 356
 {serviceType === "classic" ? (
   <>{getTotalPrice().toFixed(2)}€</>
 ) : (
   <span className="text-green-600">Inclus dans l'abonnement</span>
 )}
-```
+\`\`\`
 
 ### Backend fait :
-```typescript
+\`\`\`typescript
 // app/api/bookings/route.ts, ligne 118
 await supabase.from("bookings").insert({
   total_amount: totalAmount,      // Montant calculé
   payment_status: "pending",      // Paiement attendu
   // Aucune exemption pour les abonnés !
 })
-```
+\`\`\`
 
 **Résultat** : L'utilisateur croit que c'est gratuit mais sera facturé ! 🚨
 

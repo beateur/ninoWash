@@ -31,7 +31,7 @@
 - ✅ En base: `status='cancelled'`, `cancelled_at` rempli, `cancellation_reason` présent
 
 ### Vérification DB
-```sql
+\`\`\`sql
 SELECT 
   id, 
   status, 
@@ -46,7 +46,7 @@ WHERE id = 'YOUR_BOOKING_ID';
 -- cancelled_at: timestamp récent
 -- cancellation_reason: "Test d'annulation pour validation"
 -- cancelled_by: YOUR_USER_ID
-```
+\`\`\`
 
 ---
 
@@ -101,7 +101,7 @@ Réservation dans n'importe quel statut (passée ou future)
 - ✅ En base: nouvelle entrée dans `booking_reports`
 
 ### Vérification DB
-```sql
+\`\`\`sql
 SELECT 
   id, 
   booking_id, 
@@ -118,7 +118,7 @@ ORDER BY created_at DESC;
 -- description: votre texte
 -- status: pending
 -- created_at: timestamp récent
-```
+\`\`\`
 
 ---
 
@@ -170,7 +170,7 @@ ORDER BY created_at DESC;
 1. Annuler une réservation
 2. Vérifier en DB:
 
-```sql
+\`\`\`sql
 SELECT 
   bm.id,
   bm.booking_id,
@@ -191,7 +191,7 @@ ORDER BY bm.created_at DESC;
 -- new_value: cancelled
 -- reason: votre texte de cancellation
 -- user_email: votre email
-```
+\`\`\`
 
 ---
 
@@ -202,7 +202,7 @@ ORDER BY bm.created_at DESC;
 - User B (autre compte)
 
 ### Test avec curl (simule user B essayant d'annuler booking de user A)
-```bash
+\`\`\`bash
 # 1. Se connecter en tant que User B
 # 2. Copier le cookie de session
 
@@ -214,7 +214,7 @@ curl -X POST http://localhost:3000/api/bookings/BOOKING_1_ID/cancel \
 
 # Résultat attendu: 403 Forbidden
 # { "error": "Vous n'êtes pas autorisé à annuler cette réservation" }
-```
+\`\`\`
 
 ---
 
@@ -222,7 +222,7 @@ curl -X POST http://localhost:3000/api/bookings/BOOKING_1_ID/cancel \
 
 ### Via Supabase Studio SQL Editor
 
-```sql
+\`\`\`sql
 -- 1. Se connecter en tant que User A
 -- 2. Essayer de voir les modifications d'un autre user
 
@@ -238,7 +238,7 @@ SELECT * FROM booking_modifications WHERE user_id = auth.uid();
 INSERT INTO booking_modifications (booking_id, user_id, field_changed, old_value, new_value)
 VALUES ('BOOKING_ID_NOT_YOURS', auth.uid(), 'test', 'old', 'new');
 -- Expected: Error (RLS policy bloque si booking.user_id != auth.uid())
-```
+\`\`\`
 
 ---
 
@@ -246,7 +246,7 @@ VALUES ('BOOKING_ID_NOT_YOURS', auth.uid(), 'test', 'old', 'new');
 
 ### Vérifier que les indexes sont utilisés
 
-```sql
+\`\`\`sql
 -- Test 1: Index sur cancelled_at
 EXPLAIN ANALYZE 
 SELECT * FROM bookings WHERE cancelled_at IS NOT NULL;
@@ -261,7 +261,7 @@ SELECT * FROM booking_reports WHERE status = 'pending';
 EXPLAIN ANALYZE
 SELECT * FROM booking_modifications WHERE booking_id = 'YOUR_BOOKING_ID';
 -- Vérifier: "Index Scan using idx_booking_modifications_booking_id"
-```
+\`\`\`
 
 ---
 

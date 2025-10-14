@@ -64,14 +64,14 @@ Modern home laundry service platform (pressing à domicile) built with Next.js 1
 ### Example: "Annuler une réservation" (Complete Stack)
 
 **❌ WRONG (Frontend only)**:
-```tsx
+\`\`\`tsx
 <Button onClick={() => alert("Annulation!")}>Annuler</Button>
-```
+\`\`\`
 
 **✅ CORRECT (Full implementation)**:
 
 1. **PRD Section**:
-   ```markdown
+   \`\`\`markdown
    ## Feature: Cancel Booking
    - Frontend: Cancel button + confirmation dialog
    - Backend: POST /api/bookings/[id]/cancel
@@ -79,7 +79,7 @@ Modern home laundry service platform (pressing à domicile) built with Next.js 1
    - Validation: Zod schema for cancel request
    - Security: User can only cancel their own bookings
    - Business Rules: Only pending/confirmed bookings can be cancelled
-   ```
+   \`\`\`
 
 2. **Frontend**: 
    - `components/booking/cancel-dialog.tsx` (UI)
@@ -87,15 +87,15 @@ Modern home laundry service platform (pressing à domicile) built with Next.js 1
 
 3. **Validation**:
    - `lib/validations/booking.ts`:
-     ```typescript
+     \`\`\`typescript
      export const cancelBookingSchema = z.object({
        reason: z.string().min(10).max(500),
      })
-     ```
+     \`\`\`
 
 4. **API Route**:
    - `app/api/bookings/[id]/cancel/route.ts`:
-     ```typescript
+     \`\`\`typescript
      export async function POST(req, { params }) {
        // Auth check
        // Validation
@@ -103,15 +103,15 @@ Modern home laundry service platform (pressing à domicile) built with Next.js 1
        // DB update
        // Return response
      }
-     ```
+     \`\`\`
 
 5. **Database Migration**:
    - `supabase/migrations/YYYYMMDDHHMMSS_add_booking_cancellation.sql`:
-     ```sql
+     \`\`\`sql
      ALTER TABLE bookings 
        ADD COLUMN cancellation_reason TEXT,
        ADD COLUMN cancelled_at TIMESTAMPTZ;
-     ```
+     \`\`\`
 
 6. **Testing**:
    - Test API endpoint
@@ -129,7 +129,7 @@ Modern home laundry service platform (pressing à domicile) built with Next.js 1
 ### Authentication Patterns
 
 **In Server Components/Pages:**
-```typescript
+\`\`\`typescript
 import { requireAuth, requireAdmin } from "@/lib/auth/route-guards"
 
 // For authenticated pages
@@ -137,10 +137,10 @@ const { user, supabase } = await requireAuth()
 
 // For admin-only pages
 const { user, supabase } = await requireAdmin()
-```
+\`\`\`
 
 **In API Routes:**
-```typescript
+\`\`\`typescript
 import { apiRequireAuth } from "@/lib/auth/api-guards"
 
 export async function POST(request: NextRequest) {
@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
   if (error) return error // Returns 401 NextResponse
   // Continue with authenticated logic...
 }
-```
+\`\`\`
 
 **Middleware Protection & Subdomain Routing:**
 - `middleware.ts` protects routes AND handles subdomain-based redirects
@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
 ### Mandatory Patterns
 
 1. **Validation**: ALL user inputs MUST use Zod schemas (from `lib/validations/`)
-   ```typescript
+   \`\`\`typescript
    import { createBookingSchema } from "@/lib/validations/booking"
    
    const result = createBookingSchema.safeParse(body)
@@ -179,26 +179,26 @@ export async function POST(request: NextRequest) {
      }, { status: 400 })
    }
    // Use result.data (typed and validated)
-   ```
+   \`\`\`
 
 2. **Error Handling**: Structured try/catch with proper HTTP codes
-   ```typescript
+   \`\`\`typescript
    try {
      // operation
    } catch (error) {
      console.error("[v0] Context description:", error)
      return NextResponse.json({ error: "Message utilisateur" }, { status: 500 })
    }
-   ```
+   \`\`\`
 
 3. **Logging**: Use `[v0]` prefix for console logs to differentiate from Next.js logs
-   ```typescript
+   \`\`\`typescript
    console.log("[v0] Booking payload:", JSON.stringify(body))
    console.error("[v0] Database error:", error)
-   ```
+   \`\`\`
 
 4. **Guest Bookings**: Check for user existence before requiring authentication
-   ```typescript
+   \`\`\`typescript
    const { data: { user } } = await supabase.auth.getUser()
    const isGuestBooking = !user
    
@@ -207,17 +207,17 @@ export async function POST(request: NextRequest) {
    } else {
      // Use user_id + pickupAddressId + deliveryAddressId
    }
-   ```
+   \`\`\`
 
 5. **Subscription Credits**: Never manipulate directly - use service functions
-   ```typescript
+   \`\`\`typescript
    import { canUseCredit, consumeCredit } from "@/lib/services/subscription-credits"
    
    if (user && await canUseCredit(user.id)) {
      await consumeCredit(user.id, bookingWeightKg)
      // Apply discount logic
    }
-   ```
+   \`\`\`
 
 ## Tech Stack Reference
 
@@ -238,7 +238,7 @@ export async function POST(request: NextRequest) {
 - **Validation**: Always validate that sensitive operations use server-side env vars only
 
 ### Required Environment Variables
-```bash
+\`\`\`bash
 # ⚠️ SERVER-ONLY (never expose to client)
 SUPABASE_SERVICE_ROLE_KEY=         # Database admin operations
 STRIPE_SECRET_KEY=                  # Stripe API calls
@@ -252,7 +252,7 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY= # Client-side Stripe.js
 # 🔧 DEPLOYMENT
 NEXT_PUBLIC_APP_URL=                # Main app domain (app.domain)
 NEXT_PUBLIC_ADMIN_URL=              # Admin subdomain (gestion.domain)
-```
+\`\`\`
 
 ### Admin Client Pattern
 Use `createAdminClient()` (with service role key) ONLY for:
@@ -265,17 +265,17 @@ Use `createAdminClient()` (with service role key) ONLY for:
 ## Common Workflows
 
 ### Development
-```bash
+\`\`\`bash
 pnpm dev              # Start dev server (localhost:3000)
 pnpm lint             # ESLint check
 pnpm tsc --noEmit     # TypeScript check
 pnpm test             # Run Vitest tests
 pnpm test:ui          # Vitest UI (interactive)
 pnpm test:coverage    # Test coverage report
-```
+\`\`\`
 
 ### Database Operations
-```bash
+\`\`\`bash
 # Local Supabase (if using)
 supabase start        # Start local instance
 supabase db reset     # Reset and re-run migrations
@@ -284,20 +284,20 @@ supabase migration new <name>  # Create new migration file
 # Apply migration manually
 cd supabase/migrations
 ./apply-migration.sh <migration_file.sql>
-```
+\`\`\`
 
 ### Performance & Security Audits
-```bash
+\`\`\`bash
 pnpm performance:audit  # Lighthouse audit
 pnpm security:audit     # npm audit
 pnpm build:analyze      # Bundle size analysis
-```
+\`\`\`
 
 ### Stripe Webhook Testing (Local)
-```bash
+\`\`\`bash
 stripe listen --forward-to localhost:3000/api/webhooks/stripe
 # Copy webhook secret to .env.local as STRIPE_WEBHOOK_SECRET
-```
+\`\`\`
 
 ### UI Requests Policy (PRD-first + Fullstack)
 - For ANY UI-related request (feature evolution or UI debugging), start with a comprehensive Product Requirements Document (PRD) BEFORE writing any code.
@@ -307,7 +307,7 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
 
 **PRD Template (Fullstack - MANDATORY for all features)**:
 
-```markdown
+\`\`\`markdown
 # Feature: [Name]
 
 ## 1. Context
@@ -394,10 +394,10 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
 - [ ] Update README if needed
 
 ## 5. Data Flow
-```
+\`\`\`
 User Action → Frontend Component → API Route → Validation → 
 Database → Response → Frontend Update → User Feedback
-```
+\`\`\`
 
 ## 6. Error Scenarios
 - Network failure
@@ -427,7 +427,7 @@ Database → Response → Frontend Update → User Feedback
 
 ## 10. Out of Scope (Explicitly)
 - List what is NOT included in this iteration
-```
+\`\`\`
 
 **Decomposition Guideline**:
 When one request mixes multiple features:

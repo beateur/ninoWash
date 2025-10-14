@@ -12,14 +12,14 @@
 
 ### 1️⃣ Feature Flag System (TypeScript strict)
 
-```typescript
+\`\`\`typescript
 // lib/flags.ts
 export const SUBSCRIPTIONS_ENABLED: boolean =
   process.env.NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED === "true"
 
 // env.d.ts
 NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED?: "true" | "false"
-```
+\`\`\`
 
 ### 2️⃣ Component UI avec Teaser Logic
 
@@ -34,18 +34,18 @@ NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED?: "true" | "false"
 ### 3️⃣ Protection Server-Side (Double Garde)
 
 **`app/reservation/page.tsx`** :
-```typescript
+\`\`\`typescript
 if (isSubscription && !SUBSCRIPTIONS_ENABLED) {
   redirect("/pricing?locked=1")
 }
-```
+\`\`\`
 
 **`middleware.ts`** :
-```typescript
+\`\`\`typescript
 if (isSubscription && !subscriptionsEnabled) {
   return NextResponse.redirect("/pricing?locked=1")
 }
-```
+\`\`\`
 
 ### 4️⃣ Documentation Exhaustive
 
@@ -99,17 +99,17 @@ if (isSubscription && !subscriptionsEnabled) {
 
 ### MVP Launch (Abonnements Locked)
 
-```bash
+\`\`\`bash
 # .env.local
 NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=false
-```
+\`\`\`
 
 ### Production Activation (Go-Live)
 
-```bash
+\`\`\`bash
 # .env.local ou Vercel Dashboard
 NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=true
-```
+\`\`\`
 
 **Deploy** → Automatic rebuild → **Tout fonctionne** ✅
 
@@ -118,10 +118,10 @@ NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=true
 ## 📊 Validation
 
 ### TypeScript Compilation
-```bash
+\`\`\`bash
 $ pnpm tsc --noEmit
 ✅ 0 errors (production code)
-```
+\`\`\`
 
 ### Files Impactés
 **Créés** : 6 fichiers (flags, types, 4 docs)
@@ -133,11 +133,11 @@ $ pnpm tsc --noEmit
 - **Total** : +1.6KB
 
 ### Dev Server
-```bash
+\`\`\`bash
 $ pnpm dev
 ✅ Running on http://localhost:3000
 ✅ No errors
-```
+\`\`\`
 
 ---
 
@@ -157,9 +157,9 @@ $ pnpm dev
 ## 🧹 Code Cleanup (Optionnel après Go-Live)
 
 ### Recherche
-```bash
+\`\`\`bash
 grep -r "TEASER LAYER" components/
-```
+\`\`\`
 
 ### Suppression
 - Badge "Bientôt"

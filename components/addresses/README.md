@@ -4,27 +4,27 @@ Ce dossier contient tous les composants liés à la **gestion des adresses** de 
 
 ## 📁 Structure
 
-```
+\`\`\`
 components/addresses/
 ├── address-card.tsx              # Carte d'affichage d'une adresse (avec actions Modifier/Supprimer)
 ├── address-delete-confirm.tsx    # Dialog de confirmation de suppression
 ├── address-form-dialog.tsx       # Dialog contenant le formulaire d'ajout/édition d'adresse
 └── addresses-section.tsx         # Section complète de gestion des adresses (utilisée dans /addresses)
-```
+\`\`\`
 
 ## 🎯 Usage
 
 ### Page dédiée `/addresses`
-```tsx
+\`\`\`tsx
 import { AddressesSection } from "@/components/addresses/addresses-section"
 
 export default function AddressesPage() {
   return <AddressesSection />
 }
-```
+\`\`\`
 
 ### Utilisation individuelle
-```tsx
+\`\`\`tsx
 import { AddressCard } from "@/components/addresses/address-card"
 import { AddressFormDialog } from "@/components/addresses/address-form-dialog"
 
@@ -42,7 +42,7 @@ import { AddressFormDialog } from "@/components/addresses/address-form-dialog"
   onOpenChange={setIsOpen}
   onSuccess={handleSuccess}
 />
-```
+\`\`\`
 
 ## ⚠️ Différence avec `components/forms/address-form.tsx`
 

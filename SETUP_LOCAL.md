@@ -8,10 +8,10 @@
 
 ### Option 1 : Via GitHub (Recommandé)
 1. Clonez le repository sur votre machine :
-```bash
+\`\`\`bash
 git clone https://github.com/beateur/ninoWash.git
 cd ninoWash
-```
+\`\`\`
 
 ### Option 2 : Téléchargement ZIP
 1. Téléchargez le ZIP depuis GitHub
@@ -23,13 +23,13 @@ cd ninoWash
 
 **⚠️ Important :** Ce projet utilise **pnpm** comme package manager.
 
-```bash
+\`\`\`bash
 # Installer pnpm si nécessaire
 npm install -g pnpm
 
 # Installer les dépendances
 pnpm install
-```
+\`\`\`
 
 ---
 
@@ -39,7 +39,7 @@ Créez un fichier `.env.local` à la racine du projet avec les variables suivant
 
 ### Variables Essentielles
 
-```env
+\`\`\`env
 # URL de l'application
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 
@@ -52,7 +52,7 @@ SUPABASE_SERVICE_ROLE_KEY=votre_supabase_service_role_key
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=votre_stripe_publishable_key
 STRIPE_SECRET_KEY=votre_stripe_secret_key
 STRIPE_WEBHOOK_SECRET=votre_stripe_webhook_secret
-```
+\`\`\`
 
 > 📝 **Note :** Le projet utilise exclusivement **Supabase** pour la base de données.
 
@@ -125,9 +125,9 @@ Si vous préférez utiliser Neon :
 
 ## 🚀 Lancer le Projet
 
-```bash
+\`\`\`bash
 pnpm dev
-```
+\`\`\`
 
 Ouvrez [http://localhost:3000](http://localhost:3000) dans votre navigateur.
 
@@ -139,14 +139,14 @@ Ce projet utilise **Next.js 14 App Router** avec une séparation stricte **Clien
 
 ### Règles Essentielles
 
-```typescript
+\`\`\`typescript
 // ✅ Client Component (interactivité, hooks)
 "use client"
 import { createClient } from "@/lib/supabase/client"
 
 // ✅ Server Component (auth, données)
 import { createClient } from "@/lib/supabase/server"
-```
+\`\`\`
 
 **❌ Ne jamais faire :**
 - Importer `@/lib/supabase/server` dans un Client Component
@@ -158,7 +158,7 @@ import { createClient } from "@/lib/supabase/server"
 
 ## 🧪 Tests (Optionnel)
 
-```bash
+\`\`\`bash
 # Lancer les tests
 pnpm test
 
@@ -167,7 +167,7 @@ pnpm test -- --watch
 
 # Lancer les tests avec couverture
 pnpm test -- --coverage
-```
+\`\`\`
 
 ---
 
@@ -210,22 +210,22 @@ pnpm test -- --coverage
 ### Erreur Stripe
 - Vérifiez que vous utilisez les bonnes clés (test vs production)
 - Pour les webhooks locaux, utilisez Stripe CLI :
-  ```bash
+  \`\`\`bash
   stripe listen --forward-to localhost:3000/api/webhooks/stripe
-  ```
+  \`\`\`
 
 ### Erreur "You're importing a component that needs next/headers"
 - **Cause :** Client Component importe du code serveur
 - **Solution :** Voir [`docs/TECHNICAL_CHANGELOG.md`](docs/TECHNICAL_CHANGELOG.md) et [`docs/architecture.md`](docs/architecture.md)
 
 ### Port 3000 déjà utilisé
-```bash
+\`\`\`bash
 # Trouver et tuer le processus
 lsof -ti:3000 | xargs kill -9
 
 # Ou utiliser un autre port
 pnpm dev --port 3001
-```
+\`\`\`
 
 ---
 

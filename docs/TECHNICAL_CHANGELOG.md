@@ -29,14 +29,14 @@ Ce document trace les changements architecturaux et techniques majeurs du projet
 #### 2. **Composant Dashboard Mis à Jour**
 **Fichier modifié :** `components/dashboard/dashboard-client.tsx`
 
-```diff
+\`\`\`diff
 - {bookings.length > 5 && (
 -   <Button variant="link" asChild>
 -     <Link href="/bookings">Voir tout</Link>
 -   </Button>
 - )}
 + {/* Note: All bookings are displayed here. "Voir tout" link removed as obsolete /bookings page was deleted */}
-```
+\`\`\`
 
 **Raison :** Le lien "Voir tout" pointait vers la page obsolète `/bookings`.
 
@@ -53,14 +53,14 @@ Ce document trace les changements architecturaux et techniques majeurs du projet
 ### 📊 Architecture Correcte pour les Réservations
 
 **Pattern Actuel (✅ Correct) :**
-```
+\`\`\`
 app/(authenticated)/dashboard/page.tsx (Server Component)
   ↓ Fetch bookings from Supabase
   ↓ Pass data as props
 components/dashboard/dashboard-client.tsx (Client Component)
   ↓ Display bookings with interactivity
 components/booking/booking-card.tsx (Presentation)
-```
+\`\`\`
 
 **Flux de données :**
 1. **Server Component** (`dashboard/page.tsx`) : 
@@ -105,7 +105,7 @@ components/booking/booking-card.tsx (Presentation)
 Les Client Components importaient du code serveur (utilisant `next/headers`), causant des erreurs de compilation dans Next.js App Router.
 
 **Erreur type :**
-```
+\`\`\`
 Error: You're importing a component that needs next/headers. 
 That only works in a Server Component which is not supported in the pages/ directory.
 
@@ -113,7 +113,7 @@ Import trace:
 ./lib/supabase/server.ts
 ./lib/services/auth.service.ts
 ./components/forms/auth-form.tsx
-```
+\`\`\`
 
 ---
 
@@ -127,7 +127,7 @@ Import trace:
 - `components/auth/logout-button.tsx`
 
 **Changement :**
-```typescript
+\`\`\`typescript
 // ❌ AVANT : Import du service qui contenait du code serveur
 import { clientAuth } from "@/lib/services/auth.service"
 await clientAuth.signOut()
@@ -136,7 +136,7 @@ await clientAuth.signOut()
 import { createClient } from "@/lib/supabase/client"
 const supabase = createClient()
 await supabase.auth.signOut()
-```
+\`\`\`
 
 **Raison :**
 - `auth.service.ts` importait `lib/supabase/server.ts` (utilise `next/headers`)
@@ -152,7 +152,7 @@ await supabase.auth.signOut()
 - `app/admin/dashboard-client.tsx` (Client Component - nouveau)
 
 **Ancien pattern (❌ problématique) :**
-```typescript
+\`\`\`typescript
 "use client"
 import { requireAdmin } from "@/lib/auth/route-guards"
 
@@ -161,10 +161,10 @@ export default async function AdminDashboard() {
   const [stats, setStats] = useState({...}) // Hooks React
   // ... UI
 }
-```
+\`\`\`
 
 **Nouveau pattern (✅ correct) :**
-```typescript
+\`\`\`typescript
 // app/admin/page.tsx (Server Component)
 import { requireAdmin } from "@/lib/auth/route-guards"
 import AdminDashboardClient from "./dashboard-client"
@@ -180,7 +180,7 @@ export default function AdminDashboardClient() {
   const [stats, setStats] = useState({...}) // ✅ OK dans Client Component
   // ... UI interactive
 }
-```
+\`\`\`
 
 **Avantages :**
 - ✅ Vérification admin côté serveur (sécurisé)
@@ -202,7 +202,7 @@ export default function AdminDashboardClient() {
 
 #### **Règle 2 : Pages Admin (Pattern Hybride)**
 
-```
+\`\`\`
 Server Component (page.tsx)
 ├── Vérifie permissions (requireAdmin)
 ├── Fetch données initiales si nécessaire
@@ -211,7 +211,7 @@ Server Component (page.tsx)
         ├── Hooks React (useState, useEffect)
         ├── Interactivité (onClick, onChange)
         └── Appels API depuis le client
-```
+\`\`\`
 
 #### **Règle 3 : Ne Jamais Faire**
 
@@ -225,13 +225,13 @@ Server Component (page.tsx)
 ### 🧪 Tests de Validation
 
 **Commandes de vérification :**
-```bash
+\`\`\`bash
 # Vérifier qu'aucun Client Component n'importe du code serveur
 grep -r "use client" --include="*.tsx" app/ components/ | \
   xargs grep -l "lib/supabase/server\|next/headers"
 
 # Résultat attendu : aucun fichier
-```
+\`\`\`
 
 **Pages testées avec succès :**
 - ✅ `/` (Homepage) - 200 OK
@@ -243,7 +243,7 @@ grep -r "use client" --include="*.tsx" app/ components/ | \
 
 ### 📦 Fichiers Impactés
 
-```
+\`\`\`
 Modifiés :
 ├── lib/hooks/use-auth.tsx
 ├── components/forms/auth-form.tsx
@@ -258,7 +258,7 @@ Créés :
 
 Cache :
 └── .next/ (supprimé et regénéré)
-```
+\`\`\`
 
 ---
 
@@ -266,7 +266,7 @@ Cache :
 
 **Si vous créez un nouveau composant admin, suivez ce pattern :**
 
-```typescript
+\`\`\`typescript
 // 1. Page Server Component (app/admin/nouvelle-page/page.tsx)
 import { requireAdmin } from "@/lib/auth/route-guards"
 import NouvellePageClient from "./page-client"
@@ -292,7 +292,7 @@ export default function NouvellePageClient({ initialData }: Props) {
   // ... hooks et interactivité
   return <div>...</div>
 }
-```
+\`\`\`
 
 ---
 

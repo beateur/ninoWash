@@ -39,7 +39,7 @@
 
 ### Method 2: Supabase CLI (Alternative)
 
-```bash
+\`\`\`bash
 # Make sure Supabase CLI is installed
 supabase --version
 
@@ -51,7 +51,7 @@ supabase db push
 
 # Or apply specific migration
 supabase migration up --file supabase/migrations/20251009000001_add_services_rls_policies.sql
-```
+\`\`\`
 
 ---
 
@@ -61,11 +61,11 @@ supabase migration up --file supabase/migrations/20251009000001_add_services_rls
 
 Run this query in Supabase SQL Editor:
 
-```sql
+\`\`\`sql
 SELECT tablename, rowsecurity 
 FROM pg_tables 
 WHERE schemaname = 'public' AND tablename = 'services';
-```
+\`\`\`
 
 **Expected Result**:
 | tablename | rowsecurity |
@@ -76,12 +76,12 @@ WHERE schemaname = 'public' AND tablename = 'services';
 
 ### 2. Check Policies Created
 
-```sql
+\`\`\`sql
 SELECT schemaname, tablename, policyname, roles, cmd
 FROM pg_policies
 WHERE tablename = 'services'
 ORDER BY policyname;
-```
+\`\`\`
 
 **Expected Result** (3 policies):
 | policyname | roles | cmd |
@@ -94,7 +94,7 @@ ORDER BY policyname;
 
 ### 3. Test Anonymous Access
 
-```sql
+\`\`\`sql
 -- Switch to anon role (simulates client-side query)
 SET ROLE anon;
 
@@ -106,7 +106,7 @@ LIMIT 5;
 
 -- Switch back to postgres role
 RESET ROLE;
-```
+\`\`\`
 
 **Expected Result**: Should return rows (if services exist and are active)
 
@@ -142,12 +142,12 @@ RESET ROLE;
 
 **Fix**: Check data exists
 
-```sql
+\`\`\`sql
 -- Count services
 SELECT COUNT(*) as total, 
        COUNT(*) FILTER (WHERE is_active = true) as active
 FROM services;
-```
+\`\`\`
 
 If `total = 0`:
 - **Problem**: No services in database
@@ -156,9 +156,9 @@ If `total = 0`:
 If `active = 0`:
 - **Problem**: All services are inactive
 - **Solution**: Activate at least one service:
-```sql
+\`\`\`sql
 UPDATE services SET is_active = true WHERE id = 'YOUR_SERVICE_ID';
-```
+\`\`\`
 
 ---
 
@@ -168,7 +168,7 @@ UPDATE services SET is_active = true WHERE id = 'YOUR_SERVICE_ID';
 
 **Fix**: Re-apply migration
 
-```sql
+\`\`\`sql
 -- Drop policies
 DROP POLICY IF EXISTS "services_select_active_for_anon" ON services;
 DROP POLICY IF EXISTS "services_select_active_for_authenticated" ON services;
@@ -176,7 +176,7 @@ DROP POLICY IF EXISTS "services_all_for_service_role" ON services;
 
 -- Recreate (copy from migration file)
 -- ... paste policy creation SQL ...
-```
+\`\`\`
 
 ---
 
@@ -187,7 +187,7 @@ DROP POLICY IF EXISTS "services_all_for_service_role" ON services;
 **Solution**: Migration includes `DROP POLICY IF EXISTS` → Safe to re-run
 
 If still fails:
-```sql
+\`\`\`sql
 -- Force drop all policies
 DO $$
 DECLARE
@@ -200,7 +200,7 @@ BEGIN
 END $$;
 
 -- Then re-run migration
-```
+\`\`\`
 
 ---
 
@@ -208,7 +208,7 @@ END $$;
 
 If `services` table is empty, create sample services:
 
-```sql
+\`\`\`sql
 -- Insert sample services
 INSERT INTO services (id, name, description, base_price, unit, category, processing_time_hours, is_active, created_at, updated_at)
 VALUES
@@ -221,7 +221,7 @@ ON CONFLICT DO NOTHING;
 
 -- Verify data inserted
 SELECT id, name, base_price, is_active FROM services;
-```
+\`\`\`
 
 **Note**: Adjust columns to match your actual `services` table schema.
 
@@ -247,7 +247,7 @@ After applying migration:
 
 ### Before Fix
 
-```
+\`\`\`
 Frontend Query:
   SELECT * FROM services WHERE is_active = true
   ↓
@@ -258,11 +258,11 @@ RLS Check:
   ↓
 UI:
   "Aucun service disponible pour le moment" ❌
-```
+\`\`\`
 
 ### After Fix
 
-```
+\`\`\`
 Frontend Query:
   SELECT * FROM services WHERE is_active = true
   ↓
@@ -277,7 +277,7 @@ UI:
   - Repassage - 3.50 €
   - Nettoyage à sec - 8.00 €
   - Détachage - 5.00 €
-```
+\`\`\`
 
 ---
 

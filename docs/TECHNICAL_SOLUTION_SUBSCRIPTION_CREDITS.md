@@ -23,7 +23,7 @@ Système de crédits hebdomadaires pour abonnés permettant des réservations gr
 ### Database (PostgreSQL + Supabase)
 
 #### 1. Nouvelle Table : `subscription_credits`
-```sql
+\`\`\`sql
 CREATE TABLE subscription_credits (
   id UUID PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users(id),
@@ -34,10 +34,10 @@ CREATE TABLE subscription_credits (
   week_start_date DATE NOT NULL,          -- Lundi
   reset_at TIMESTAMP WITH TIME ZONE NOT NULL
 );
-```
+\`\`\`
 
 #### 2. Nouvelle Table : `credit_usage_log`
-```sql
+\`\`\`sql
 CREATE TABLE credit_usage_log (
   id UUID PRIMARY KEY,
   user_id UUID NOT NULL,
@@ -48,16 +48,16 @@ CREATE TABLE credit_usage_log (
   amount_saved DECIMAL(10,2),
   used_at TIMESTAMP DEFAULT NOW()
 );
-```
+\`\`\`
 
 #### 3. Modifications : `bookings`
-```sql
+\`\`\`sql
 ALTER TABLE bookings 
   ADD COLUMN subscription_id UUID,
   ADD COLUMN used_subscription_credit BOOLEAN DEFAULT false,
   ADD COLUMN booking_weight_kg DECIMAL(5,2),
   ADD COLUMN credit_discount_amount DECIMAL(10,2);
-```
+\`\`\`
 
 ### Backend (Next.js + TypeScript)
 
@@ -97,7 +97,7 @@ ALTER TABLE bookings
 
 ### Scénario 1 : Réservation avec Crédit (≤ 15kg)
 
-```
+\`\`\`
 1. User ouvre /reservation
 2. Frontend : GET /api/subscriptions/credits
    → Response : { creditsRemaining: 2, creditsTotal: 2 }
@@ -111,11 +111,11 @@ ALTER TABLE bookings
    ├─> Appeler consumeCredit()
    └─> Créer booking
 7. Dashboard : "1 réservation gratuite restante"
-```
+\`\`\`
 
 ### Scénario 2 : Réservation avec Crédit (> 15kg)
 
-```
+\`\`\`
 1. User ouvre /reservation
 2. Frontend : { creditsRemaining: 1 }
 3. User remplit formulaire (20kg)
@@ -130,11 +130,11 @@ ALTER TABLE bookings
    ├─> Consommer crédit
    └─> Créer booking
 8. Dashboard : "0 réservation gratuite restante"
-```
+\`\`\`
 
 ### Scénario 3 : Réservation sans Crédit
 
-```
+\`\`\`
 1. User ouvre /reservation
 2. Frontend : { creditsRemaining: 0 }
 3. Frontend affiche : "Tarif classique appliqué"
@@ -144,11 +144,11 @@ ALTER TABLE bookings
    ├─> totalAmount = 24,99€
    ├─> used_subscription_credit = false
    └─> Paiement requis
-```
+\`\`\`
 
 ### Scénario 4 : Reset Hebdomadaire
 
-```
+\`\`\`
 Dimanche 23:59 → Lundi 00:00 UTC
 ├─> Cron job déclenché
 ├─> Pour chaque subscription active :
@@ -157,7 +157,7 @@ Dimanche 23:59 → Lundi 00:00 UTC
 │   └─> Créer nouvelle entrée subscription_credits
 ├─> Logger crédits perdus
 └─> Notifier users (optionnel)
-```
+\`\`\`
 
 ---
 
@@ -165,7 +165,7 @@ Dimanche 23:59 → Lundi 00:00 UTC
 
 ### 1. Fonction : Consommer Crédit (PostgreSQL)
 
-```sql
+\`\`\`sql
 CREATE FUNCTION consume_subscription_credit(
   p_user_id UUID,
   p_subscription_id UUID,
@@ -207,11 +207,11 @@ BEGIN
   RETURN TRUE;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-```
+\`\`\`
 
 ### 2. Service : Vérifier Crédits (TypeScript)
 
-```typescript
+\`\`\`typescript
 export async function canUseCredit(
   userId: string,
   bookingWeightKg: number
@@ -257,11 +257,11 @@ export async function canUseCredit(
     message,
   }
 }
-```
+\`\`\`
 
 ### 3. API Route : POST /api/bookings (Modifiée)
 
-```typescript
+\`\`\`typescript
 export async function POST(request: NextRequest) {
   const body = await request.json()
   const validatedData = createBookingSchema.parse(body)
@@ -326,11 +326,11 @@ export async function POST(request: NextRequest) {
   
   return NextResponse.json({ booking })
 }
-```
+\`\`\`
 
 ### 4. Composant : CreditsDisplay
 
-```tsx
+\`\`\`tsx
 export function CreditsDisplay({ userId }: { userId: string }) {
   const [credits, setCredits] = useState<UserCredits | null>(null)
   
@@ -363,7 +363,7 @@ export function CreditsDisplay({ userId }: { userId: string }) {
     </Card>
   )
 }
-```
+\`\`\`
 
 ---
 

@@ -16,7 +16,7 @@ Suite à l'audit détaillé de la migration initiale et à l'erreur `ERROR 42883
 **Problème** : `trigger_set_timestamp()` n'existait pas, causant l'échec de la migration.
 
 **Correction** :
-```sql
+\`\`\`sql
 CREATE OR REPLACE FUNCTION public.trigger_set_timestamp()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$
 BEGIN
@@ -24,7 +24,7 @@ BEGIN
     RETURN NEW;
 END;
 $$;
-```
+\`\`\`
 - Création idempotente avec `CREATE OR REPLACE`
 - Révocation d'accès pour `anon` et `authenticated` (helper interne uniquement)
 - Trigger créé avec `DROP TRIGGER IF EXISTS` puis `CREATE TRIGGER`
@@ -37,7 +37,7 @@ $$;
 - **Policy anon** : même validation mais `created_by IS NULL`
 - **Policy SELECT** : permet aux utilisateurs authentifiés de lire leurs propres demandes (`created_by = auth.uid()`)
 
-```sql
+\`\`\`sql
 CREATE POLICY "slot_requests_insert_authenticated"
     ON public.slot_requests FOR INSERT TO authenticated
     WITH CHECK (
@@ -51,15 +51,15 @@ CREATE POLICY "slot_requests_insert_authenticated"
               AND ls.slot_date >= CURRENT_DATE
         )
     );
-```
+\`\`\`
 
 #### 3. Foreign Keys bookings sans `ON DELETE`
 **Problème** : Suppression d'un slot bloquerait les bookings ou laisserait des FK invalides.
 
 **Correction** :
-```sql
+\`\`\`sql
 ADD COLUMN ... REFERENCES public.logistic_slots(id) ON DELETE SET NULL
-```
+\`\`\`
 - Permet de supprimer un slot sans casser les réservations existantes
 - Les champs legacy (`pickup_date`, `pickup_time_slot`, etc.) servent de fallback
 
@@ -87,13 +87,13 @@ ADD COLUMN ... REFERENCES public.logistic_slots(id) ON DELETE SET NULL
 **Problème** : Requêtes par `slot_date` seul ou par `booking_id`/`created_by` non optimisées.
 
 **Correction** :
-```sql
+\`\`\`sql
 CREATE INDEX logistic_slots_date_idx ON public.logistic_slots (slot_date) WHERE is_open = TRUE;
 CREATE INDEX slot_requests_booking_id_idx ON public.slot_requests (booking_id);
 CREATE INDEX slot_requests_created_by_idx ON public.slot_requests (created_by);
 CREATE INDEX bookings_pickup_slot_id_idx ON public.bookings (pickup_slot_id);
 CREATE INDEX bookings_delivery_slot_id_idx ON public.bookings (delivery_slot_id);
-```
+\`\`\`
 
 ---
 
@@ -119,19 +119,19 @@ CREATE INDEX bookings_delivery_slot_id_idx ON public.bookings (delivery_slot_id)
 ### Tables créées
 
 #### `public.logistic_slots`
-```
+\`\`\`
 id (UUID PK), role (TEXT), slot_date (DATE), start_time (TIME), end_time (TIME),
 label (TEXT), is_open (BOOLEAN), notes (TEXT), created_at, updated_at
-```
+\`\`\`
 **RLS** :
 - `SELECT` public (anon/auth) : `is_open = TRUE AND slot_date >= CURRENT_DATE`
 - `ALL` service_role : accès complet
 
 #### `public.slot_requests`
-```
+\`\`\`
 id (UUID PK), slot_id (UUID FK), role (TEXT), booking_id (UUID FK), 
 created_by (UUID), requested_at (TIMESTAMPTZ)
-```
+\`\`\`
 **RLS** :
 - `INSERT` authenticated : validation stricte + `created_by = auth.uid()`
 - `INSERT` anon : validation stricte + `created_by IS NULL`
@@ -141,10 +141,10 @@ created_by (UUID), requested_at (TIMESTAMPTZ)
 ### Colonnes ajoutées
 
 #### `public.bookings`
-```sql
+\`\`\`sql
 pickup_slot_id UUID REFERENCES public.logistic_slots(id) ON DELETE SET NULL
 delivery_slot_id UUID REFERENCES public.logistic_slots(id) ON DELETE SET NULL
-```
+\`\`\`
 - FKs avec `ON DELETE SET NULL` pour permettre suppression slots
 - Indexes créés pour optimiser requêtes
 - Champs legacy conservés (compatibilité)
@@ -156,23 +156,23 @@ delivery_slot_id UUID REFERENCES public.logistic_slots(id) ON DELETE SET NULL
 ### Commandes de test recommandées
 
 #### 1. Vérifier création tables/fonction
-```sql
+\`\`\`sql
 SELECT table_name FROM information_schema.tables 
 WHERE table_schema = 'public' AND table_name IN ('logistic_slots', 'slot_requests');
 
 SELECT proname FROM pg_proc WHERE proname = 'trigger_set_timestamp';
-```
+\`\`\`
 
 #### 2. Vérifier policies RLS
-```sql
+\`\`\`sql
 SELECT schemaname, tablename, policyname, cmd, roles 
 FROM pg_policies 
 WHERE schemaname = 'public' AND tablename IN ('logistic_slots', 'slot_requests')
 ORDER BY tablename, policyname;
-```
+\`\`\`
 
 #### 3. Tester trigger `updated_at`
-```sql
+\`\`\`sql
 -- Insérer un slot test
 INSERT INTO public.logistic_slots (role, slot_date, start_time, end_time, label)
 VALUES ('pickup', CURRENT_DATE + 1, '09:00', '12:00', 'Test slot');
@@ -181,10 +181,10 @@ VALUES ('pickup', CURRENT_DATE + 1, '09:00', '12:00', 'Test slot');
 UPDATE public.logistic_slots SET label = 'Test updated' WHERE label = 'Test slot';
 SELECT label, created_at, updated_at FROM public.logistic_slots WHERE label = 'Test updated';
 -- ✅ updated_at doit être > created_at
-```
+\`\`\`
 
 #### 4. Tester RLS policies
-```sql
+\`\`\`sql
 -- En tant qu'anon : doit voir uniquement slots ouverts futurs
 SET ROLE anon;
 SELECT * FROM public.logistic_slots;
@@ -196,10 +196,10 @@ VALUES ('00000000-0000-0000-0000-000000000000', 'pickup', NULL);
 -- ❌ Doit échouer : WITH CHECK validation
 
 RESET ROLE;
-```
+\`\`\`
 
 #### 5. Vérifier ON DELETE SET NULL
-```sql
+\`\`\`sql
 -- Créer booking test lié à un slot
 INSERT INTO public.logistic_slots (id, role, slot_date, start_time, end_time)
 VALUES ('11111111-1111-1111-1111-111111111111', 'pickup', CURRENT_DATE + 2, '14:00', '17:00');
@@ -212,7 +212,7 @@ DELETE FROM public.logistic_slots WHERE id = '11111111-1111-1111-1111-1111111111
 -- Vérifier que booking.pickup_slot_id est NULL (pas d'erreur FK)
 SELECT id, pickup_slot_id FROM public.bookings WHERE id = ...;
 -- ✅ pickup_slot_id doit être NULL
-```
+\`\`\`
 
 ---
 

@@ -32,7 +32,7 @@ Les pages authentifiées utilisent **UNIQUEMENT** `DashboardSidebar` pour la nav
 - Badge "Actif" pour abonnement
 
 **Pourquoi c'était du dead code** :
-```tsx
+\`\`\`tsx
 // ❌ app/(authenticated)/layout.tsx (AVANT)
 import { AuthenticatedHeader } from "@/components/layout/authenticated-header"
 
@@ -45,7 +45,7 @@ export default function Layout({ children }) {
     </div>
   )
 }
-```
+\`\`\`
 
 **Découverte** : Aucun `<AuthenticatedHeader` dans le JSX du projet (grep -r "<AuthenticatedHeader" → 0 résultats)
 
@@ -66,7 +66,7 @@ export default function Layout({ children }) {
 - Bouton déconnexion
 
 **Dépendance morte** :
-```tsx
+\`\`\`tsx
 // ❌ components/layout/authenticated-header.tsx (supprimé)
 import { MobileAuthNav } from "./mobile-auth-nav"
 
@@ -79,7 +79,7 @@ export function AuthenticatedHeader() {
 }
 
 // ❌ Mais AuthenticatedHeader jamais rendu → MobileAuthNav jamais appelé
-```
+\`\`\`
 
 **État utilisateur** : Screenshot mobile montrait AUCUN hamburger menu (confirmant que le composant n'était jamais visible)
 
@@ -106,7 +106,7 @@ export function AuthenticatedHeader() {
 - ✅ Commentaire TODO pour mobile sidebar (Sheet overlay)
 
 **AVANT** :
-```tsx
+\`\`\`tsx
 import { AuthenticatedHeader } from "@/components/layout/authenticated-header"
 import { Footer } from "@/components/layout/footer"
 
@@ -116,10 +116,10 @@ import { Footer } from "@/components/layout/footer"
  * - Mobile : MobileAuthNav (Sheet sidebar overlay)
  * - Plus de barre fixe en bas (BottomNav supprimé)
  */
-```
+\`\`\`
 
 **APRÈS** :
-```tsx
+\`\`\`tsx
 /**
  * 🚨 RÈGLE ARCHITECTURE : Pas de Header/Footer dans les pages authentifiées
  * 
@@ -134,7 +134,7 @@ import { Footer } from "@/components/layout/footer"
  * - CTA "Nouvelle réservation"
  * - Bouton Déconnexion
  */
-```
+\`\`\`
 
 **Lignes** : 70 → 53 (simplification + documentation améliorée)
 
@@ -195,7 +195,7 @@ import { Footer } from "@/components/layout/footer"
 **Ajout** : Warning banner au début du document
 
 **Message** :
-```markdown
+\`\`\`markdown
 # ❌ DEPRECATED : Implémentation Mobile Navigation Redesign
 
 **Status** : ❌ DEPRECATED - Code never rendered (AuthenticatedHeader imported but not used in layout JSX)
@@ -205,7 +205,7 @@ import { Footer } from "@/components/layout/footer"
 **Problème découvert** : Tous les composants implémentés dans ce document sont du **dead code**
 
 **Solution réelle** : Voir `docs/architecture.md` section "No Header/Footer When Authenticated"
-```
+\`\`\`
 
 **Référence** : Liens vers AUDIT (POSTMORTEM) et DEVELOPMENT_CHECKLIST
 
@@ -238,13 +238,13 @@ import { Footer } from "@/components/layout/footer"
 
 ### 1. Grep de Références Cassées
 
-```bash
+\`\`\`bash
 grep -r "authenticated-header\|AuthenticatedHeader\|mobile-auth-nav\|MobileAuthNav" \
   /Users/bilel/Documents/websites/ninoWebsite/ninoWash \
   --include="*.tsx" --include="*.ts" --exclude-dir=node_modules
 
 # Résultat : 0 matches ✅
-```
+\`\`\`
 
 **Conclusion** : Aucune référence aux composants supprimés dans le code TypeScript/React
 
@@ -252,11 +252,11 @@ grep -r "authenticated-header\|AuthenticatedHeader\|mobile-auth-nav\|MobileAuthN
 
 ### 2. TypeScript Compilation
 
-```bash
+\`\`\`bash
 pnpm tsc --noEmit
 
 # Résultat : 65 errors (non liées au nettoyage) ✅
-```
+\`\`\`
 
 **Erreurs préexistantes** : Stripe API version, form validation types, tests mocks, etc.
 **Erreurs liées au nettoyage** : 0 ✅
@@ -265,7 +265,7 @@ pnpm tsc --noEmit
 
 ### 3. Git Status
 
-```
+\`\`\`
 Changes:
 - deleted:    components/layout/authenticated-header.tsx ✅
 - deleted:    components/layout/mobile-auth-nav.tsx ✅
@@ -273,7 +273,7 @@ Changes:
 - modified:   app/(authenticated)/layout.tsx ✅
 - modified:   docs/architecture.md ✅
 - modified:   TESTING_AUTH_SEPARATION.md ✅
-```
+\`\`\`
 
 **Nouveaux fichiers** :
 - `docs/DEVELOPMENT_CHECKLIST.md` (10-point error prevention guide)
@@ -287,7 +287,7 @@ Changes:
 
 ### Pages Authentifiées (`app/(authenticated)/`)
 
-```
+\`\`\`
 ┌────────────────────────────────────────┐
 │ Layout Authentifié (NO HEADER/FOOTER) │
 ├────────────────────────────────────────┤
@@ -315,7 +315,7 @@ Mobile (< 768px) :
 
 TODO: Sidebar en overlay (Sheet)
 déclenché par hamburger button
-```
+\`\`\`
 
 ### DashboardSidebar (Composant Unique)
 

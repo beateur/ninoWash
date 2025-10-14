@@ -96,9 +96,9 @@ Permettre aux utilisateurs de réserver des collectes et livraisons via des cré
 - Logging avec préfixe `[v0]`
 
 **Exemple d'utilisation** :
-```typescript
+\`\`\`typescript
 GET /api/logistic-slots?role=pickup&startDate=2025-10-14&endDate=2025-10-20
-```
+\`\`\`
 
 #### POST /api/bookings (modifié)
 **Fichier** : `app/api/bookings/route.ts`
@@ -283,7 +283,7 @@ GET /api/logistic-slots?role=pickup&startDate=2025-10-14&endDate=2025-10-20
 
 ## 📁 Structure des Fichiers - Vue d'Ensemble
 
-```
+\`\`\`
 ninoWash/
 ├── app/
 │   └── api/
@@ -322,7 +322,7 @@ ninoWash/
     ├── SLOT_INTEGRATION_GUIDE.md                 # Guide intégration (NOUVEAU)
     ├── TESTING_SLOT_UI.md                        # Guide tests (NOUVEAU)
     └── IMPLEMENTATION_COMPLETE_SUMMARY.md        # Ce document (NOUVEAU)
-```
+\`\`\`
 
 ---
 
@@ -359,28 +359,28 @@ ninoWash/
 **En cas de problème critique** :
 
 1. **Désactiver les slots côté frontend** :
-   ```typescript
+   \`\`\`typescript
    // Dans components/booking/guest/steps/datetime-step.tsx
    const USE_LEGACY_CALENDAR = true // Force ancien système
-   ```
+   \`\`\`
 
 2. **Désactiver l'API slots** :
-   ```typescript
+   \`\`\`typescript
    // Dans app/api/logistic-slots/route.ts
    export async function GET() {
      return NextResponse.json({ error: "Maintenance" }, { status: 503 })
    }
-   ```
+   \`\`\`
 
 3. **Revenir aux dates legacy dans bookings** :
    - Laisser les colonnes `pickupSlotId`/`deliverySlotId` à NULL
    - Le système acceptera automatiquement les dates legacy
 
 4. **Rollback DB (si nécessaire)** :
-   ```sql
+   \`\`\`sql
    DROP TABLE IF EXISTS public.slot_requests CASCADE;
    DROP TABLE IF EXISTS public.logistic_slots CASCADE;
-   ```
+   \`\`\`
 
 ---
 
@@ -534,11 +534,11 @@ ninoWash/
 **Erreurs Supabase / RLS** :
 1. Vérifier Dashboard > Authentication > Policies
 2. Tester requête SQL manuellement en tant qu'anon :
-   ```sql
+   \`\`\`sql
    SET ROLE anon;
    SELECT * FROM logistic_slots WHERE is_open = TRUE;
    RESET ROLE;
-   ```
+   \`\`\`
 3. Consulter les logs Supabase (Dashboard > Logs)
 
 **Erreurs UI / État React** :

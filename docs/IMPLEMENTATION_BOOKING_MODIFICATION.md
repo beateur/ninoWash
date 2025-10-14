@@ -17,9 +17,9 @@ Permettre aux utilisateurs de modifier leurs réservations existantes (adresses,
 ### 1. Backend API - `/api/bookings/[id]/route.ts`
 
 #### GET Method (Fetch Single Booking)
-```typescript
+\`\`\`typescript
 export async function GET(request: NextRequest, { params }: { params: { id: string } })
-```
+\`\`\`
 
 **Fonctionnalités**:
 - Récupère une réservation avec ses adresses (pickup/delivery)
@@ -29,19 +29,19 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 - Retourne 403 si l'utilisateur n'est pas le propriétaire
 
 **Query Supabase**:
-```sql
+\`\`\`sql
 bookings
   *, 
   pickup_address:user_addresses!pickup_address_id(*),
   delivery_address:user_addresses!delivery_address_id(*),
   booking_items(*, service:services(*))
 WHERE id = {id} AND user_id = {user.id}
-```
+\`\`\`
 
 #### PATCH Method (Modify Booking)
-```typescript
+\`\`\`typescript
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } })
-```
+\`\`\`
 
 **Pipeline de Validation (7 étapes)**:
 1. **Validation Zod**: `modifyBookingSchema.safeParse(body)`
@@ -84,7 +84,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 - Passe `existingBooking` au Client Component
 
 **Code clé**:
-```typescript
+\`\`\`typescript
 const { user } = await requireAuth()
 const { data: booking } = await supabase
   .from("bookings")
@@ -100,42 +100,42 @@ const canModify =
 if (!canModify) redirect("/dashboard?error=cannot_modify_booking")
 
 return <ReservationClient existingBooking={booking} isModification={true} />
-```
+\`\`\`
 
 ---
 
 ### 3. Frontend - Client Component (`app/reservation/reservation-client.tsx`)
 
 **Props Interface**:
-```typescript
+\`\`\`typescript
 interface ReservationClientProps {
   existingBooking?: any          // Booking data si modification
   isModification?: boolean        // true = mode modification
   serviceType?: string            // "classic" | "monthly" | "quarterly"
 }
-```
+\`\`\`
 
 **Améliorations UI**:
 
 1. **Badge "Mode modification"**:
-   ```tsx
+   \`\`\`tsx
    {isModification && (
      <Badge variant="outline" className="gap-1">
        <Edit className="h-3 w-3" />
        Mode modification
      </Badge>
    )}
-   ```
+   \`\`\`
 
 2. **Alert d'information**:
-   ```tsx
+   \`\`\`tsx
    <Alert className="mb-6 bg-blue-50 border-blue-200">
      <strong>Mode modification :</strong> Les services ne peuvent pas être modifiés.
    </Alert>
-   ```
+   \`\`\`
 
 3. **Préfillage automatique**:
-   ```typescript
+   \`\`\`typescript
    useState({
      pickupAddressId: existingBooking?.pickup_address_id || "",
      deliveryAddressId: existingBooking?.delivery_address_id || "",
@@ -144,12 +144,12 @@ interface ReservationClientProps {
      pickupTimeSlot: existingBooking?.pickup_time_slot || "",
      specialInstructions: existingBooking?.special_instructions || "",
    })
-   ```
+   \`\`\`
 
 4. **Titre dynamique**:
-   ```tsx
+   \`\`\`tsx
    {isModification ? "Modifier la réservation" : "Nouvelle réservation"}
-   ```
+   \`\`\`
 
 ---
 
@@ -164,17 +164,17 @@ interface ReservationClientProps {
 - Titre: "Services sélectionnés (lecture seule)"
 
 **Code clé**:
-```tsx
+\`\`\`tsx
 <ServicesStep
   items={bookingData.items}
   onUpdate={updateBookingData}
   serviceType={bookingData.serviceType}
   readOnly={isModification} // ← NEW
 />
-```
+\`\`\`
 
 **ServiceCard modifications**:
-```tsx
+\`\`\`tsx
 {!readOnly && (
   <Button onClick={() => onQuantityChange(...)}>...</Button>
 )}
@@ -182,24 +182,24 @@ interface ReservationClientProps {
 {readOnly && quantity > 0 && (
   <Badge variant="secondary">Quantité: {quantity}</Badge>
 )}
-```
+\`\`\`
 
 ---
 
 ### 5. Summary Step - API PATCH Call (`components/booking/summary-step.tsx`)
 
 **Nouveaux props**:
-```typescript
+\`\`\`typescript
 interface SummaryStepProps {
   bookingData: BookingData
   serviceType?: string
   isModification?: boolean  // ← NEW
   bookingId?: string        // ← NEW
 }
-```
+\`\`\`
 
 **Logique conditionnelle**:
-```typescript
+\`\`\`typescript
 const handleSubmit = async () => {
   if (isModification && bookingId) {
     // Mode modification: PATCH
@@ -220,19 +220,19 @@ const handleSubmit = async () => {
     router.push(`/dashboard?success=true`)
   }
 }
-```
+\`\`\`
 
 **Texte bouton dynamique**:
-```tsx
+\`\`\`tsx
 {isModification ? "Enregistrer les modifications" : "Confirmer la réservation"}
-```
+\`\`\`
 
 ---
 
 ### 6. Validation Schema - `lib/validations/booking.ts`
 
 **Ajout `specialInstructions`**:
-```typescript
+\`\`\`typescript
 export const modifyBookingSchema = z.object({
   pickupAddressId: z.string().uuid(),
   pickupDate: z.string().refine(...),
@@ -242,14 +242,14 @@ export const modifyBookingSchema = z.object({
   deliveryTimeSlot: z.enum([...]).optional(),
   specialInstructions: z.string().optional(), // ← NEW
 })
-```
+\`\`\`
 
 ---
 
 ### 7. Booking Card - Bouton "Modifier" (`components/booking/booking-card.tsx`)
 
 **Modification implémentée** (déjà fait dans PR précédente):
-```tsx
+\`\`\`tsx
 {canModify && (
   <Button variant="outline" asChild>
     <Link href={`/reservation?modify=${booking.id}`}>
@@ -258,7 +258,7 @@ export const modifyBookingSchema = z.object({
     </Link>
   </Button>
 )}
-```
+\`\`\`
 
 ---
 
@@ -284,7 +284,7 @@ export const modifyBookingSchema = z.object({
 
 ## 📊 Data Flow Complet
 
-```
+\`\`\`
 ┌──────────────────┐
 │  Dashboard       │
 │  Booking Card    │
@@ -343,16 +343,16 @@ export const modifyBookingSchema = z.object({
 │  • Display toast "Modifié avec succès" │
 │  • Updated booking in list             │
 └────────────────────────────────────────┘
-```
+\`\`\`
 
 ---
 
 ## 🧪 Tests à Implémenter
 
 ### ❌ Tests unitaires (TODO)
-```bash
+\`\`\`bash
 __tests__/api/bookings/patch.test.ts
-```
+\`\`\`
 
 **Scénarios à tester**:
 1. ✅ Modification réussie avec toutes les validations passées
@@ -364,9 +364,9 @@ __tests__/api/bookings/patch.test.ts
 7. ❌ Erreur 404: Réservation inexistante
 
 ### ❌ Tests E2E (TODO)
-```bash
+\`\`\`bash
 __tests__/e2e/booking-modification.spec.ts
-```
+\`\`\`
 
 **Flow à tester**:
 1. Login utilisateur
@@ -417,7 +417,7 @@ Ajouter endpoint PATCH `/api/bookings/[id]`:
 
 ### Commandes de Test Local
 
-```bash
+\`\`\`bash
 # 1. Démarrer dev server
 pnpm dev
 
@@ -435,7 +435,7 @@ pnpm dev
 # - Modifier réservation passée (should redirect with error)
 # - Modifier réservation "completed" (should redirect)
 # - Modifier réservation d'un autre user (should 403)
-```
+\`\`\`
 
 ---
 
@@ -498,7 +498,7 @@ pnpm dev
 
 ## 📌 Commit Message Suggéré
 
-```
+\`\`\`
 feat: ✨ Implement booking modification flow (Backend + Frontend)
 
 - Add PATCH /api/bookings/[id] endpoint with 7-step validation
@@ -523,7 +523,7 @@ UX:
 - Dynamic button text and page title
 
 Refs: #PRD_BOOKING_MODIFICATION, #ISSUE-123
-```
+\`\`\`
 
 ---
 

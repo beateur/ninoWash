@@ -12,7 +12,7 @@ Ce document présente les deux états visuels du système de teaser d'abonnement
 
 ### Carte Service Classique
 
-```
+\`\`\`
 ┌─────────────────────────────────────┐
 │         Service Classique          │
 │  Parfait pour vos besoins ponctuels │
@@ -30,7 +30,7 @@ Ce document présente les deux états visuels du système de teaser d'abonnement
 │ │       🔗 Réserver            │   │  ← Cliquable
 │ └─────────────────────────────┘   │
 └─────────────────────────────────────┘
-```
+\`\`\`
 
 **État** : ✅ Totalement fonctionnel
 
@@ -38,7 +38,7 @@ Ce document présente les deux états visuels du système de teaser d'abonnement
 
 ### Carte Abonnement Mensuel
 
-```
+\`\`\`
 ┌─────────────────────────────────────┐
 │   ⭐ Plus populaire                 │  ← Badge conservé
 │                                     │
@@ -63,7 +63,7 @@ Ce document présente les deux états visuels du système de teaser d'abonnement
 │ │    🚫 S'abonner              │   │  ← Disabled, no href
 │ └─────────────────────────────┘   │
 └─────────────────────────────────────┘
-```
+\`\`\`
 
 **Détails visuels** :
 - Badge "Bientôt disponible" (secondary) avec icône Lock
@@ -81,7 +81,7 @@ Ce document présente les deux états visuels du système de teaser d'abonnement
 
 ### Carte Abonnement Trimestriel
 
-```
+\`\`\`
 ┌─────────────────────────────────────┐
 │    Abonnement Trimestriel 🔒 Bientôt│
 │  La solution la plus avantageuse    │
@@ -105,7 +105,7 @@ Ce document présente les deux états visuels du système de teaser d'abonnement
 │ │    🚫 S'abonner              │   │
 │ └─────────────────────────────┘   │
 └─────────────────────────────────────┘
-```
+\`\`\`
 
 **État** : 🔒 Identique à Mensuel (teaser mode)
 
@@ -117,7 +117,7 @@ Ce document présente les deux états visuels du système de teaser d'abonnement
 
 ### Carte Service Classique
 
-```
+\`\`\`
 ┌─────────────────────────────────────┐
 │         Service Classique          │
 │  Parfait pour vos besoins ponctuels │
@@ -135,7 +135,7 @@ Ce document présente les deux états visuels du système de teaser d'abonnement
 │ │       🔗 Réserver            │   │
 │ └─────────────────────────────┘   │
 └─────────────────────────────────────┘
-```
+\`\`\`
 
 **État** : ✅ Inchangé (identique à MVP)
 
@@ -143,7 +143,7 @@ Ce document présente les deux états visuels du système de teaser d'abonnement
 
 ### Carte Abonnement Mensuel
 
-```
+\`\`\`
 ┌─────────────────────────────────────┐
 │   ⭐ Plus populaire                 │
 │                                     │
@@ -166,7 +166,7 @@ Ce document présente les deux états visuels du système de teaser d'abonnement
 │                                     │
 │ * Connexion requise pour...        │
 └─────────────────────────────────────┘
-```
+\`\`\`
 
 **Détails visuels** :
 - ❌ Plus de badge "Bientôt disponible"
@@ -184,7 +184,7 @@ Ce document présente les deux états visuels du système de teaser d'abonnement
 
 ### Carte Abonnement Trimestriel
 
-```
+\`\`\`
 ┌─────────────────────────────────────┐
 │    Abonnement Trimestriel           │
 │  La solution la plus avantageuse    │
@@ -206,7 +206,7 @@ Ce document présente les deux états visuels du système de teaser d'abonnement
 │                                     │
 │ * Connexion requise pour...        │
 └─────────────────────────────────────┘
-```
+\`\`\`
 
 **État** : ✅ Totalement fonctionnel
 
@@ -217,24 +217,24 @@ Ce document présente les deux états visuels du système de teaser d'abonnement
 ### Layout Responsive (Desktop)
 
 **Flag OFF** :
-```
+\`\`\`
 ┌─────────────┬─────────────┬─────────────┐
 │   Classic   │   Monthly   │  Quarterly  │
 │   ✅ Active  │  🔒 Locked  │  🔒 Locked  │
 │             │  (blur)     │  (blur)     │
 │  [Réserver] │ [Disabled]  │ [Disabled]  │
 └─────────────┴─────────────┴─────────────┘
-```
+\`\`\`
 
 **Flag ON** :
-```
+\`\`\`
 ┌─────────────┬─────────────┬─────────────┐
 │   Classic   │   Monthly   │  Quarterly  │
 │   ✅ Active  │  ✅ Active  │  ✅ Active  │
 │             │  ⭐ Popular │             │
 │  [Réserver] │ [S'abonner] │ [S'abonner] │
 └─────────────┴─────────────┴─────────────┘
-```
+\`\`\`
 
 ---
 
@@ -243,13 +243,13 @@ Ce document présente les deux états visuels du système de teaser d'abonnement
 ### Overlay Blur (Flag OFF uniquement)
 
 **CSS Classes** :
-```css
+\`\`\`css
 absolute inset-0 rounded-xl backdrop-blur-[2px] bg-background/40
 flex items-end justify-center p-3
-```
+\`\`\`
 
 **Structure DOM** :
-```html
+\`\`\`html
 <div class="relative">
   <!-- Features list -->
   <ul>...</ul>
@@ -261,12 +261,12 @@ flex items-end justify-center p-3
     </div>
   )}
 </div>
-```
+\`\`\`
 
 ### CTA Button States
 
 **Flag OFF (Disabled)** :
-```tsx
+\`\`\`tsx
 <Button
   className="w-full opacity-80 cursor-not-allowed"
   variant="default"
@@ -276,16 +276,16 @@ flex items-end justify-center p-3
 >
   S'abonner
 </Button>
-```
+\`\`\`
 
 **Flag ON (Active)** :
-```tsx
+\`\`\`tsx
 <Button asChild className="w-full" variant="default">
   <Link href="/reservation?service=monthly">
     S'abonner
   </Link>
 </Button>
-```
+\`\`\`
 
 ---
 
@@ -294,7 +294,7 @@ flex items-end justify-center p-3
 ### Mobile (< 768px)
 
 **Flag OFF** :
-```
+\`\`\`
 ┌─────────────────────┐
 │      Classic        │
 │     [Réserver] ✅   │
@@ -309,7 +309,7 @@ flex items-end justify-center p-3
 │    Quarterly 🔒     │
 │   [Disabled] (blur) │
 └─────────────────────┘
-```
+\`\`\`
 
 **Grid** : 1 colonne (stacked)
 **Scale** : Monthly garde son `scale-105` (Plus populaire)
@@ -372,7 +372,7 @@ flex items-end justify-center p-3
 
 ### Analytics Events
 
-```javascript
+\`\`\`javascript
 // Teaser interaction (Flag OFF)
 gtag('event', 'subscription_teaser_click', {
   service_id: 'monthly',
@@ -384,7 +384,7 @@ gtag('event', 'subscription_cta_click', {
   service_id: 'monthly',
   destination: '/reservation?service=monthly'
 })
-```
+\`\`\`
 
 ### User Behavior Insights
 

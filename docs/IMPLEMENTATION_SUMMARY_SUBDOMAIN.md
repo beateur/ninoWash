@@ -55,19 +55,19 @@
 ### 3. Environment Variables
 
 **New Required Variables:**
-```bash
+\`\`\`bash
 # Main app domain (users)
 NEXT_PUBLIC_APP_URL=https://app.ninowash.com
 
 # Admin subdomain
 NEXT_PUBLIC_ADMIN_URL=https://gestion.ninowash.com
-```
+\`\`\`
 
 **Development:**
-```bash
+\`\`\`bash
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_ADMIN_URL=http://localhost:3000
-```
+\`\`\`
 
 ### 4. Security Improvements
 
@@ -120,10 +120,10 @@ NEXT_PUBLIC_ADMIN_URL=http://localhost:3000
 ### 7. Deployment Steps
 
 1. **DNS Configuration** (via domain registrar)
-   ```
+   \`\`\`
    app.ninowash.com → CNAME → cname.vercel-dns.com
    gestion.ninowash.com → CNAME → cname.vercel-dns.com
-   ```
+   \`\`\`
 
 2. **Vercel Configuration**
    - Add both domains in Project Settings → Domains
@@ -131,10 +131,10 @@ NEXT_PUBLIC_ADMIN_URL=http://localhost:3000
    - Verify SSL certificates are issued
 
 3. **Environment Variables** (Vercel Dashboard)
-   ```bash
+   \`\`\`bash
    NEXT_PUBLIC_APP_URL=https://app.ninowash.com
    NEXT_PUBLIC_ADMIN_URL=https://gestion.ninowash.com
-   ```
+   \`\`\`
 
 4. **Supabase Configuration**
    - Add redirect URLs:
@@ -166,7 +166,7 @@ If subdomain routing causes issues:
 
 ### 10. Files Modified
 
-```
+\`\`\`
 Modified:
   - .github/copilot-instructions.md
   - app/auth/callback/page.tsx
@@ -178,7 +178,7 @@ Created:
   - docs/PRD/PRD_ADMIN_SUBDOMAIN_ROUTING.md
   - .env.example
   - docs/IMPLEMENTATION_SUMMARY_SUBDOMAIN.md (this file)
-```
+\`\`\`
 
 ---
 

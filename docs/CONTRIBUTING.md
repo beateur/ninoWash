@@ -35,9 +35,9 @@ Merci de votre intérêt pour contribuer à Nino Wash ! Ce guide vous aidera à 
   - Tailwind CSS IntelliSense
 
 ### Installation pnpm
-```bash
+\`\`\`bash
 npm install -g pnpm
-```
+\`\`\`
 
 ### Connaissance Requise
 - TypeScript
@@ -54,7 +54,7 @@ npm install -g pnpm
 Next.js 14 App Router impose une **séparation stricte** entre Server et Client Components.
 
 #### Server Components (par défaut)
-```typescript
+\`\`\`typescript
 // Peuvent utiliser next/headers, cookies, etc.
 import { createClient } from "@/lib/supabase/server"
 
@@ -63,10 +63,10 @@ export default async function MyPage() {
   const { data } = await supabase.from('table').select()
   return <div>{data}</div>
 }
-```
+\`\`\`
 
 #### Client Components (avec "use client")
-```typescript
+\`\`\`typescript
 "use client"
 // NE PEUVENT PAS utiliser next/headers
 import { createClient } from "@/lib/supabase/client"
@@ -77,7 +77,7 @@ export function MyComponent() {
   const supabase = createClient()
   // ...
 }
-```
+\`\`\`
 
 ### ❌ Ne Jamais Faire
 - Importer `@/lib/supabase/server` dans un Client Component
@@ -85,7 +85,7 @@ export function MyComponent() {
 - Mélanger `"use client"` + code serveur (cookies, headers)
 
 ### ✅ Pattern Recommandé : Pages Admin
-```typescript
+\`\`\`typescript
 // app/admin/my-page/page.tsx (Server Component)
 import { requireAdmin } from "@/lib/auth/route-guards"
 import MyPageClient from "./page-client"
@@ -100,7 +100,7 @@ export default async function MyPage() {
 export default function MyPageClient() {
   // Hooks React, interactivité
 }
-```
+\`\`\`
 
 📖 **Plus de détails :** [`architecture.md`](architecture.md) - Section "Patterns Courants"
 

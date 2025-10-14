@@ -13,7 +13,7 @@ Guide pour les nouveaux développeurs rejoignant le projet Nino Wash.
 
 ### Étapes
 
-```bash
+\`\`\`bash
 # 1. Clone le repo
 git clone https://github.com/beateur/ninoWash.git
 cd ninoWash
@@ -29,13 +29,13 @@ cp .env.example .env.local
 pnpm dev
 
 # ✅ Ouvrir http://localhost:3000
-```
+\`\`\`
 
 ---
 
 ## 🔑 Variables d'Environnement Requises
 
-```bash
+\`\`\`bash
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJxxx...
@@ -48,13 +48,13 @@ STRIPE_WEBHOOK_SECRET=whsec_xxx
 
 # App
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
+\`\`\`
 
 ---
 
 ## 📁 Structure du Projet
 
-```
+\`\`\`
 ninoWash/
 ├── app/                    # Next.js App Router
 │   ├── (main)/            # Routes publiques
@@ -70,7 +70,7 @@ ninoWash/
 │   ├── validations/      # Schémas Zod
 │   └── hooks/            # Hooks personnalisés
 └── docs/                  # Documentation
-```
+\`\`\`
 
 ---
 
@@ -78,7 +78,7 @@ ninoWash/
 
 ### 1. **Séparation Client/Server Components**
 
-```typescript
+\`\`\`typescript
 // ✅ Client Component (interactivité)
 "use client"
 import { createClient } from "@/lib/supabase/client"
@@ -97,11 +97,11 @@ export default async function MaPage() {
   const data = await supabase.from('table').select()
   // ...
 }
-```
+\`\`\`
 
 ### 2. **Pages Admin : Pattern Hybride**
 
-```typescript
+\`\`\`typescript
 // page.tsx (Server - vérifie permissions)
 import { requireAdmin } from "@/lib/auth/route-guards"
 import MonPageClient from "./page-client"
@@ -116,7 +116,7 @@ export default async function AdminPage() {
 export default function MonPageClient() {
   // Hooks React ici
 }
-```
+\`\`\`
 
 ### 3. **Ne Jamais Faire**
 
@@ -128,7 +128,7 @@ export default function MonPageClient() {
 
 ## 🧪 Commandes Utiles
 
-```bash
+\`\`\`bash
 # Développement
 pnpm dev                   # Démarrer serveur (port 3000)
 pnpm build                 # Build production
@@ -149,19 +149,19 @@ pnpm db:seed               # Seed données de test
 
 # Cache
 rm -rf .next               # Nettoyer cache Next.js
-```
+\`\`\`
 
 ---
 
 ## 👤 Créer un Utilisateur Admin
 
-```bash
+\`\`\`bash
 # Méthode 1 : Script TypeScript
 pnpm tsx scripts/create-admin.ts
 
 # Méthode 2 : SQL direct
 psql -h db.xxx.supabase.co -U postgres -d postgres -f scripts/create-admin.sql
-```
+\`\`\`
 
 **Credentials admin de test :**
 - Email : `habilel99@gmail.com`
@@ -174,13 +174,13 @@ psql -h db.xxx.supabase.co -U postgres -d postgres -f scripts/create-admin.sql
 
 ### Erreur : "Port 3000 already in use"
 
-```bash
+\`\`\`bash
 # Trouver et tuer le processus
 lsof -ti:3000 | xargs kill -9
 
 # Ou utiliser un autre port
 pnpm dev --port 3001
-```
+\`\`\`
 
 ### Erreur : "You're importing a component that needs next/headers"
 
@@ -196,15 +196,15 @@ pnpm dev --port 3001
 **Cause :** Composant UI sans `forwardRef` utilisé avec react-hook-form.
 
 **Solution :**
-```typescript
+\`\`\`typescript
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   (props, ref) => <input ref={ref} {...props} />
 )
-```
+\`\`\`
 
 ### Page blanche / 500 Internal Server Error
 
-```bash
+\`\`\`bash
 # 1. Nettoyer le cache
 rm -rf .next
 
@@ -213,7 +213,7 @@ rm -rf .next
 
 # 4. Redémarrer le serveur
 pnpm dev
-```
+\`\`\`
 
 ---
 
@@ -269,7 +269,7 @@ pnpm dev
 
 ## 🤝 Workflow Git
 
-```bash
+\`\`\`bash
 # 1. Créer une branche feature
 git checkout -b feature/ma-feature
 
@@ -281,7 +281,7 @@ git commit -m "feat: description"
 git push origin feature/ma-feature
 
 # 4. Merge après review
-```
+\`\`\`
 
 **Branches principales :**
 - `main` : Production

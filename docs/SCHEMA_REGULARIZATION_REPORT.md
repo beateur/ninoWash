@@ -6,7 +6,7 @@
 **File**: `scripts/03-create-database-schema-fixed.sql`
 
 ### Actual Database Schema for `user_addresses`:
-```sql
+\`\`\`sql
 CREATE TABLE IF NOT EXISTS user_addresses (
     id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS user_addresses (
     created_at TIMESTAMP,
     updated_at TIMESTAMP
 );
-```
+\`\`\`
 
 ## Files Requiring Correction
 

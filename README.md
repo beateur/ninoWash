@@ -348,14 +348,14 @@ Pour une documentation complète des routes, interfaces et conditions de routage
 
 Le projet utilise Next.js 14 App Router avec une séparation stricte entre Server et Client Components :
 
-```typescript
+\`\`\`typescript
 // ✅ Client Component (interactivité, hooks)
 "use client"
 import { createClient } from "@/lib/supabase/client"
 
 // ✅ Server Component (auth, données)
 import { createClient } from "@/lib/supabase/server"
-```
+\`\`\`
 
 **Règle d'or :** Ne jamais importer `@/lib/supabase/server` dans un Client Component.
 

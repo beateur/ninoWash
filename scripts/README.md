@@ -13,11 +13,11 @@ Collection de scripts utilitaires pour le développement et le testing.
 **Description** : Créer des créneaux de collecte et livraison via un script Node.js avec validation automatique.
 
 **Usage** :
-```bash
+\`\`\`bash
 pnpm slots:create
 # ou
 pnpm tsx scripts/create-slots.ts
-```
+\`\`\`
 
 **Configuration** : Modifier `SLOT_CONFIG` dans le fichier pour définir vos créneaux.
 
@@ -63,14 +63,14 @@ pnpm tsx scripts/create-slots.ts
 **Description** : Script de test automatisé pour la fonction Edge "reset-weekly-credits" (production)
 
 **Usage** :
-```bash
+\`\`\`bash
 # Définir les variables d'environnement
 export SUPABASE_PROJECT_REF=your-project-ref
 export SUPABASE_ANON_KEY=your-anon-key
 
 # Exécuter le script
 ./scripts/test-reset-credits.sh
-```
+\`\`\`
 
 **Ce que le script fait** :
 1. ✅ Vérifie que la fonction Edge est déployée (HTTP ping)
@@ -88,7 +88,7 @@ export SUPABASE_ANON_KEY=your-anon-key
 **Description** : Reset manuel des crédits pour le développement local
 
 **Usage** :
-```bash
+\`\`\`bash
 # Charger les variables d'environnement
 source .env.local
 
@@ -97,7 +97,7 @@ source .env.local
 
 # Reset un utilisateur spécifique
 ./scripts/dev-reset-credits.sh abc-123-def-456
-```
+\`\`\`
 
 **Ce que le script fait** :
 1. ✅ Récupère tous les abonnements actifs (ou utilisateur spécifique)
@@ -107,7 +107,7 @@ source .env.local
 5. ✅ Fournit des requêtes SQL de vérification
 
 **Sortie attendue** :
-```
+\`\`\`
 ═══════════════════════════════════════════════════════════
    🔄 Manual Credit Reset (DEV MODE)
 ═══════════════════════════════════════════════════════════
@@ -120,7 +120,7 @@ Continue with reset? [y/N]: y
     ✅ Success
 
 Summary: 3 processed, 3 successful, 0 failed
-```
+\`\`\`
 
 **Use Case** : Tests locaux, itération rapide, régénération de crédits
 
@@ -144,7 +144,7 @@ Summary: 3 processed, 3 successful, 0 failed
    • Erreurs: 0
 
 ...
-```
+\`\`\`
 
 **Dépendances** :
 - `curl` (installé par défaut sur macOS/Linux)

@@ -27,13 +27,13 @@ L'agent Copilot a commis une erreur critique en cherchant la structure de la bas
 - Mise à jour de "Common Pitfalls" avec avertissements spécifiques
 
 **Règles Obligatoires:**
-```markdown
+\`\`\`markdown
 1. NEVER trust SQL script files
 2. NEVER trust databaseschema.json (only auth.* tables)
 3. ALWAYS query live database via Supabase SQL Editor
 4. Verify schema BEFORE writing Zod validators
 5. Verify schema BEFORE creating API routes
-```
+\`\`\`
 
 ### 2. ✅ Documentation Complète Créée
 
@@ -61,29 +61,29 @@ L'agent Copilot a commis une erreur critique en cherchant la structure de la bas
 - Requêtes de référence rapide commentées
 
 **Usage:**
-```sql
+\`\`\`sql
 -- Copier dans Supabase SQL Editor et exécuter
 -- Exporter le résultat comme documentation
-```
+\`\`\`
 
 ## Workflow Corrigé
 
 ### Avant (❌ INCORRECT)
-```
+\`\`\`
 1. Chercher dans scripts/*.sql
 2. Assumer que le script reflète la réalité
 3. Écrire du code basé sur ces suppositions
 4. ❌ Échec car colonnes inexistantes
-```
+\`\`\`
 
 ### Après (✅ CORRECT)
-```
+\`\`\`
 1. Ouvrir Supabase SQL Editor
 2. Exécuter requête information_schema
 3. Vérifier colonnes exactes
 4. Écrire code avec noms de colonnes vérifiés
 5. ✅ Succès garanti
-```
+\`\`\`
 
 ## Impact
 

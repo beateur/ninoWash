@@ -50,33 +50,33 @@
 ## 🔍 Preuves Techniques
 
 ### 1. Calcul de prix identique pour tous
-```typescript
+\`\`\`typescript
 // app/api/bookings/route.ts:68-81
 for (const item of validatedData.items) {
   const service = services.find((s) => s.id === item.serviceId)
   totalAmount += service.base_price * item.quantity
 }
 // ❌ Aucun "if (hasActiveSubscription) { applyDiscount() }"
-```
+\`\`\`
 
 ### 2. Table bookings sans lien subscription
-```sql
+\`\`\`sql
 -- scripts/03-create-database-schema-fixed.sql:83
 CREATE TABLE bookings (
     total_amount DECIMAL(10,2),
     payment_status VARCHAR(20) DEFAULT 'pending',
     -- ❌ PAS DE subscription_id
 );
-```
+\`\`\`
 
 ### 3. Frontend affiche message trompeur
-```tsx
+\`\`\`tsx
 // components/booking/summary-step.tsx:356
 {serviceType !== "classic" && (
   <span>Inclus dans l'abonnement</span>  // 🟢 UI
 )}
 // Mais backend charge : payment_status = "pending" ❌
-```
+\`\`\`
 
 ---
 
@@ -217,7 +217,7 @@ CREATE TABLE bookings (
 
 **Action immédiate requise** :
 
-```
+\`\`\`
 [ ] Réunion décision business (2h max)
     ├─> Décider du modèle économique
     ├─> Valider Option 1, 2 ou 3
@@ -232,7 +232,7 @@ CREATE TABLE bookings (
     ├─> Implémenter quick fix
     ├─> Communication clients
     └─> Planifier Option 1 plus tard
-```
+\`\`\`
 
 ---
 

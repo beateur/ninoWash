@@ -15,13 +15,13 @@ Erreurs lors de la création d'adresse/réservation : `Key (user_id) is not pres
 1. **Ouvrir** → [app.supabase.com](https://app.supabase.com) → Votre projet → SQL Editor
 
 2. **Copier/Coller le contenu de ce fichier** :
-   ```
+   \`\`\`
    supabase/migrations/20250108000001_fix_all_user_foreign_keys.sql
-   ```
+   \`\`\`
 
    Ou directement ce code simplifié :
 
-```sql
+\`\`\`sql
 -- Fix ALL user_id foreign keys at once
 DO $$
 BEGIN
@@ -62,7 +62,7 @@ BEGIN
 
   RAISE NOTICE '✅ All foreign keys fixed!';
 END $$;
-```
+\`\`\`
 
 3. **Cliquer sur "Run"** (ou `Ctrl+Enter`)
 
@@ -74,7 +74,7 @@ END $$;
 
 ## Test Complet
 
-```bash
+\`\`\`bash
 # 1. Redémarrer le serveur (si nécessaire)
 pnpm dev
 
@@ -88,7 +88,7 @@ open http://localhost:3000/reservation
 
 # 4. Vérifier dans Supabase
 # → Dashboard → Table Editor → bookings → ✅ Nouvelle ligne créée
-```
+\`\`\`
 
 ---
 

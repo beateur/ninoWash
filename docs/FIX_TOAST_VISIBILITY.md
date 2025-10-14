@@ -13,12 +13,12 @@
 
 ### Cause Racine
 Classes CSS du variant "destructive" :
-```tsx
+\`\`\`tsx
 // AVANT - Problématique
 variant: {
   destructive: "destructive border-destructive bg-destructive text-destructive-foreground"
 }
-```
+\`\`\`
 
 **Problèmes identifiés** :
 1. `bg-destructive` = fond rouge foncé
@@ -35,7 +35,7 @@ variant: {
 
 #### Toast Container (ligne ~28)
 
-```tsx
+\`\`\`tsx
 // APRÈS - Meilleur contraste et visibilité
 const toastVariants = cva(
   "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-4 pr-8 shadow-lg transition-all [...animations...] min-h-[80px]",
@@ -51,7 +51,7 @@ const toastVariants = cva(
     },
   },
 )
-```
+\`\`\`
 
 **Changements** :
 - ✅ `bg-red-50` : Fond rouge très clair (au lieu de rouge foncé)
@@ -63,7 +63,7 @@ const toastVariants = cva(
 
 #### ToastTitle (ligne ~100)
 
-```tsx
+\`\`\`tsx
 // APRÈS - Texte foncé sur fond clair
 const ToastTitle = React.forwardRef<...>(({ className, ...props }, ref) => (
   <ToastPrimitives.Title 
@@ -75,7 +75,7 @@ const ToastTitle = React.forwardRef<...>(({ className, ...props }, ref) => (
     {...props} 
   />
 ))
-```
+\`\`\`
 
 **Changements** :
 - ✅ `group-[.destructive]:text-red-900` : Titre rouge foncé
@@ -83,7 +83,7 @@ const ToastTitle = React.forwardRef<...>(({ className, ...props }, ref) => (
 
 #### ToastDescription (ligne ~110)
 
-```tsx
+\`\`\`tsx
 // APRÈS - Description claire avec espacement
 const ToastDescription = React.forwardRef<...>(({ className, ...props }, ref) => (
   <ToastPrimitives.Description 
@@ -95,7 +95,7 @@ const ToastDescription = React.forwardRef<...>(({ className, ...props }, ref) =>
     {...props} 
   />
 ))
-```
+\`\`\`
 
 **Changements** :
 - ✅ `group-[.destructive]:text-red-800` : Texte rouge moyen (bon contraste)
@@ -104,7 +104,7 @@ const ToastDescription = React.forwardRef<...>(({ className, ...props }, ref) =>
 
 #### ToastClose (ligne ~85)
 
-```tsx
+\`\`\`tsx
 // APRÈS - Bouton de fermeture visible
 const ToastClose = React.forwardRef<...>(({ className, ...props }, ref) => (
   <ToastPrimitives.Close
@@ -119,7 +119,7 @@ const ToastClose = React.forwardRef<...>(({ className, ...props }, ref) => (
     <Cross2Icon className="h-4 w-4" />
   </ToastPrimitives.Close>
 ))
-```
+\`\`\`
 
 **Changements** :
 - ✅ `opacity-70` initial (au lieu de `opacity-0`) : Visible dès le départ
@@ -131,7 +131,7 @@ const ToastClose = React.forwardRef<...>(({ className, ...props }, ref) => (
 
 **Fichier**: `components/ui/toaster.tsx`
 
-```tsx
+\`\`\`tsx
 // APRÈS - Meilleur espacement
 export function Toaster() {
   const { toasts } = useToast()
@@ -152,7 +152,7 @@ export function Toaster() {
     </ToastProvider>
   )
 }
-```
+\`\`\`
 
 **Changements** :
 - ✅ `gap-2` : Espacement entre titre et description (1 → 2)
@@ -161,14 +161,14 @@ export function Toaster() {
 ## 🎨 Résultat Visuel
 
 ### Avant
-```
+\`\`\`
 ┌─────────────────────────┐
 │ [Rectangle rouge]       │  ← Aucun texte visible
 └─────────────────────────┘
-```
+\`\`\`
 
 ### Après
-```
+\`\`\`
 ┌────────────────────────────────────────────────┐
 │  🚫 Suppression impossible                 ✕  │
 │                                                 │
@@ -181,7 +181,7 @@ export function Toaster() {
    ↑ Texte rouge foncé (text-red-900)
    ↑ Bouton fermeture visible (opacity-70)
    ↑ Hauteur minimale 80px
-```
+\`\`\`
 
 ## 📐 Design Tokens
 
