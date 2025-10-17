@@ -1,6 +1,6 @@
 /**
- * Step 4: Summary & Payment
- * Displays complete booking summary + Stripe payment
+ * Step 4: Summary & Booking Confirmation
+ * Displays complete booking summary + creates booking (payment happens on separate page)
  */
 
 "use client"
@@ -12,10 +12,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { User, MapPin, Package, Home, Calendar, Clock, ShoppingCart, CreditCard, Loader2 } from "lucide-react"
+import { User, MapPin, Package, Home, Calendar, Clock, ShoppingCart, CheckCircle2, Loader2, AlertCircle } from "lucide-react"
 import type { GuestBookingState } from "@/lib/hooks/use-guest-booking"
-import { StripePayment } from "../stripe-payment"
 import { toast } from "sonner"
+import { createBookingSchema } from "@/lib/validations/booking"
 
 interface SummaryStepProps {
   bookingData: GuestBookingState
@@ -30,10 +30,10 @@ const TIME_SLOTS = [
 
 export function SummaryStep({ bookingData, onComplete }: SummaryStepProps) {
   const router = useRouter()
-  const [showPayment, setShowPayment] = useState(false)
-  const [paymentError, setPaymentError] = useState<string | null>(null)
   const [services, setServices] = useState<Array<{ id: string; name: string; base_price: number }>>([])
   const [loadingServices, setLoadingServices] = useState(true)
+  const [isCreatingBooking, setIsCreatingBooking] = useState(false)
+  const [bookingError, setBookingError] = useState<string | null>(null)
 
   // Fetch services details for items
   useEffect(() => {
@@ -291,95 +291,60 @@ export function SummaryStep({ bookingData, onComplete }: SummaryStepProps) {
         </CardContent>
       </Card>
 
-      {/* Payment Button (Placeholder for Phase 2) */}
-      {!showPayment ? (
-        <Card className="border-primary">
-          <CardContent className="p-6">
-            <Button
-              size="lg"
-              className="w-full"
-              onClick={() => setShowPayment(true)}
-              disabled={loadingServices}
-            >
-              {loadingServices ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Chargement...
-                </>
-              ) : (
-                <>
-                  <CreditCard className="mr-2 h-5 w-5" />
-                  Procéder au paiement
-                </>
-              )}
-            </Button>
-            {paymentError && (
-              <p className="text-sm text-destructive mt-3 text-center">
-                {paymentError}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5" />
-              Paiement sécurisé
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loadingServices ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <span className="ml-2">Chargement...</span>
-              </div>
+      {/* Confirm Booking Button */}
+      <Card className="border-primary bg-gradient-to-br from-blue-50 to-blue-50">
+        <CardContent className="p-6">
+          <div className="mb-4">
+            <p className="text-sm text-muted-foreground mb-2">
+              En confirmant, vous acceptez les conditions de service et recevrez un email avec un lien de paiement.
+            </p>
+          </div>
+          
+          <Button
+            size="lg"
+            className="w-full"
+            onClick={() => handleConfirmBooking(bookingData, router, setIsCreatingBooking, setBookingError)}
+            disabled={isCreatingBooking || loadingServices}
+          >
+            {isCreatingBooking ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Confirmation en cours...
+              </>
             ) : (
-              <StripePayment
-                bookingData={{
-                  contact: {
-                    fullName: bookingData.contact
-                      ? `${bookingData.contact.firstName} ${bookingData.contact.lastName}`
-                      : "",
-                    email: bookingData.contact?.email || "",
-                    phone: bookingData.contact?.phone || "",
-                  },
-                  pickupAddress: {
-                    street_address: bookingData.pickupAddress?.street_address || "",
-                    city: bookingData.pickupAddress?.city || "",
-                    postal_code: bookingData.pickupAddress?.postal_code || "",
-                  },
-                  deliveryAddress: {
-                    street_address: bookingData.deliveryAddress?.street_address || "",
-                    city: bookingData.deliveryAddress?.city || "",
-                    postal_code: bookingData.deliveryAddress?.postal_code || "",
-                  },
-                  items: bookingData.items,
-                  services,
-                  pickupDate: bookingData.pickupDate || "",
-                  pickupTimeSlot: bookingData.pickupTimeSlot || "",
-                  totalAmount: bookingData.totalAmount || 0,
-                }}
-                onSuccess={(bookingId, email) => {
-                  console.log("[v0] Payment success, redirecting to success page")
-                  console.log("[v0] BookingID:", bookingId, "Email:", email)
-                  
-                  // Redirect to success page with booking details
-                  const userEmail = email || bookingData.contact?.email || ""
-                  router.push(
-                    `/reservation/guest/success?bookingId=${bookingId}&email=${encodeURIComponent(userEmail)}`
-                  )
-                }}
-                onError={(error) => {
-                  console.error("[v0] Payment error:", error)
-                  setPaymentError(error)
-                  setShowPayment(false)
-                }}
-              />
+              <>
+                <CheckCircle2 className="mr-2 h-5 w-5" />
+                Confirmer ma réservation
+              </>
             )}
-          </CardContent>
-        </Card>
-      )}
+          </Button>
+          
+          {bookingError && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex gap-2">
+              <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-700">{bookingError}</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Info Message */}
+      <Card className="bg-blue-50 border-blue-200">
+        <CardContent className="p-4">
+          <div className="flex gap-3">
+            <CheckCircle2 className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-blue-800">
+              <p className="font-medium mb-1">Comment ça fonctionne ?</p>
+              <ol className="space-y-1 text-xs">
+                <li>1. Vous confirmez votre réservation</li>
+                <li>2. Vous recevez un email avec un lien de paiement</li>
+                <li>3. Vous complétez le paiement en toute sécurité</li>
+                <li>4. Votre réservation est confirmée !</li>
+              </ol>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Test Button (Development only) */}
       {process.env.NODE_ENV === "development" && (
@@ -389,4 +354,97 @@ export function SummaryStep({ bookingData, onComplete }: SummaryStepProps) {
       )}
     </div>
   )
+}
+
+async function handleConfirmBooking(
+  bookingData: GuestBookingState,
+  router: any,
+  setIsCreatingBooking: (value: boolean) => void,
+  setBookingError: (value: string | null) => void
+) {
+  setIsCreatingBooking(true)
+  setBookingError(null)
+
+  try {
+    // Validate booking data
+    if (!bookingData.contact || !bookingData.pickupAddress || !bookingData.deliveryAddress) {
+      throw new Error("Données de réservation incomplètes")
+    }
+
+    if (bookingData.items.length === 0) {
+      throw new Error("Aucun service sélectionné")
+    }
+
+    // Prepare booking payload
+    const bookingPayload = {
+      guestContact: {
+        first_name: bookingData.contact.firstName,
+        last_name: bookingData.contact.lastName,
+        email: bookingData.contact.email,
+        phone: bookingData.contact.phone,
+      },
+      guestPickupAddress: {
+        street_address: bookingData.pickupAddress.street_address,
+        city: bookingData.pickupAddress.city,
+        postal_code: bookingData.pickupAddress.postal_code,
+        building_info: bookingData.pickupAddress.building_info,
+        access_instructions: bookingData.pickupAddress.access_instructions,
+        label: bookingData.pickupAddress.label || "Pickup",
+      },
+      guestDeliveryAddress: {
+        street_address: bookingData.deliveryAddress.street_address,
+        city: bookingData.deliveryAddress.city,
+        postal_code: bookingData.deliveryAddress.postal_code,
+        building_info: bookingData.deliveryAddress.building_info,
+        access_instructions: bookingData.deliveryAddress.access_instructions,
+        label: bookingData.deliveryAddress.label || "Delivery",
+      },
+      items: bookingData.items.map((item) => ({
+        serviceId: item.serviceId,
+        quantity: item.quantity,
+        specialInstructions: item.specialInstructions,
+      })),
+      pickupDate: bookingData.pickupDate,
+      pickupTimeSlot: bookingData.pickupTimeSlot,
+    }
+
+    // Validate with Zod schema
+    const validationResult = createBookingSchema.safeParse(bookingPayload)
+    if (!validationResult.success) {
+      const errors = validationResult.error.issues.map((issue) => issue.message).join(", ")
+      throw new Error(`Validation échouée: ${errors}`)
+    }
+
+    // Create booking via API
+    const response = await fetch("/api/bookings", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(bookingPayload),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.error || "Erreur lors de la création de la réservation")
+    }
+
+    const result = await response.json()
+    const { id: bookingId } = result
+
+    console.log("[v0] Booking created successfully:", bookingId)
+
+    // Show success message
+    toast.success("Réservation créée ! Un email de paiement a été envoyé.")
+
+    // Redirect to payment page
+    router.push(`/booking/${bookingId}/pay`)
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Erreur inconnue"
+    console.error("[v0] Booking creation error:", errorMessage)
+    setBookingError(errorMessage)
+    toast.error(errorMessage)
+  } finally {
+    setIsCreatingBooking(false)
+  }
 }

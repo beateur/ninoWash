@@ -229,13 +229,13 @@ export function SummaryStep({
         throw new Error(result.error || "Une erreur est survenue")
       }
 
-      // Redirect to confirmation page with booking number
-      const bookingNumber = result.booking?.booking_number
-      if (bookingNumber) {
-        router.push(`/reservation/success?number=${bookingNumber}`)
+      // New booking created with status='pending_payment'
+      // Redirect to payment page
+      const newBookingId = result.id
+      if (newBookingId) {
+        router.push(`/booking/${newBookingId}/pay`)
       } else {
-        // Fallback if no booking number (shouldn't happen)
-        router.push("/dashboard?success=true")
+        throw new Error("ID de réservation manquant dans la réponse")
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Une erreur est survenue")
