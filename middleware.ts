@@ -21,8 +21,6 @@ const PROTECTED_ROUTES = {
   // Note: /reservation removed - now only authenticated route is /reservation (not /reservation/guest)
   // Authenticated booking flow
   authenticatedBooking: ["/reservation"],
-  // Routes requiring admin role
-  admin: ["/admin"],
   // Routes requiring guest (not authenticated)
   guest: ["/auth/signin", "/auth/signup"],
   // Guest booking flow (no auth required)
@@ -113,19 +111,6 @@ export async function middleware(request: NextRequest) {
         console.log("[v0] Redirecting regular user from gestion to app subdomain")
         return NextResponse.redirect(appUrl)
       }
-    }
-  }
-
-  // Check if route requires admin access
-  if (PROTECTED_ROUTES.admin.some((route) => pathname.startsWith(route))) {
-    if (!user) {
-      return NextResponse.redirect(new URL("/auth/signin", request.url))
-    }
-
-    const isAdmin = user.user_metadata?.role === "admin" || user.app_metadata?.role === "admin"
-
-    if (!isAdmin) {
-      return NextResponse.redirect(new URL("/", request.url))
     }
   }
 

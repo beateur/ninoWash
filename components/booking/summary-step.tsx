@@ -107,34 +107,22 @@ export function SummaryStep({
     }
   }
 
-  const getTimeSlotLabel = (timeSlot: string) => {
-    if (!timeSlot) return "Créneau non sélectionné"
-    const slots = {
-      "09:00-12:00": "9h00 - 12h00",
-      "14:00-17:00": "14h00 - 17h00",
-      "18:00-21:00": "18h00 - 21h00",
-    }
-    return slots[timeSlot as keyof typeof slots] || timeSlot
-  }
-
   const getDisplayDate = () => {
-    // Priorité : utiliser le slot si disponible
+    // Utilise toujours le slot de collecte
     if (bookingData.pickupSlot?.slot_date) {
       return formatDate(bookingData.pickupSlot.slot_date)
     }
-    // Fallback : utiliser pickupDate
-    return formatDate(bookingData.pickupDate)
+    return "Date non sélectionnée"
   }
 
   const getDisplayTimeSlot = () => {
-    // Priorité : utiliser le slot si disponible
+    // Utilise toujours le slot de collecte
     if (bookingData.pickupSlot) {
       const start = bookingData.pickupSlot.start_time?.substring(0, 5) || ""
       const end = bookingData.pickupSlot.end_time?.substring(0, 5) || ""
       return `${start} - ${end}`
     }
-    // Fallback : utiliser pickupTimeSlot
-    return getTimeSlotLabel(bookingData.pickupTimeSlot)
+    return "Créneau non sélectionné"
   }
 
   const getServiceTypeInfo = () => {
@@ -207,17 +195,23 @@ export function SummaryStep({
       }
 
       // Mode nouvelle réservation: POST request
-      const bookingPayload = {
+      const bookingPayload: any = {
         pickupAddressId: bookingData.pickupAddressId,
         deliveryAddressId: bookingData.deliveryAddressId,
-        pickupDate: bookingData.pickupDate,
-        pickupTimeSlot: bookingData.pickupTimeSlot,
-        // Nouveau: Slot-based scheduling (prioritaire si présent)
-        pickupSlotId: bookingData.pickupSlot?.id,
-        deliverySlotId: bookingData.deliverySlot?.id,
         items: bookingData.items,
         specialInstructions,
         serviceType,
+      }
+
+      // Slot-based scheduling (prioritaire)
+      if (bookingData.pickupSlot?.id && bookingData.deliverySlot?.id) {
+        bookingPayload.pickupSlotId = bookingData.pickupSlot.id
+        bookingPayload.deliverySlotId = bookingData.deliverySlot.id
+        // Ne PAS inclure pickupDate/pickupTimeSlot si on utilise les slots
+      } else if (bookingData.pickupDate?.trim() && bookingData.pickupTimeSlot?.trim()) {
+        // Fallback: Legacy date/time fields (seulement si non-vides)
+        bookingPayload.pickupDate = bookingData.pickupDate
+        bookingPayload.pickupTimeSlot = bookingData.pickupTimeSlot
       }
 
       console.log("[v0] Booking payload:", bookingPayload)
