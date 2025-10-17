@@ -1,0 +1,15 @@
+{
+  "tasks": {
+    "dev": "deno run -A --env --watch supabase/functions/send-booking-payment-email/index.ts",
+    "test": "deno test -A --env supabase/functions/**/*.test.ts"
+  },
+  "lint": {
+    "rules": {
+      "tags": ["recommended"]
+    }
+  },
+  "fmt": {
+    "useTabs": false,
+    "lineWidth": 100
+  }
+}

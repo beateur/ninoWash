@@ -256,11 +256,12 @@ export async function POST(request: NextRequest) {
         delivery_slot_id: deliverySlotId,
         special_instructions: validatedData.specialInstructions,
         total_amount: totalAmount,
+        total_amount_cents: Math.round(totalAmount * 100), // ✨ NEW: For Stripe
         booking_weight_kg: bookingWeightKg > 0 ? bookingWeightKg : null,
         used_subscription_credit: usedCredit,
         credit_discount_amount: creditDiscountAmount,
-        status: "pending",
-        payment_status: totalAmount > 0 ? "pending" : "paid",
+        status: "pending_payment", // ✨ CHANGED: All bookings start as pending_payment
+        payment_status: "pending", // ✨ NEW: Track payment status separately
         metadata: Object.keys(bookingMetadata).length > 0 ? bookingMetadata : null,
       })
       .select()
