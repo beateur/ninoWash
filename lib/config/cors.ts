@@ -6,7 +6,6 @@ export const CORS_CONFIG = {
   // Allowed origins (production and development)
   allowedOrigins: [
     process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-    process.env.NEXT_PUBLIC_ADMIN_URL || "",
     process.env.PRODUCTION_URL || "",
     process.env.STAGING_URL || "",
   ].filter(Boolean),
