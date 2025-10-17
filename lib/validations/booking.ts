@@ -203,6 +203,11 @@ export const reportProblemSchema = z.object({
   photos: z.array(z.string().url("URL de photo invalide")).max(5, "Maximum 5 photos").optional(),
 })
 
+// Payment intent schema - for creating Stripe Checkout Session
+export const createPaymentIntentSchema = z.object({
+  bookingId: z.string().uuid("ID de réservation invalide"),
+})
+
 export type AddressInput = z.infer<typeof addressSchema>
 export type GuestAddressInput = z.infer<typeof guestAddressSchema>
 export type GuestContactInput = z.infer<typeof guestContactSchema>
@@ -211,3 +216,4 @@ export type CreateBookingInput = z.infer<typeof createBookingSchema>
 export type CancelBookingInput = z.infer<typeof cancelBookingSchema>
 export type ModifyBookingInput = z.infer<typeof modifyBookingSchema>
 export type ReportProblemInput = z.infer<typeof reportProblemSchema>
+export type CreatePaymentIntentInput = z.infer<typeof createPaymentIntentSchema>

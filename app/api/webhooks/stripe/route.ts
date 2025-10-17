@@ -245,6 +245,83 @@ export async function POST(req: Request) {
         break
       }
 
+      case "payment_intent.succeeded": {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent
+
+        console.log("[v0] Payment intent succeeded:", {
+          paymentIntentId: paymentIntent.id,
+          metadata: paymentIntent.metadata,
+        })
+
+        const bookingId = paymentIntent.metadata?.booking_id
+
+        if (!bookingId) {
+          console.error("[v0] Missing booking_id in payment intent metadata")
+          break
+        }
+
+        // Update booking status to confirmed and mark payment as succeeded
+        const { error: updateError } = await supabase
+          .from("bookings")
+          .update({
+            status: "confirmed",
+            payment_status: "succeeded",
+            paid_at: new Date().toISOString(),
+            payment_intent_id: paymentIntent.id,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", bookingId)
+
+        if (updateError) {
+          console.error("[v0] Error updating booking after payment success:", updateError)
+          break
+        }
+
+        console.log("[v0] Booking confirmed after payment:", bookingId)
+
+        // TODO: Trigger send-booking-confirmation-email Edge Function
+        // This will send a confirmation email to the customer
+        break
+      }
+
+      case "payment_intent.payment_failed": {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent
+
+        console.log("[v0] Payment intent failed:", {
+          paymentIntentId: paymentIntent.id,
+          lastPaymentError: paymentIntent.last_payment_error,
+          metadata: paymentIntent.metadata,
+        })
+
+        const bookingId = paymentIntent.metadata?.booking_id
+
+        if (!bookingId) {
+          console.error("[v0] Missing booking_id in failed payment intent metadata")
+          break
+        }
+
+        // Update booking payment status to failed
+        const { error: updateError } = await supabase
+          .from("bookings")
+          .update({
+            payment_status: "failed",
+            payment_intent_id: paymentIntent.id,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", bookingId)
+
+        if (updateError) {
+          console.error("[v0] Error updating booking after payment failure:", updateError)
+          break
+        }
+
+        console.log("[v0] Booking payment marked as failed:", bookingId)
+
+        // TODO: Trigger send-booking-payment-failed-email Edge Function
+        // This will notify the customer that payment failed and retry needed
+        break
+      }
+
       default:
         console.log("[v0] Unhandled event type:", event.type)
     }
