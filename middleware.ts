@@ -2,17 +2,6 @@ import { NextResponse, type NextRequest } from "next/server"
 import { createServerClient } from "@supabase/ssr"
 import { getCorsHeaders } from "@/lib/config/cors"
 
-// Helper to extract root domain for cookie sharing across subdomains
-// e.g., "app.ninowash.com" → ".ninowash.com"
-function extractRootDomain(hostname: string): string {
-  const parts = hostname.split(".")
-  if (parts.length > 2) {
-    // Return last two parts with leading dot (e.g., ".ninowash.com")
-    return "." + parts.slice(-2).join(".")
-  }
-  return hostname // Fallback for simple domains
-}
-
 // Define protected routes and their requirements
 const PROTECTED_ROUTES = {
   // Routes requiring authentication
@@ -62,13 +51,6 @@ export async function middleware(request: NextRequest) {
               httpOnly: options?.httpOnly ?? true,
               secure: process.env.NODE_ENV === "production",
               sameSite: (options?.sameSite as "lax" | "strict" | "none") ?? "lax",
-              // Share cookies across subdomains in production
-              domain:
-                process.env.NODE_ENV === "production" &&
-                process.env.NEXT_PUBLIC_APP_URL &&
-                process.env.NEXT_PUBLIC_ADMIN_URL
-                  ? extractRootDomain(hostname)
-                  : undefined,
             })
           })
         },
@@ -81,38 +63,7 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Subdomain-based routing (production only)
-  const hostname = request.headers.get("host") || ""
-  const isAdminSubdomain = hostname.startsWith("gestion.") || hostname.includes("gestion.")
-  const isAppSubdomain = hostname.startsWith("app.")
-
-  // Only enforce subdomain routing in production with configured URLs
-  if (
-    process.env.NODE_ENV === "production" &&
-    process.env.NEXT_PUBLIC_APP_URL &&
-    process.env.NEXT_PUBLIC_ADMIN_URL
-  ) {
-    if (user) {
-      const isAdmin = user.user_metadata?.role === "admin" || user.app_metadata?.role === "admin"
-
-      // Admin user on app subdomain → redirect to admin subdomain
-      if (isAdmin && isAppSubdomain && !pathname.startsWith("/auth")) {
-        const adminUrl = new URL(process.env.NEXT_PUBLIC_ADMIN_URL)
-        adminUrl.pathname = pathname
-        adminUrl.search = request.nextUrl.search
-        console.log("[v0] Redirecting admin from app to gestion subdomain:", pathname)
-        return NextResponse.redirect(adminUrl)
-      }
-
-      // Regular user on admin subdomain → redirect to app subdomain
-      if (!isAdmin && isAdminSubdomain && !pathname.startsWith("/auth")) {
-        const appUrl = new URL(process.env.NEXT_PUBLIC_APP_URL)
-        appUrl.pathname = "/dashboard"
-        console.log("[v0] Redirecting regular user from gestion to app subdomain")
-        return NextResponse.redirect(appUrl)
-      }
-    }
-  }
+  // Subdomain-based routing removed - admin app is now separate project
 
   // Check guest booking routes FIRST (before authenticated booking check)
   // /reservation/guest should be accessible to everyone (no auth required)

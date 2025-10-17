@@ -49,39 +49,6 @@ export async function requireAuth(options: RouteGuardOptions = {}) {
 }
 
 /**
- * Require admin role - redirects to home if not admin
- */
-export async function requireAdmin(options: RouteGuardOptions = {}) {
-  const { redirectTo = "/" } = options
-  const { user, supabase } = await requireAuth({ redirectTo: "/auth/signin" })
-
-  const isAdmin = user.user_metadata?.role === "admin" || user.app_metadata?.role === "admin"
-
-  if (!isAdmin) {
-    redirect(redirectTo)
-  }
-
-  return { user, supabase }
-}
-
-/**
- * Require specific role(s) - redirects if user doesn't have required role
- */
-export async function requireRole(roles: string | string[], options: RouteGuardOptions = {}) {
-  const { redirectTo = "/" } = options
-  const { user, supabase } = await requireAuth({ redirectTo: "/auth/signin" })
-
-  const userRole = user.user_metadata?.role || user.app_metadata?.role
-  const requiredRoles = Array.isArray(roles) ? roles : [roles]
-
-  if (!userRole || !requiredRoles.includes(userRole)) {
-    redirect(redirectTo)
-  }
-
-  return { user, supabase }
-}
-
-/**
  * Require active subscription - redirects if user doesn't have active subscription
  */
 export async function requireSubscription(options: RouteGuardOptions = {}) {

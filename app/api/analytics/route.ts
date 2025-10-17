@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { apiRequireAuth } from "@/lib/auth/api-guards"
 import { sanitizeForAnalytics } from "@/lib/utils/data-sanitization"
 
 /**
@@ -45,32 +44,6 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * Get analytics data (admin only)
+ * GET endpoint removed - was admin-only analytics
+ * All admin functionality removed as per project separation
  */
-export async function GET(request: NextRequest) {
-  const { user, error } = await apiRequireAuth(request)
-
-  if (error) {
-    return error
-  }
-
-  // Check admin role
-  const isAdmin = user.user_metadata?.role === "admin" || user.app_metadata?.role === "admin"
-
-  if (!isAdmin) {
-    return NextResponse.json({ error: "Non autorisé" }, { status: 403 })
-  }
-
-  try {
-    // TODO: Fetch analytics data from database
-    // This would return aggregated, anonymized data only
-
-    return NextResponse.json({
-      message: "Analytics data endpoint",
-      note: "Returns only aggregated, anonymized data",
-    })
-  } catch (error) {
-    console.error("[v0] Analytics fetch error:", error)
-    return NextResponse.json({ error: "Failed to fetch analytics" }, { status: 500 })
-  }
-}

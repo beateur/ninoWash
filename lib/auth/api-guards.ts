@@ -51,55 +51,6 @@ export async function apiRequireAuth(request: NextRequest): Promise<ApiGuardResu
 }
 
 /**
- * Require admin role for API routes
- */
-export async function apiRequireAdmin(request: NextRequest): Promise<ApiGuardResult> {
-  const authResult = await apiRequireAuth(request)
-
-  if (authResult.error) {
-    return authResult
-  }
-
-  const { user, supabase } = authResult
-  const isAdmin = user.user_metadata?.role === "admin" || user.app_metadata?.role === "admin"
-
-  if (!isAdmin) {
-    return {
-      user,
-      supabase,
-      error: NextResponse.json({ error: "Forbidden - Admin access required" }, { status: 403 }),
-    }
-  }
-
-  return { user, supabase }
-}
-
-/**
- * Require specific role for API routes
- */
-export async function apiRequireRole(request: NextRequest, roles: string | string[]): Promise<ApiGuardResult> {
-  const authResult = await apiRequireAuth(request)
-
-  if (authResult.error) {
-    return authResult
-  }
-
-  const { user, supabase } = authResult
-  const userRole = user.user_metadata?.role || user.app_metadata?.role
-  const requiredRoles = Array.isArray(roles) ? roles : [roles]
-
-  if (!userRole || !requiredRoles.includes(userRole)) {
-    return {
-      user,
-      supabase,
-      error: NextResponse.json({ error: "Forbidden - Insufficient permissions" }, { status: 403 }),
-    }
-  }
-
-  return { user, supabase }
-}
-
-/**
  * Require API key authentication
  */
 export async function apiRequireApiKey(request: NextRequest): Promise<{ apiKey: any; error?: NextResponse }> {

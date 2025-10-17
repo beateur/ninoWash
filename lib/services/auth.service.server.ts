@@ -74,23 +74,6 @@ export class ServerAuthService {
   }
 
   /**
-   * Check if user is admin
-   */
-  async isAdmin(): Promise<boolean> {
-    try {
-      const user = await this.getUser()
-
-      if (!user) {
-        return false
-      }
-
-      return user.user_metadata?.role === "admin" || user.app_metadata?.role === "admin"
-    } catch {
-      return false
-    }
-  }
-
-  /**
    * Require authentication (throws if not authenticated)
    */
   async requireAuth(): Promise<User> {
@@ -98,20 +81,6 @@ export class ServerAuthService {
 
     if (!user) {
       throw new Error("Authentication required")
-    }
-
-    return user
-  }
-
-  /**
-   * Require admin role (throws if not admin)
-   */
-  async requireAdmin(): Promise<User> {
-    const user = await this.requireAuth()
-    const isAdmin = await this.isAdmin()
-
-    if (!isAdmin) {
-      throw new Error("Admin access required")
     }
 
     return user
