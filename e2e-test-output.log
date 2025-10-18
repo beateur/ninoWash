@@ -1,0 +1,12 @@
+[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+[0;34m  E2E Payment Flow Testing[0m
+[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+
+[1;33m📋 Checking prerequisites...[0m
+[0;32m✓ curl found[0m
+[1;33m! jq not found (optional, but recommended)[0m
+  Install with: brew install jq
+[1;33m🔍 Checking if servers are running...[0m
+[0;32m✓ Next.js running at http://localhost:3000[0m
+[0;31m✗ Deno server not running at http://localhost:8000[0m
+  Start with: deno task dev
