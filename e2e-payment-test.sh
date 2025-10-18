@@ -65,15 +65,20 @@ echo ""
 # Test 1: Create a guest booking via API
 echo -e "${BLUE}Test 1: Creating guest booking...${NC}"
 
+# Calculate date 3 days from now in YYYY-MM-DD format
+BOOKING_DATE=$(date -u -v+3d +%Y-%m-%d 2>/dev/null || date -u -d "+3 days" +%Y-%m-%d 2>/dev/null || echo "2025-10-22")
+
 BOOKING_RESPONSE=$(curl -s -X POST "${NEXT_APP_URL}/api/bookings" \
   -H "Content-Type: application/json" \
   -d '{
-    "service_type": "wash_and_press",
-    "weight_kg": 5.0,
-    "pickup_date": "2025-01-25",
-    "pickup_time": "09:00",
-    "delivery_date": "2025-01-27",
-    "delivery_time": "18:00",
+    "items": [
+      {
+        "serviceId": "550e8400-e29b-41d4-a716-446655440000",
+        "quantity": 1
+      }
+    ],
+    "pickupDate": "'$BOOKING_DATE'",
+    "pickupTimeSlot": "09:00-12:00",
     "guestContact": {
       "email": "test-payment@example.com",
       "first_name": "Jean",
@@ -81,16 +86,16 @@ BOOKING_RESPONSE=$(curl -s -X POST "${NEXT_APP_URL}/api/bookings" \
       "phone": "+33612345678"
     },
     "guestPickupAddress": {
-      "street": "123 Rue de Test",
+      "street_address": "123 Rue de Test",
       "city": "Paris",
-      "zip": "75001",
-      "country": "FR"
+      "postal_code": "75001",
+      "label": "Domicile"
     },
     "guestDeliveryAddress": {
-      "street": "456 Avenue de Test",
+      "street_address": "456 Avenue de Test",
       "city": "Paris",
-      "zip": "75002",
-      "country": "FR"
+      "postal_code": "75002",
+      "label": "Travail"
     }
   }')
 
