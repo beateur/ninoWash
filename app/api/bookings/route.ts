@@ -288,7 +288,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!booking || !booking.id) {
-      console.error("[v0] Booking created but ID is missing:", booking)
+      console.error("[v0] Booking created but ID is missing:", { booking, bookingError })
       return NextResponse.json({ error: "Erreur: ID de réservation manquant" }, { status: 500 })
     }
 
@@ -339,6 +339,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({
+      id: booking.id,
       booking,
       message: "Réservation créée avec succès",
     })
