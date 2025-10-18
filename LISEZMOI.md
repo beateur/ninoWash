@@ -55,12 +55,29 @@ supabase functions deploy send-booking-confirmation-email --no-verify-jwt
 ```
 
 ### **Étape 3**: Configurer Webhook Stripe (5 min)
+
+**Option A: Local Testing avec Stripe CLI** (Recommandé pour dev)
+```bash
+# 1. Installer Stripe CLI (si pas fait)
+brew install stripe/stripe-cli/stripe
+
+# 2. Login
+stripe login
+
+# 3. Forward webhooks vers localhost
+stripe listen --forward-to localhost:3000/api/webhooks/stripe
+
+# 4. Copier le signing secret affiché
+# ✅ Mettre dans .env.local: STRIPE_WEBHOOK_SECRET=whsec_xxx
 ```
-1. Aller sur: Stripe Dashboard
-2. Cliquer: Webhooks → Add Endpoint
+
+**Option B: Production avec Stripe Dashboard**
+```
+1. Aller sur: dashboard.stripe.com
+2. Developers → Webhooks → Add Endpoint
 3. URL: https://votre-domaine.com/api/webhooks/stripe
 4. Events: payment_intent.succeeded + payment_intent.payment_failed
-5. Copier: Signing Secret → .env STRIPE_WEBHOOK_SECRET
+5. Copier: Signing Secret → .env.production
 ```
 
 **Total: 25 minutes de déploiement** ✅

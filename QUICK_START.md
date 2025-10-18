@@ -29,6 +29,14 @@ In Supabase Dashboard, set environment variable:
 - Value: Your Resend API key
 
 ### Step 3: Stripe Webhook (5 min)
+
+**For Local Development (Stripe CLI - Recommended):**
+```bash
+stripe listen --forward-to localhost:3000/api/webhooks/stripe
+# Copy the signing secret displayed
+```
+
+**For Production (Stripe Dashboard):**
 1. Go to Stripe Dashboard → Developers → Webhooks
 2. Add Endpoint: `https://your-domain.com/api/webhooks/stripe`
 3. Events: `payment_intent.succeeded` + `payment_intent.payment_failed`
