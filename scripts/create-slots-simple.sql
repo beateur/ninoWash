@@ -1,13 +1,7 @@
 -- ============================================================================
--- Script SQL Simple pour Créer des Créneaux
+-- Script SQL Simple pour Créer des Créneaux de Livraison
 -- ============================================================================
 -- 
--- Instructions:
--- 1. Modifier les valeurs INSERT ci-dessous selon vos besoins
--- 2. Copier tout le contenu de ce fichier
--- 3. Ouvrir Supabase Dashboard > SQL Editor
--- 4. Coller et exécuter
---
 -- Format des colonnes:
 -- - role: 'pickup' (collecte) ou 'delivery' (livraison)
 -- - slot_date: 'YYYY-MM-DD'
@@ -19,56 +13,56 @@
 -- ============================================================================
 
 -- ============================================================================
--- SEMAINE 1: 14-18 octobre 2025
+-- SEMAINE 2: 20-27 octobre 2025 (LIVRAISON UNIQUEMENT)
 -- ============================================================================
 
--- Mardi 14 octobre - Matin (9h-12h)
+-- Lundi 20 octobre - Matin (9h-12h) + Après-midi (14h-17h)
 INSERT INTO public.logistic_slots (role, slot_date, start_time, end_time, label, is_open, notes)
 VALUES 
-  ('pickup', '2025-10-14', '09:00', '12:00', 'Matin', TRUE, 'Créneau matinal - Mardi'),
-  ('delivery', '2025-10-14', '09:00', '12:00', 'Matin', TRUE, 'Créneau matinal - Mardi');
+  ('delivery', '2025-10-20', '09:00', '12:00', 'Matin', TRUE, 'Créneau matinal - Lundi'),
+  ('delivery', '2025-10-20', '14:00', '17:00', 'Après-midi', TRUE, 'Créneau après-midi - Lundi');
 
--- Mardi 14 octobre - Après-midi (14h-17h)
+-- Mardi 21 octobre - Matin (9h-12h) + Après-midi (14h-17h)
 INSERT INTO public.logistic_slots (role, slot_date, start_time, end_time, label, is_open, notes)
 VALUES 
-  ('pickup', '2025-10-14', '14:00', '17:00', 'Après-midi', TRUE, 'Créneau après-midi - Mardi'),
-  ('delivery', '2025-10-14', '14:00', '17:00', 'Après-midi', TRUE, 'Créneau après-midi - Mardi');
+  ('delivery', '2025-10-21', '09:00', '12:00', 'Matin', TRUE, 'Créneau matinal - Mardi'),
+  ('delivery', '2025-10-21', '14:00', '17:00', 'Après-midi', TRUE, 'Créneau après-midi - Mardi');
 
--- Mardi 14 octobre - Soirée (18h-21h)
+-- Mercredi 22 octobre - Matin (9h-12h) + Après-midi (14h-17h)
 INSERT INTO public.logistic_slots (role, slot_date, start_time, end_time, label, is_open, notes)
 VALUES 
-  ('pickup', '2025-10-14', '18:00', '21:00', 'Soirée', TRUE, 'Créneau soirée - Mardi'),
-  ('delivery', '2025-10-14', '18:00', '21:00', 'Soirée', TRUE, 'Créneau soirée - Mardi');
+  ('delivery', '2025-10-22', '09:00', '12:00', 'Matin', TRUE, 'Créneau matinal - Mercredi'),
+  ('delivery', '2025-10-22', '14:00', '17:00', 'Après-midi', TRUE, 'Créneau après-midi - Mercredi');
 
--- Jeudi 16 octobre - Matin (9h-12h)
+-- Jeudi 23 octobre - Matin (9h-12h) + Après-midi (14h-17h)
 INSERT INTO public.logistic_slots (role, slot_date, start_time, end_time, label, is_open, notes)
 VALUES 
-  ('pickup', '2025-10-16', '09:00', '12:00', 'Matin', TRUE, 'Créneau matinal - Jeudi'),
-  ('delivery', '2025-10-16', '09:00', '12:00', 'Matin', TRUE, 'Créneau matinal - Jeudi');
+  ('delivery', '2025-10-23', '09:00', '12:00', 'Matin', TRUE, 'Créneau matinal - Jeudi'),
+  ('delivery', '2025-10-23', '14:00', '17:00', 'Après-midi', TRUE, 'Créneau après-midi - Jeudi');
 
--- Jeudi 16 octobre - Après-midi (14h-17h)
+-- Vendredi 24 octobre - Matin (9h-12h) + Après-midi (14h-17h)
 INSERT INTO public.logistic_slots (role, slot_date, start_time, end_time, label, is_open, notes)
 VALUES 
-  ('pickup', '2025-10-16', '14:00', '17:00', 'Après-midi', TRUE, 'Créneau après-midi - Jeudi'),
-  ('delivery', '2025-10-16', '14:00', '17:00', 'Après-midi', TRUE, 'Créneau après-midi - Jeudi');
+  ('delivery', '2025-10-24', '09:00', '12:00', 'Matin', TRUE, 'Créneau matinal - Vendredi'),
+  ('delivery', '2025-10-24', '14:00', '17:00', 'Après-midi', TRUE, 'Créneau après-midi - Vendredi');
 
--- Jeudi 16 octobre - Soirée (18h-21h)
+-- Samedi 25 octobre - Matin (9h-12h) + Après-midi (14h-17h)
 INSERT INTO public.logistic_slots (role, slot_date, start_time, end_time, label, is_open, notes)
 VALUES 
-  ('pickup', '2025-10-16', '18:00', '21:00', 'Soirée', TRUE, 'Créneau soirée - Jeudi'),
-  ('delivery', '2025-10-16', '18:00', '21:00', 'Soirée', TRUE, 'Créneau soirée - Jeudi');
+  ('delivery', '2025-10-25', '09:00', '12:00', 'Matin', TRUE, 'Créneau matinal - Samedi'),
+  ('delivery', '2025-10-25', '14:00', '17:00', 'Après-midi', TRUE, 'Créneau après-midi - Samedi');
 
--- Samedi 18 octobre - Fin d'après-midi (16h-18h)
+-- Dimanche 26 octobre - Matin (9h-12h) + Après-midi (14h-17h)
 INSERT INTO public.logistic_slots (role, slot_date, start_time, end_time, label, is_open, notes)
 VALUES 
-  ('pickup', '2025-10-18', '16:00', '18:00', 'Fin d''après-midi', TRUE, 'Créneau fin d''après-midi - Samedi'),
-  ('delivery', '2025-10-18', '16:00', '18:00', 'Fin d''après-midi', TRUE, 'Créneau fin d''après-midi - Samedi');
+  ('delivery', '2025-10-26', '09:00', '12:00', 'Matin', TRUE, 'Créneau matinal - Dimanche'),
+  ('delivery', '2025-10-26', '14:00', '17:00', 'Après-midi', TRUE, 'Créneau après-midi - Dimanche');
 
--- Samedi 18 octobre - Soirée (19h-21h)
+-- Lundi 27 octobre - Matin (9h-12h) + Après-midi (14h-17h)
 INSERT INTO public.logistic_slots (role, slot_date, start_time, end_time, label, is_open, notes)
 VALUES 
-  ('pickup', '2025-10-18', '19:00', '21:00', 'Soirée', TRUE, 'Créneau soirée - Samedi'),
-  ('delivery', '2025-10-18', '19:00', '21:00', 'Soirée', TRUE, 'Créneau soirée - Samedi');
+  ('delivery', '2025-10-27', '09:00', '12:00', 'Matin', TRUE, 'Créneau matinal - Lundi'),
+  ('delivery', '2025-10-27', '14:00', '17:00', 'Après-midi', TRUE, 'Créneau après-midi - Lundi');
 
 -- ============================================================================
 -- VERIFICATION POST-INSERTION
@@ -79,51 +73,27 @@ DECLARE
   slot_count INT;
 BEGIN
   SELECT COUNT(*) INTO slot_count FROM public.logistic_slots 
-  WHERE slot_date BETWEEN '2025-10-14' AND '2025-10-18' AND is_open = TRUE;
+  WHERE slot_date BETWEEN '2025-10-20' AND '2025-10-27' AND is_open = TRUE;
   
   RAISE NOTICE '';
   RAISE NOTICE '✅ Script exécuté avec succès!';
   RAISE NOTICE '📊 Nombre de créneaux créés: %', slot_count;
   RAISE NOTICE '';
-  RAISE NOTICE '📋 Résumé par date:';
+  RAISE NOTICE '📋 Résumé par date (20-27 Oct):';
   
   FOR rec IN 
     SELECT 
       slot_date,
-      COUNT(*) FILTER (WHERE role = 'pickup') as pickup_count,
       COUNT(*) FILTER (WHERE role = 'delivery') as delivery_count
     FROM public.logistic_slots 
-    WHERE slot_date BETWEEN '2025-10-14' AND '2025-10-18' AND is_open = TRUE
+    WHERE slot_date BETWEEN '2025-10-20' AND '2025-10-27' AND is_open = TRUE AND role = 'delivery'
     GROUP BY slot_date
     ORDER BY slot_date
   LOOP
-    RAISE NOTICE '   % : % collecte(s) + % livraison(s)', 
-      rec.slot_date, 
-      rec.pickup_count, 
-      rec.delivery_count;
+    RAISE NOTICE '   %: % créneaux livraison', rec.slot_date, rec.delivery_count;
   END LOOP;
   
   RAISE NOTICE '';
   RAISE NOTICE '🎉 Créneaux disponibles dans l''application!';
-  RAISE NOTICE '   → Testez sur: http://localhost:3000/reservation/guest (étape 3)';
   RAISE NOTICE '';
 END $$;
-
--- ============================================================================
--- REQUÊTES UTILES POUR LA GESTION
--- ============================================================================
-
--- Voir tous les créneaux créés
--- SELECT role, slot_date, start_time, end_time, label, capacity_limit, capacity_used, is_open 
--- FROM logistic_slots 
--- WHERE slot_date >= CURRENT_DATE 
--- ORDER BY slot_date, role, start_time;
-
--- Fermer un créneau spécifique (remplacer l'ID)
--- UPDATE logistic_slots SET is_open = FALSE WHERE id = 'UUID_ICI';
-
--- Supprimer tous les créneaux d'une date spécifique
--- DELETE FROM logistic_slots WHERE slot_date = '2025-10-14';
-
--- Supprimer tous les créneaux de test
--- DELETE FROM logistic_slots WHERE slot_date >= '2025-10-14' AND slot_date <= '2025-10-18';
