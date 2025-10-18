@@ -216,8 +216,6 @@ async function BookingPaymentContent({ bookingId }: { bookingId: string }) {
   )
 }
 
-}
-
 export default async function BookingPaymentPage({ params }: BookingPaymentPageProps) {
   return (
     <Suspense
