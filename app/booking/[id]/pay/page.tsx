@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
+import { PaymentButton } from "@/components/booking/payment-button"
 
 interface BookingPaymentPageProps {
   params: {
@@ -215,35 +216,6 @@ async function BookingPaymentContent({ bookingId }: { bookingId: string }) {
   )
 }
 
-function PaymentButton({ bookingId }: { bookingId: string }) {
-  const handlePaymentClick = async () => {
-    try {
-      const response = await fetch(`/api/bookings/${bookingId}/create-payment-intent`, {
-        method: "POST",
-      })
-
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || "Erreur lors de la création de la session de paiement")
-      }
-
-      const data = await response.json()
-
-      // Redirect to Stripe Checkout
-      if (data.checkoutUrl) {
-        window.location.href = data.checkoutUrl
-      }
-    } catch (error) {
-      console.error("[v0] Payment error:", error)
-      alert(`Erreur: ${error instanceof Error ? error.message : "Erreur inconnue"}`)
-    }
-  }
-
-  return (
-    <Button size="lg" onClick={handlePaymentClick} className="w-full" disabled={false}>
-      Payer maintenant
-    </Button>
-  )
 }
 
 export default async function BookingPaymentPage({ params }: BookingPaymentPageProps) {
