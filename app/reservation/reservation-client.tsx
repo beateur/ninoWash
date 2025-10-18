@@ -227,7 +227,9 @@ export default function ReservationClient({
                   ) => {
                     // Convert Date to string format for the booking data
                     const dateString = pickupDate ? pickupDate.toISOString().split("T")[0] : ""
-                    const timeString = pickupTimeSlot || ""
+                    const timeString = pickupSlot 
+                      ? `${pickupSlot.start_time.substring(0,5)}-${pickupSlot.end_time.substring(0,5)}`
+                      : pickupTimeSlot || ""
                     updateBookingData({
                       pickupDate: dateString,
                       pickupTimeSlot: timeString,

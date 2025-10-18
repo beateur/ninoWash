@@ -140,7 +140,9 @@ export function GuestBookingContainer() {
               ) => {
                 // Convert Date to string format for the hook
                 const dateString = pickupDate ? pickupDate.toISOString() : new Date().toISOString()
-                const timeString = pickupTimeSlot || "09:00"
+                const timeString = pickupSlot 
+                  ? `${pickupSlot.start_time.substring(0,5)}-${pickupSlot.end_time.substring(0,5)}`
+                  : pickupTimeSlot || "09:00"
                 updateDateTime(
                   dateString,
                   timeString,

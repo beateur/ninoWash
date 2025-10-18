@@ -16,6 +16,8 @@ import { User, MapPin, Package, Home, Calendar, Clock, ShoppingCart, CheckCircle
 import type { GuestBookingState } from "@/lib/hooks/use-guest-booking"
 import { toast } from "sonner"
 import { createBookingSchema } from "@/lib/validations/booking"
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
 
 interface SummaryStepProps {
   bookingData: GuestBookingState
@@ -267,7 +269,17 @@ export function SummaryStep({ bookingData, onComplete }: SummaryStepProps) {
               <div>
                 <p className="font-medium">Livraison estimée</p>
                 <p className="text-sm text-muted-foreground">
-                  {calculateDeliveryDate(bookingData.pickupDate)} (72h après collecte)
+                                  <div className="text-sm text-muted-foreground">
+                  {bookingData.deliverySlot ? (
+                    <>
+                      {format(new Date(bookingData.deliverySlot.slot_date), "EEEE d MMMM yyyy", { locale: fr })}
+                      {" - "}
+                      {bookingData.deliverySlot.label} ({bookingData.deliverySlot.start_time.substring(0,5)}-{bookingData.deliverySlot.end_time.substring(0,5)})
+                    </>
+                  ) : (
+                    <>{calculateDeliveryDate(bookingData.pickupDate)} (72h après collecte)</>
+                  )}
+                </div>
                 </p>
               </div>
             </div>
@@ -404,8 +416,16 @@ async function handleConfirmBooking(
         quantity: item.quantity,
         specialInstructions: item.specialInstructions,
       })),
-      pickupDate: bookingData.pickupDate,
-      pickupTimeSlot: bookingData.pickupTimeSlot,
+      // Prioritize slot-based scheduling (new system)
+      ...(bookingData.pickupSlot && bookingData.deliverySlot ? {
+        pickupSlotId: bookingData.pickupSlot.id,
+        deliverySlotId: bookingData.deliverySlot.id,
+      } : {
+        // Fallback to legacy date/time system
+        pickupDate: bookingData.pickupDate,
+        pickupTimeSlot: bookingData.pickupTimeSlot,
+      }),
+      serviceType: "classic", // Default service type for guest bookings
     }
 
     // Validate with Zod schema

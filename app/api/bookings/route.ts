@@ -111,8 +111,23 @@ export async function POST(request: NextRequest) {
       }
 
       // Determine service type from items (default to 'classic' if unknown)
-      const serviceType: ServiceType =
-        validatedData.serviceType === "express" ? "express" : "classic"
+      let serviceType: ServiceType = validatedData.serviceType === "express" ? "express" : "classic"
+
+      // If no explicit serviceType in payload, try to determine from selected services
+      if (!validatedData.serviceType && validatedData.items.length > 0) {
+        // Fetch service details to check type
+        const serviceIds = validatedData.items.map((item) => item.serviceId)
+        const { data: selectedServices, error: servicesCheckError } = await supabase
+          .from("services")
+          .select("id, type")
+          .in("id", serviceIds)
+
+        if (!servicesCheckError && selectedServices && selectedServices.length > 0) {
+          // If ANY service is express, use express (24h requirement)
+          // Otherwise use classic (72h requirement)
+          serviceType = selectedServices.some((s) => s.type === "express") ? "express" : "classic"
+        }
+      }
 
       // Validate delay between pickup and delivery
       const delayValidation = validateSlotDelay(
@@ -270,6 +285,11 @@ export async function POST(request: NextRequest) {
     if (bookingError) {
       console.error("[v0] Booking creation error:", bookingError)
       return NextResponse.json({ error: "Erreur lors de la création de la réservation" }, { status: 500 })
+    }
+
+    if (!booking || !booking.id) {
+      console.error("[v0] Booking created but ID is missing:", booking)
+      return NextResponse.json({ error: "Erreur: ID de réservation manquant" }, { status: 500 })
     }
 
     console.log(`[v0] Booking created successfully: ${booking.id}`)

@@ -42,7 +42,9 @@ export const createBookingSchema = z
     
     // Legacy date/time fields (optional si slots fournis)
     pickupDate: z.string().optional(),
-    pickupTimeSlot: z.enum(["09:00-12:00", "14:00-17:00", "18:00-21:00"]).optional(),
+    pickupTimeSlot: z.string()
+      .regex(/^\d{2}:\d{2}-\d{2}:\d{2}$/, "Format invalide. Attendu HH:MM-HH:MM")
+      .optional(),
     
     // Nouveau: Slot-based scheduling
     pickupSlotId: z.string().uuid("ID slot collecte invalide").optional(),
