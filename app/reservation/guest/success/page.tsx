@@ -25,14 +25,14 @@ export default function GuestBookingSuccessPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-center text-2xl">
-            Réservation enregistrée 
+            Réservation reçue ! 
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Success Message */}
           <p className="text-center text-muted-foreground">
-            Votre emprunte bancaire a été traité avec succès et votre réservation va 
-            être traitée par nos équipes.
+            Votre réservation a été enregistrée. Elle est actuellement en attente de 
+            confirmation de notre part.
           </p>
 
           {/* Booking ID */}
@@ -55,10 +55,10 @@ export default function GuestBookingSuccessPage() {
                   Vérifiez votre email
                 </p>
                 <p className="text-sm text-blue-700 dark:text-blue-300">
-                  Un email va être envoyé à l'adresse suivante :{" "}
+                  Un email de confirmation sera envoyé à l'adresse suivante :{" "}
                   <span className="font-medium">{email || "votre adresse email"}</span>.
-                  Vous y trouverez les détails de votre compte et un lien pour
-                  définir votre mot de passe.
+                  Une fois votre réservation confirmée par nos équipes, vous recevrez 
+                  un lien pour procéder au paiement.
                 </p>
               </div>
             </div>
@@ -72,16 +72,16 @@ export default function GuestBookingSuccessPage() {
             </h3>
             <ol className="space-y-2 text-sm text-muted-foreground list-decimal list-inside">
               <li>
-                <strong>Vérifiez votre email</strong> pour les détails de votre
-                réservation et les informations de votre compte
+                <strong>Vérifiez votre email</strong> pour l'email de confirmation
               </li>
               <li>
-                <strong>Définissez votre mot de passe</strong> en cliquant sur
-                le lien dans l'email
+                <strong>Attendez notre confirmation</strong> que votre réservation est acceptée
               </li>
               <li>
-                <strong>Connectez-vous</strong> pour suivre votre réservation en
-                temps réel
+                <strong>Recevez un email avec le lien de paiement</strong> une fois confirmée
+              </li>
+              <li>
+                <strong>Procédez au paiement</strong> en cliquant sur le lien sécurisé
               </li>
             </ol>
           </div>
@@ -89,9 +89,9 @@ export default function GuestBookingSuccessPage() {
           {/* CTA Button */}
           <div className="flex justify-center">
             <Button asChild size="lg" className="w-full sm:w-auto min-w-[300px]">
-              <Link href="/dashboard">
+              <Link href="/">
                 <ArrowRight className="mr-2 h-4 w-4" />
-                Accéder à mon tableau de bord
+                Retour à l'accueil
               </Link>
             </Button>
           </div>
