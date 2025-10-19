@@ -44,6 +44,7 @@ async function BookingSuccessContent({
 
   // If payment hasn't been confirmed yet, show a message
   const isPaymentConfirmed = booking.payment_status === "succeeded" || booking.status === "confirmed"
+  const isPending = booking.status === "pending"
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 p-4 md:p-8">
@@ -56,9 +57,13 @@ async function BookingSuccessContent({
               <CheckCircle2 className="h-16 w-16 text-green-600 relative" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-green-900 mb-2">Paiement confirmé !</h1>
+          <h1 className="text-3xl font-bold text-green-900 mb-2">
+            {isPending ? "Réservation reçue !" : "Paiement confirmé !"}
+          </h1>
           <p className="text-green-700">
-            Votre réservation a été confirmée avec succès
+            {isPending
+              ? "Votre réservation a été reçue. En attente de confirmation de notre part."
+              : "Votre réservation a été confirmée avec succès"}
           </p>
         </div>
 
@@ -75,10 +80,28 @@ async function BookingSuccessContent({
             </div>
 
             {/* Payment Confirmation */}
-            <div className="flex justify-between items-center p-4 bg-green-50 rounded-lg border border-green-200">
-              <span className="text-green-700 font-semibold">Paiement</span>
-              <span className="text-green-700 font-semibold">
-                ✓ Confirmé
+            <div
+              className={`flex justify-between items-center p-4 rounded-lg border ${
+                isPending
+                  ? "bg-yellow-50 border-yellow-200"
+                  : "bg-green-50 border-green-200"
+              }`}
+            >
+              <span
+                className={`font-semibold ${
+                  isPending ? "text-yellow-700" : "text-green-700"
+                }`}
+              >
+                Statut
+              </span>
+              <span
+                className={`font-semibold ${
+                  isPending ? "text-yellow-700" : "text-green-700"
+                }`}
+              >
+                {isPending
+                  ? "⏳ En attente de confirmation"
+                  : "✓ Confirmé"}
               </span>
             </div>
 
@@ -139,43 +162,102 @@ async function BookingSuccessContent({
             <CardTitle>Prochaines étapes</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex gap-3">
-              <div className="flex-shrink-0">
-                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-green-200 text-green-700 font-semibold">
-                  1
+            {isPending ? (
+              <>
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0">
+                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-yellow-200 text-yellow-700 font-semibold">
+                      1
+                    </div>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900">Réservation en attente</p>
+                    <p className="text-sm text-slate-600">
+                      Nous examinons votre réservation
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <p className="font-semibold text-slate-900">Confirmation envoyée</p>
-                <p className="text-sm text-slate-600">Un email de confirmation a été envoyé à votre adresse</p>
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <div className="flex-shrink-0">
-                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-green-200 text-green-700 font-semibold">
-                  2
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0">
+                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-gray-200 text-gray-700 font-semibold">
+                      2
+                    </div>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900">Email de confirmation</p>
+                    <p className="text-sm text-slate-600">
+                      Vous recevrez un email avec un lien pour procéder au paiement
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <p className="font-semibold text-slate-900">Collecte programmée</p>
-                <p className="text-sm text-slate-600">
-                  Nous viendrons collecter vos vêtements à la date et heure prévues
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <div className="flex-shrink-0">
-                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-green-200 text-green-700 font-semibold">
-                  3
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0">
+                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-gray-200 text-gray-700 font-semibold">
+                      3
+                    </div>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900">Finaliser le paiement</p>
+                    <p className="text-sm text-slate-600">
+                      Cliquez sur le lien de l'email pour effectuer le paiement
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <p className="font-semibold text-slate-900">Livraison</p>
-                <p className="text-sm text-slate-600">
-                  Vos vêtements nettoyés et repassés seront livrés à la date prévue
-                </p>
-              </div>
-            </div>
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0">
+                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-gray-200 text-gray-700 font-semibold">
+                      4
+                    </div>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900">Collecte programmée</p>
+                    <p className="text-sm text-slate-600">
+                      Nous viendrons collecter vos vêtements à la date et heure prévues
+                    </p>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0">
+                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-green-200 text-green-700 font-semibold">
+                      1
+                    </div>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900">Confirmation envoyée</p>
+                    <p className="text-sm text-slate-600">Un email de confirmation a été envoyé à votre adresse</p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0">
+                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-green-200 text-green-700 font-semibold">
+                      2
+                    </div>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900">Collecte programmée</p>
+                    <p className="text-sm text-slate-600">
+                      Nous viendrons collecter vos vêtements à la date et heure prévues
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0">
+                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-green-200 text-green-700 font-semibold">
+                      3
+                    </div>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900">Livraison</p>
+                    <p className="text-sm text-slate-600">
+                      Vos vêtements nettoyés et repassés seront livrés à la date prévue
+                    </p>
+                  </div>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -194,9 +276,21 @@ async function BookingSuccessContent({
         </div>
 
         {/* Info Message */}
-        <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <p className="text-sm text-blue-800">
-            💡 Vous pouvez suivre l'état de votre réservation depuis votre tableau de bord.
+        <div
+          className={`mt-8 p-4 rounded-lg border ${
+            isPending
+              ? "bg-yellow-50 border-yellow-200"
+              : "bg-blue-50 border-blue-200"
+          }`}
+        >
+          <p
+            className={`text-sm ${
+              isPending ? "text-yellow-800" : "text-blue-800"
+            }`}
+          >
+            {isPending
+              ? "⏳ Votre réservation est en attente de confirmation. Vous recevrez un email dès que nous aurons validé votre demande."
+              : "💡 Vous pouvez suivre l'état de votre réservation depuis votre tableau de bord."}
           </p>
         </div>
       </div>

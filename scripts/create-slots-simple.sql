@@ -63,37 +63,3 @@ INSERT INTO public.logistic_slots (role, slot_date, start_time, end_time, label,
 VALUES 
   ('delivery', '2025-10-27', '09:00', '12:00', 'Matin', TRUE, 'Créneau matinal - Lundi'),
   ('delivery', '2025-10-27', '14:00', '17:00', 'Après-midi', TRUE, 'Créneau après-midi - Lundi');
-
--- ============================================================================
--- VERIFICATION POST-INSERTION
--- ============================================================================
-
-DO $$
-DECLARE
-  slot_count INT;
-BEGIN
-  SELECT COUNT(*) INTO slot_count FROM public.logistic_slots 
-  WHERE slot_date BETWEEN '2025-10-20' AND '2025-10-27' AND is_open = TRUE;
-  
-  RAISE NOTICE '';
-  RAISE NOTICE '✅ Script exécuté avec succès!';
-  RAISE NOTICE '📊 Nombre de créneaux créés: %', slot_count;
-  RAISE NOTICE '';
-  RAISE NOTICE '📋 Résumé par date (20-27 Oct):';
-  
-  FOR rec IN 
-    SELECT 
-      slot_date,
-      COUNT(*) FILTER (WHERE role = 'delivery') as delivery_count
-    FROM public.logistic_slots 
-    WHERE slot_date BETWEEN '2025-10-20' AND '2025-10-27' AND is_open = TRUE AND role = 'delivery'
-    GROUP BY slot_date
-    ORDER BY slot_date
-  LOOP
-    RAISE NOTICE '   %: % créneaux livraison', rec.slot_date, rec.delivery_count;
-  END LOOP;
-  
-  RAISE NOTICE '';
-  RAISE NOTICE '🎉 Créneaux disponibles dans l''application!';
-  RAISE NOTICE '';
-END $$;

@@ -455,10 +455,10 @@ async function handleConfirmBooking(
     console.log("[v0] Booking created successfully:", bookingId)
 
     // Show success message
-    toast.success("Réservation créée ! Un email de paiement a été envoyé.")
+    toast.success("Réservation créée ! En attente de confirmation...")
 
-    // Redirect to payment page
-    router.push(`/booking/${bookingId}/pay`)
+    // Redirect to confirmation page
+    router.push(`/booking/${bookingId}/success`)
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Erreur inconnue"
     console.error("[v0] Booking creation error:", errorMessage)

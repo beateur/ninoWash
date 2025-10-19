@@ -275,7 +275,7 @@ export async function POST(request: NextRequest) {
         booking_weight_kg: bookingWeightKg > 0 ? bookingWeightKg : null,
         used_subscription_credit: usedCredit,
         credit_discount_amount: creditDiscountAmount,
-        status: "pending_payment", // ✨ CHANGED: All bookings start as pending_payment
+        status: "pending", // ✨ CHANGED: Bookings start as pending (await admin confirmation)
         payment_status: "pending", // ✨ NEW: Track payment status separately
         metadata: Object.keys(bookingMetadata).length > 0 ? bookingMetadata : null,
       })
