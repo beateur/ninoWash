@@ -50,19 +50,61 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     // 4. Get guest/user email
     let customerEmail = ""
+    
+    console.log("[v0] Booking user_id:", booking.user_id)
+    console.log("[v0] Booking metadata:", JSON.stringify(booking.metadata, null, 2))
+    
     if (booking.user_id) {
-      const { data: userData } = await supabase.auth.admin.getUserById(booking.user_id)
+      // User booking - get email from auth.users
+      console.log("[v0] Fetching email for user_id:", booking.user_id)
+      const { data: userData, error: userError } = await supabase.auth.admin.getUserById(booking.user_id)
+      
+      if (userError) {
+        console.error("[v0] Error fetching user:", userError)
+      }
+      
       if (userData?.user?.email) {
         customerEmail = userData.user.email
+        console.log("[v0] Found email from auth.users:", customerEmail)
+      } else {
+        console.error("[v0] User exists but no email found in auth.users")
       }
-    } else if (booking.metadata?.guest_contact?.email) {
-      customerEmail = booking.metadata.guest_contact.email
+    } else {
+      // Guest booking - get email from metadata
+      console.log("[v0] Guest booking detected (no user_id)")
+      
+      if (booking.metadata?.guest_contact?.email) {
+        customerEmail = booking.metadata.guest_contact.email
+        console.log("[v0] Found email from metadata.guest_contact:", customerEmail)
+      } else {
+        console.error("[v0] No guest_contact.email in metadata")
+        console.error("[v0] Metadata structure:", booking.metadata)
+      }
     }
 
     if (!customerEmail) {
-      console.error("[v0] No email found for booking")
-      return NextResponse.json({ error: "Email introuvable pour cette réservation" }, { status: 400 })
+      console.error("[v0] ❌ No email found for booking")
+      console.error("[v0] Debug info:", {
+        bookingId,
+        hasUserId: !!booking.user_id,
+        hasMetadata: !!booking.metadata,
+        hasGuestContact: !!booking.metadata?.guest_contact,
+        hasGuestEmail: !!booking.metadata?.guest_contact?.email,
+        metadataKeys: booking.metadata ? Object.keys(booking.metadata) : [],
+      })
+      
+      return NextResponse.json({ 
+        error: "Email introuvable pour cette réservation",
+        debug: process.env.NODE_ENV === "development" ? {
+          bookingId,
+          hasUserId: !!booking.user_id,
+          hasMetadata: !!booking.metadata,
+          hasGuestContact: !!booking.metadata?.guest_contact,
+        } : undefined
+      }, { status: 400 })
     }
+    
+    console.log("[v0] ✅ Customer email found:", customerEmail)
 
     // 5. Build line items for Stripe
     const lineItems = booking.booking_items.map((item: any) => ({
