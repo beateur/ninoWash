@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { stripe } from "@/lib/stripe"
 import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
@@ -57,7 +58,10 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     if (booking.user_id) {
       // User booking - get email from auth.users
       console.log("[v0] Fetching email for user_id:", booking.user_id)
-      const { data: userData, error: userError } = await supabase.auth.admin.getUserById(booking.user_id)
+      
+      // Use admin client for auth.admin.getUserById()
+      const adminClient = createAdminClient()
+      const { data: userData, error: userError } = await adminClient.auth.admin.getUserById(booking.user_id)
       
       if (userError) {
         console.error("[v0] Error fetching user:", userError)
