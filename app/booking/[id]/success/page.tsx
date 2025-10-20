@@ -268,11 +268,6 @@ async function BookingSuccessContent({
               Voir mes réservations
             </Button>
           </Link>
-          <Link href="/" className="flex-1">
-            <Button size="lg" className="w-full bg-green-600 hover:bg-green-700">
-              Accueil
-            </Button>
-          </Link>
         </div>
 
         {/* Info Message */}
