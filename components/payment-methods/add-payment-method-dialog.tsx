@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { loadStripe } from "@stripe/stripe-js"
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js"
 import {
   Dialog,
@@ -16,8 +15,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, Loader2 } from "lucide-react"
 import { createSetupIntent } from "@/app/actions/payment-methods"
 import { useToast } from "@/hooks/use-toast"
-
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
+import { stripePromise } from "@/lib/stripe/client"
 
 interface AddPaymentMethodDialogProps {
   open: boolean
