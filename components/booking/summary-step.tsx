@@ -229,11 +229,16 @@ export function SummaryStep({
         throw new Error(result.error || "Une erreur est survenue")
       }
 
-      // New booking created with status='pending_payment'
-      // Redirect to payment page
+      // New booking created with status='pending' (awaiting admin confirmation)
+      // Redirect to success/confirmation page
       const newBookingId = result.id
+      const bookingNumber = result.booking?.booking_number
+
       if (newBookingId) {
-        router.push(`/booking/${newBookingId}/pay`)
+        // Redirect to confirmation page with booking number
+        const successUrl = `/reservation/success?number=${encodeURIComponent(bookingNumber || newBookingId)}`
+        console.log("[v0] Redirecting to confirmation page:", successUrl)
+        router.push(successUrl)
       } else {
         throw new Error("ID de réservation manquant dans la réponse")
       }

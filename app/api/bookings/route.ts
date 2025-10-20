@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { apiRequireAuth } from "@/lib/auth/api-guards"
 import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { createBookingSchema } from "@/lib/validations/booking"
 import { z } from "zod"
 import { canUseCredit, consumeCredit } from "@/lib/services/subscription-credits"
@@ -338,19 +339,119 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Erreur lors de la création des articles" }, { status: 500 })
     }
 
+    // ========================================================================
+    // CREATE USER ACCOUNT FOR GUEST BOOKINGS (New Auto-Login)
+    // ========================================================================
+    let accessToken: string | null = null
+    let refreshToken: string | null = null
+
+    if (isGuestBooking) {
+      console.log("[v0] Creating user account for guest booking...")
+
+      try {
+        const guestContact = validatedData.guestContact
+        if (!guestContact?.email || !guestContact?.first_name || !guestContact?.last_name) {
+          throw new Error("Contact information incomplete for account creation")
+        }
+
+        // Generate secure random password
+        const tempPassword = generateSecurePassword()
+        const adminClient = createAdminClient()
+
+        // Create user account with auto-confirmed email
+        const { data: createUserData, error: createUserError } = await adminClient.auth.admin.createUser({
+          email: guestContact.email,
+          password: tempPassword,
+          email_confirm: true, // Auto-confirm since email is from form
+          user_metadata: {
+            full_name: `${guestContact.first_name} ${guestContact.last_name}`,
+            phone: guestContact.phone || null,
+            source: "guest_booking",
+            needs_password_setup: true, // User should reset password
+          },
+        })
+
+        if (createUserError || !createUserData?.user?.id) {
+          console.error("[v0] User creation failed:", createUserError)
+          throw new Error(`Failed to create user: ${createUserError?.message}`)
+        }
+
+        console.log("[v0] User account created successfully:", createUserData.user.id)
+
+        // Sign in with password to get session tokens
+        console.log("[v0] Creating session with password (new user)...")
+        const { data: signInData, error: signInError } = await adminClient.auth.signInWithPassword({
+          email: guestContact.email,
+          password: tempPassword,
+        })
+
+        if (signInError) {
+          console.error("[v0] Failed to create session:", signInError)
+        } else if (signInData.session) {
+          accessToken = signInData.session.access_token
+          refreshToken = signInData.session.refresh_token
+          console.log("[v0] Session created successfully for new user auto-login")
+        }
+
+        // Update booking with user_id
+        const { error: updateError } = await supabase
+          .from("bookings")
+          .update({ user_id: createUserData.user.id })
+          .eq("id", booking.id)
+
+        if (updateError) {
+          console.warn("[v0] Failed to link user to booking:", updateError)
+          // Non-critical: booking is already created
+        } else {
+          console.log("[v0] Booking linked to user account successfully")
+        }
+      } catch (error) {
+        console.error("[v0] Guest account creation error:", error)
+        // Non-critical: booking is created, user can still login manually
+        // Continue with response (tokens will be null)
+      }
+    }
+
     return NextResponse.json({
       id: booking.id,
       booking,
       message: "Réservation créée avec succès",
+      // Include tokens for automatic login (null if not a guest booking or if creation failed)
+      session: accessToken && refreshToken ? { accessToken, refreshToken } : null,
     })
   } catch (error) {
     console.error("[v0] Booking creation error:", error)
 
-    if (error instanceof z.ZodError) {
-      console.log("[v0] Validation errors:", error.errors)
-      return NextResponse.json({ error: "Données invalides", details: error.errors }, { status: 400 })
-    }
-
     return NextResponse.json({ error: "Erreur interne du serveur" }, { status: 500 })
   }
+}
+
+// =====================================================
+// Helper Functions
+// =====================================================
+
+function generateSecurePassword(): string {
+  const length = 32
+  const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*"
+  let password = ""
+  const randomValues = new Uint8Array(length)
+  crypto.getRandomValues(randomValues)
+
+  for (let i = 0; i < length; i++) {
+    password += charset[randomValues[i] % charset.length]
+  }
+
+  return password
+}
+
+function generateBookingNumber(): string {
+  const date = new Date()
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const day = String(date.getDate()).padStart(2, "0")
+  const randomNum = Math.floor(Math.random() * 10000)
+    .toString()
+    .padStart(4, "0")
+
+  return `BK-${year}${month}${day}-${randomNum}`
 }

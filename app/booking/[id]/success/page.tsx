@@ -45,7 +45,6 @@ async function BookingSuccessContent({
   // If payment hasn't been confirmed yet, show a message
   const isPaymentConfirmed = booking.payment_status === "succeeded" || booking.status === "confirmed"
   const isPending = booking.status === "pending"
-  const isGuestBooking = !booking.user_id
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 p-4 md:p-8">
@@ -264,33 +263,16 @@ async function BookingSuccessContent({
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4">
-          {isGuestBooking && isPending ? (
-            <>
-              <Link href={`/auth/signup?email=${encodeURIComponent(booking.metadata?.guest_contact?.email || "")}`} className="flex-1">
-                <Button size="lg" className="w-full bg-green-600 hover:bg-green-700">
-                  Créer un compte
-                </Button>
-              </Link>
-              <Link href="/" className="flex-1">
-                <Button variant="outline" size="lg" className="w-full">
-                  Retour à l'accueil
-                </Button>
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link href="/dashboard" className="flex-1">
-                <Button variant="outline" size="lg" className="w-full">
-                  Voir mes réservations
-                </Button>
-              </Link>
-              <Link href="/" className="flex-1">
-                <Button size="lg" className="w-full bg-green-600 hover:bg-green-700">
-                  Accueil
-                </Button>
-              </Link>
-            </>
-          )}
+          <Link href="/dashboard" className="flex-1">
+            <Button variant="outline" size="lg" className="w-full">
+              Voir mes réservations
+            </Button>
+          </Link>
+          <Link href="/" className="flex-1">
+            <Button size="lg" className="w-full bg-green-600 hover:bg-green-700">
+              Accueil
+            </Button>
+          </Link>
         </div>
 
         {/* Info Message */}
@@ -307,9 +289,7 @@ async function BookingSuccessContent({
             }`}
           >
             {isPending
-              ? isGuestBooking
-                ? "👤 Créez un compte pour suivre vos réservations et accéder à des avantages exclusifs."
-                : "⏳ Votre réservation est en attente de confirmation. Vous recevrez un email dès que nous aurons validé votre demande."
+              ? "⏳ Votre réservation est en attente de confirmation. Vous recevrez un email dès que nous aurons validé votre demande."
               : "💡 Vous pouvez suivre l'état de votre réservation depuis votre tableau de bord."}
           </p>
         </div>

@@ -450,16 +450,25 @@ async function handleConfirmBooking(
     }
 
     const result = await response.json()
-    const { id: bookingId } = result
+    const { id: bookingId, session } = result
 
     console.log("[v0] Booking created successfully:", bookingId)
+    if (session?.accessToken && session?.refreshToken) {
+      console.log("[v0] Session tokens received, will auto-login user")
+    }
 
     // Show success message
     toast.success("Réservation créée ! En attente de confirmation...")
 
-    // Redirect to guest success page with booking details
+    // Redirect to guest success page with booking details and session tokens
     const email = bookingData.contact?.email || ""
-    router.push(`/reservation/guest/success?bookingId=${bookingId}&email=${encodeURIComponent(email)}`)
+    const params = new URLSearchParams({
+      bookingId: bookingId,
+      email: email,
+      ...(session?.accessToken && { accessToken: session.accessToken }),
+      ...(session?.refreshToken && { refreshToken: session.refreshToken }),
+    })
+    router.push(`/reservation/guest/success?${params.toString()}`)
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Erreur inconnue"
     console.error("[v0] Booking creation error:", errorMessage)

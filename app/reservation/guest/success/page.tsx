@@ -1,23 +1,104 @@
 /**
  * Guest Booking Success Page
- * Displayed after successful payment + account creation + booking creation
+ * Displayed after successful booking creation with automatic account creation + auto-login
  * 
- * Route: /reservation/guest/success?bookingId=xxx&email=xxx
+ * Route: /reservation/guest/success?bookingId=xxx&email=xxx&accessToken=xxx&refreshToken=xxx
  */
 
 "use client"
 
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import { createClient } from "@/lib/supabase/client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { CheckCircle2, Mail, Calendar, Package, ArrowRight } from "lucide-react"
-import Link from "next/link"
+import { CheckCircle2, Mail, Calendar, Package, ArrowRight, Loader2 } from "lucide-react"
 
 export default function GuestBookingSuccessPage() {
   const searchParams = useSearchParams()
+  const router = useRouter()
+  const [isLoggingIn, setIsLoggingIn] = useState(false)
+  const [loginError, setLoginError] = useState<string | null>(null)
 
   const bookingId = searchParams.get("bookingId")
   const email = searchParams.get("email")
+  const accessToken = searchParams.get("accessToken")
+  const refreshToken = searchParams.get("refreshToken")
+
+  // Auto-login if tokens are present
+  useEffect(() => {
+    const performAutoLogin = async () => {
+      if (!accessToken || !refreshToken) {
+        console.log("[v0] No tokens provided, user will need to login manually")
+        return
+      }
+
+      setIsLoggingIn(true)
+      try {
+        const supabase = createClient()
+
+        // Set session with tokens
+        const { error: setSessionError } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        })
+
+        if (setSessionError) {
+          console.error("[v0] Failed to set session:", setSessionError)
+          setLoginError("Erreur lors de la connexion automatique")
+          return
+        }
+
+        console.log("[v0] Session set successfully, redirecting to dashboard...")
+
+        // Small delay to ensure session is persisted
+        await new Promise((resolve) => setTimeout(resolve, 500))
+
+        // Redirect to dashboard with booking ID
+        router.push(`/dashboard?newBookingId=${bookingId}`)
+      } catch (error) {
+        console.error("[v0] Auto-login error:", error)
+        setLoginError("Erreur lors de la connexion automatique")
+      } finally {
+        setIsLoggingIn(false)
+      }
+    }
+
+    performAutoLogin()
+  }, [accessToken, refreshToken, bookingId, router])
+
+  // Show loading state while logging in
+  if (isLoggingIn) {
+    return (
+      <div className="container mx-auto px-4 py-12 max-w-2xl flex items-center justify-center min-h-screen">
+        <Card>
+          <CardContent className="p-8 text-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+            <p className="text-muted-foreground">Connexion en cours...</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Show error if login failed
+  if (loginError) {
+    return (
+      <div className="container mx-auto px-4 py-12 max-w-2xl">
+        <Card className="border-red-200">
+          <CardContent className="p-8 space-y-4">
+            <p className="text-red-600 font-semibold">{loginError}</p>
+            <p className="text-sm text-muted-foreground">
+              Vous pouvez continuer vers le dashboard et vous connecter manuellement si nécessaire.
+            </p>
+            <Button onClick={() => router.push("/dashboard")}>
+              Aller au dashboard
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-2xl">
@@ -88,11 +169,13 @@ export default function GuestBookingSuccessPage() {
 
           {/* CTA Button */}
           <div className="flex justify-center">
-            <Button asChild size="lg" className="w-full sm:w-auto min-w-[300px]">
-              <Link href="/">
-                <ArrowRight className="mr-2 h-4 w-4" />
-                Retour à l'accueil
-              </Link>
+            <Button 
+              onClick={() => router.push("/dashboard")}
+              size="lg" 
+              className="w-full sm:w-auto min-w-[300px]"
+            >
+              <ArrowRight className="mr-2 h-4 w-4" />
+              Aller au tableau de bord
             </Button>
           </div>
 
