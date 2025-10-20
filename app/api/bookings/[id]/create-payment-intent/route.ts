@@ -55,36 +55,38 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     console.log("[v0] Booking user_id:", booking.user_id)
     console.log("[v0] Booking metadata:", JSON.stringify(booking.metadata, null, 2))
     
-    if (booking.user_id) {
-      // User booking - get email from auth.users
-      console.log("[v0] Fetching email for user_id:", booking.user_id)
+    // PRIORITY 1: Check metadata.guest_contact.email (works for both guest and user bookings)
+    if (booking.metadata?.guest_contact?.email) {
+      customerEmail = booking.metadata.guest_contact.email
+      console.log("[v0] Found email from metadata.guest_contact:", customerEmail)
+    } 
+    // PRIORITY 2: If no metadata email and user_id exists, fetch from auth.users via SQL
+    else if (booking.user_id) {
+      console.log("[v0] No metadata email, fetching from auth.users for user_id:", booking.user_id)
       
-      // Use admin client for auth.admin.getUserById()
+      // Query auth.users directly via SQL (bypasses auth.admin API)
       const adminClient = createAdminClient()
-      const { data: userData, error: userError } = await adminClient.auth.admin.getUserById(booking.user_id)
+      const { data: authUsers, error: authError } = await adminClient
+        .from('auth.users')
+        .select('email')
+        .eq('id', booking.user_id)
+        .single()
       
-      if (userError) {
-        console.error("[v0] Error fetching user:", userError)
+      if (authError) {
+        console.error("[v0] Error fetching from auth.users:", authError)
       }
       
-      if (userData?.user?.email) {
-        customerEmail = userData.user.email
+      if (authUsers?.email) {
+        customerEmail = authUsers.email
         console.log("[v0] Found email from auth.users:", customerEmail)
       } else {
         console.error("[v0] User exists but no email found in auth.users")
       }
     } else {
-      // Guest booking - get email from metadata
-      console.log("[v0] Guest booking detected (no user_id)")
-      
-      if (booking.metadata?.guest_contact?.email) {
-        customerEmail = booking.metadata.guest_contact.email
-        console.log("[v0] Found email from metadata.guest_contact:", customerEmail)
-      } else {
-        console.error("[v0] No guest_contact.email in metadata")
-        console.error("[v0] Metadata structure:", booking.metadata)
-      }
+      // No user_id and no guest_contact email
+      console.log("[v0] No user_id and no metadata email")
     }
+
 
     if (!customerEmail) {
       console.error("[v0] ❌ No email found for booking")
