@@ -5,7 +5,7 @@ import { cookies } from "next/headers"
 export default async function AuthCallbackPage({
   searchParams,
 }: {
-  searchParams: { code?: string; error?: string }
+  searchParams: { code?: string; error?: string; type?: string }
 }) {
   const cookieStore = await cookies()
   const supabase = createServerClient(
@@ -23,7 +23,12 @@ export default async function AuthCallbackPage({
     },
   )
 
+  // Gérer les erreurs selon le type
   if (searchParams.error) {
+    // Si c'est un reset password, rediriger vers la page de reset avec l'erreur
+    if (searchParams.type === "recovery") {
+      redirect("/auth/reset-password?error=" + encodeURIComponent(searchParams.error))
+    }
     redirect("/auth/signin?error=" + encodeURIComponent(searchParams.error))
   }
 
@@ -31,10 +36,19 @@ export default async function AuthCallbackPage({
     const { error } = await supabase.auth.exchangeCodeForSession(searchParams.code)
 
     if (error) {
+      // Si c'est un reset password, rediriger vers la page de reset avec l'erreur
+      if (searchParams.type === "recovery") {
+        redirect("/auth/reset-password?error=" + encodeURIComponent(error.message))
+      }
       redirect("/auth/signin?error=" + encodeURIComponent(error.message))
     }
 
-    // Redirect to dashboard
+    // Si reset password, rediriger vers /auth/reset-password avec session active
+    if (searchParams.type === "recovery") {
+      redirect("/auth/reset-password")
+    }
+
+    // Sinon, redirection normale vers dashboard
     redirect("/dashboard")
   }
 
