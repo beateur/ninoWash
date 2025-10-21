@@ -17,7 +17,15 @@ export default async function AuthCallbackPage({
           return cookieStore.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
+          // ✅ Fix Next.js 15: Utiliser try-catch pour éviter l'erreur
+          try {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set(name, value, options)
+            })
+          } catch (error) {
+            // Les cookies seront définis par le middleware après la redirection
+            console.log('Cookies will be set after redirect')
+          }
         },
       },
     },
@@ -33,7 +41,8 @@ export default async function AuthCallbackPage({
   }
 
   if (searchParams.code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(searchParams.code)
+    // Échanger le code contre une session
+    const { data, error } = await supabase.auth.exchangeCodeForSession(searchParams.code)
 
     if (error) {
       // Si c'est un reset password, rediriger vers la page de reset avec l'erreur
@@ -43,8 +52,13 @@ export default async function AuthCallbackPage({
       redirect("/auth/signin?error=" + encodeURIComponent(error.message))
     }
 
+    // ✅ Détecter si c'est un password recovery en vérifiant le type d'auth event
+    // Supabase marque les sessions de recovery avec un flag spécial
+    const isPasswordRecovery = data?.user?.user_metadata?.iss?.includes('recovery') || 
+                               searchParams.type === "recovery"
+
     // Si reset password, rediriger vers /auth/reset-password avec session active
-    if (searchParams.type === "recovery") {
+    if (isPasswordRecovery) {
       redirect("/auth/reset-password")
     }
 
