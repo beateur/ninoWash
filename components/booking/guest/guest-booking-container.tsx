@@ -5,7 +5,7 @@
 
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { useGuestBooking, hasAbandonedBooking } from "@/lib/hooks/use-guest-booking"
 import type { GuestContact } from "@/lib/validations/guest-contact"
@@ -44,6 +44,49 @@ export function GuestBookingContainer() {
     canProceed,
   } = useGuestBooking()
 
+  // Stabiliser les callbacks avec useCallback (AVANT tout early return)
+  const handleContactComplete = useCallback((data: GuestContact) => {
+    updateContact(data)
+  }, [updateContact])
+
+  const handleAddressesComplete = useCallback((pickup: GuestAddress, delivery: GuestAddress) => {
+    updateAddresses(pickup, delivery)
+  }, [updateAddresses])
+
+  const handleServicesComplete = useCallback((items: GuestBookingItem[], totalAmount: number) => {
+    updateServices(items, totalAmount)
+  }, [updateServices])
+
+  const handleDateTimeComplete = useCallback((
+    pickupDate: Date | null,
+    pickupTimeSlot: string | null,
+    pickupSlot: any,
+    deliverySlot: any
+  ) => {
+    const dateString = pickupDate ? pickupDate.toISOString() : new Date().toISOString()
+    const timeString = pickupSlot 
+      ? `${pickupSlot.start_time.substring(0,5)}-${pickupSlot.end_time.substring(0,5)}`
+      : pickupTimeSlot || "09:00"
+    updateDateTime(
+      dateString,
+      timeString,
+      pickupSlot || undefined,
+      deliverySlot || undefined
+    )
+  }, [updateDateTime])
+
+  const handleNext = useCallback(() => {
+    if (canProceed()) {
+      goToStep(state.currentStep + 1)
+    }
+  }, [canProceed, goToStep, state.currentStep])
+
+  const handlePrevious = useCallback(() => {
+    if (state.currentStep > 0) {
+      goToStep(state.currentStep - 1)
+    }
+  }, [state.currentStep, goToStep])
+
   // Prompt to resume abandoned booking
   useEffect(() => {
     if (isLoaded && hasAbandonedBooking() && state.currentStep === 0) {
@@ -64,18 +107,6 @@ export function GuestBookingContainer() {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
       </div>
     )
-  }
-
-  const handleNext = () => {
-    if (canProceed()) {
-      goToStep(state.currentStep + 1)
-    }
-  }
-
-  const handlePrevious = () => {
-    if (state.currentStep > 0) {
-      goToStep(state.currentStep - 1)
-    }
   }
 
   return (
@@ -99,10 +130,7 @@ export function GuestBookingContainer() {
           {state.currentStep === 0 && (
             <ContactStep
               initialData={state.contact}
-              onComplete={(data: GuestContact) => {
-                updateContact(data)
-                handleNext()
-              }}
+              onComplete={handleContactComplete}
             />
           )}
 
@@ -110,20 +138,14 @@ export function GuestBookingContainer() {
             <AddressesStep
               initialPickupAddress={state.pickupAddress}
               initialDeliveryAddress={state.deliveryAddress}
-              onComplete={(pickup: GuestAddress, delivery: GuestAddress) => {
-                updateAddresses(pickup, delivery)
-                handleNext()
-              }}
+              onComplete={handleAddressesComplete}
             />
           )}
 
           {state.currentStep === 2 && (
             <ServicesStep
               initialItems={state.items}
-              onComplete={(items: GuestBookingItem[], totalAmount: number) => {
-                updateServices(items, totalAmount)
-                handleNext()
-              }}
+              onComplete={handleServicesComplete}
             />
           )}
 
@@ -132,24 +154,7 @@ export function GuestBookingContainer() {
               pickupDate={state.pickupDate ? new Date(state.pickupDate) : null}
               pickupTimeSlot={state.pickupTimeSlot}
               deliveryDate={null}
-              updateDateTime={(
-                pickupDate: Date | null,
-                pickupTimeSlot: string | null,
-                pickupSlot,
-                deliverySlot
-              ) => {
-                // Convert Date to string format for the hook
-                const dateString = pickupDate ? pickupDate.toISOString() : new Date().toISOString()
-                const timeString = pickupSlot 
-                  ? `${pickupSlot.start_time.substring(0,5)}-${pickupSlot.end_time.substring(0,5)}`
-                  : pickupTimeSlot || "09:00"
-                updateDateTime(
-                  dateString,
-                  timeString,
-                  pickupSlot || undefined,
-                  deliverySlot || undefined
-                )
-              }}
+              updateDateTime={handleDateTimeComplete}
               onNext={handleNext}
             />
           )}

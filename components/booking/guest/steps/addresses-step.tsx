@@ -6,7 +6,7 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { guestAddressSchema, type GuestAddress } from "@/lib/validations/guest-booking"
@@ -46,6 +46,7 @@ export function AddressesStep({
 
   const pickupForm = useForm<GuestAddress>({
     resolver: zodResolver(guestAddressSchema),
+    mode: "onBlur", // ← Validation seulement quand on quitte le champ (pas de saccades)
     defaultValues: initialPickupAddress || {
       street_address: "",
       city: "",
@@ -58,6 +59,7 @@ export function AddressesStep({
 
   const deliveryForm = useForm<GuestAddress>({
     resolver: zodResolver(guestAddressSchema),
+    mode: "onBlur", // ← Validation seulement quand on quitte le champ (pas de saccades)
     defaultValues: initialDeliveryAddress || {
       street_address: "",
       city: "",
@@ -74,53 +76,53 @@ export function AddressesStep({
     return parisRegex.test(postalCode)
   }
 
-  const handleSubmit = () => {
+  // Valider et mettre à jour le parent quand l'utilisateur termine
+  const handleValidation = async () => {
+    const pickupValid = await pickupForm.trigger()
+    const deliveryValid = sameAddress ? true : await deliveryForm.trigger()
+
+    if (pickupValid && deliveryValid) {
+      const pickupData = pickupForm.getValues()
+      const deliveryData = sameAddress ? pickupData : deliveryForm.getValues()
+
+      // Final postal code validation
+      if (
+        validatePostalCode(pickupData.postal_code) &&
+        (sameAddress || validatePostalCode(deliveryData.postal_code))
+      ) {
+        onComplete(pickupData, deliveryData)
+      }
+    }
+  }
+
+  // Exposer la validation au parent pour qu'il puisse vérifier avant de passer à l'étape suivante
+  const canProceed = () => {
     const pickupData = pickupForm.getValues()
     const deliveryData = sameAddress ? pickupData : deliveryForm.getValues()
 
-    // Validate pickup address
-    const pickupValid = pickupForm.trigger()
-    pickupValid.then((isValid) => {
-      if (!isValid) {
-        toast.error("Veuillez corriger les erreurs dans l'adresse de collecte")
-        return
-      }
+    const pickupValid =
+      pickupForm.formState.isValid &&
+      pickupData.street_address &&
+      pickupData.city &&
+      validatePostalCode(pickupData.postal_code)
 
-      // Validate postal code
-      if (!validatePostalCode(pickupData.postal_code)) {
-        pickupForm.setError("postal_code", {
-          message: "Nous ne livrons actuellement qu'à Paris (75001-75020)",
-        })
-        toast.error("Code postal non couvert")
-        return
-      }
+    const deliveryValid = sameAddress
+      ? true
+      : deliveryForm.formState.isValid &&
+        deliveryData.street_address &&
+        deliveryData.city &&
+        validatePostalCode(deliveryData.postal_code)
 
-      // Validate delivery address if different
-      if (!sameAddress) {
-        const deliveryValid = deliveryForm.trigger()
-        deliveryValid.then((isDeliveryValid) => {
-          if (!isDeliveryValid) {
-            toast.error("Veuillez corriger les erreurs dans l'adresse de livraison")
-            return
-          }
-
-          if (!validatePostalCode(deliveryData.postal_code)) {
-            deliveryForm.setError("postal_code", {
-              message: "Nous ne livrons actuellement qu'à Paris (75001-75020)",
-            })
-            toast.error("Code postal de livraison non couvert")
-            return
-          }
-
-          toast.success("Adresses enregistrées !")
-          onComplete(pickupData, deliveryData)
-        })
-      } else {
-        toast.success("Adresses enregistrées !")
-        onComplete(pickupData, pickupData)
-      }
-    })
+    return pickupValid && deliveryValid
   }
+
+  // Appeler handleValidation au montage pour synchroniser l'état initial
+  useEffect(() => {
+    if (canProceed()) {
+      handleValidation()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div className="space-y-6">
@@ -337,10 +339,17 @@ export function AddressesStep({
         </Card>
       )}
 
-      {/* Submit Button */}
-      <Button onClick={handleSubmit} className="w-full" size="lg">
-        Continuer →
-      </Button>
+      {/* Bouton de validation visible */}
+      <div className="flex justify-end mt-6">
+        <Button
+          onClick={handleValidation}
+          disabled={!canProceed()}
+          size="lg"
+          className="min-w-[200px]"
+        >
+          Valider les adresses
+        </Button>
+      </div>
     </div>
   )
 }

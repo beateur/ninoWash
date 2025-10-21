@@ -176,17 +176,20 @@ async function BookingPaymentContent({ bookingId }: { bookingId: string }) {
                           </span>
                         )}
                       </span>
-                      <span>{(item.unit_price * item.quantity).toFixed(2)}€</span>
+                      <span className="text-slate-500">{(item.unit_price * item.quantity).toFixed(2)}€</span>
                     </li>
                   ))}
                 </ul>
+                <p className="text-xs text-slate-500 mt-2 italic">
+                  Note : Le prix total ci-dessous inclut toutes les options sélectionnées
+                </p>
               </div>
             )}
 
             {/* Total */}
             <div className="border-t pt-4">
               <div className="flex justify-between items-center">
-                <span className="font-semibold text-slate-900">Montant total</span>
+                <span className="font-semibold text-slate-900">Montant total à payer</span>
                 <span className="text-2xl font-bold text-blue-600">{formattedAmount}</span>
               </div>
             </div>

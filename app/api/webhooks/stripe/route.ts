@@ -35,21 +35,59 @@ export async function POST(req: Request) {
           sessionId: session.id,
           customerId: session.customer,
           subscriptionId: session.subscription,
+          paymentIntent: session.payment_intent,
           metadata: session.metadata,
         })
 
-        // Get user ID from metadata
+        // =====================================================
+        // BOOKING PAYMENT (mode: "payment")
+        // =====================================================
+        const bookingId = session.metadata?.booking_id
+
+        if (bookingId) {
+          console.log("[v0] Processing booking payment checkout:", bookingId)
+
+          // Update booking status to confirmed and mark payment as paid
+          const { error: updateError } = await supabase
+            .from("bookings")
+            .update({
+              status: "confirmed",
+              payment_status: "paid", // ✅ Utiliser "paid" (contrainte SQL)
+              paid_at: new Date().toISOString(),
+              stripe_session_id: session.id,
+              payment_intent_id: session.payment_intent as string,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", bookingId)
+
+          if (updateError) {
+            console.error("[v0] Error updating booking after checkout success:", updateError)
+            break
+          }
+
+          console.log("[v0] ✅ Booking confirmed via checkout.session.completed:", bookingId)
+          // TODO: Trigger send-booking-confirmation-email Edge Function
+          break // ✅ Sortie précoce après traitement booking
+        }
+
+        // =====================================================
+        // SUBSCRIPTION PAYMENT (mode: "subscription")
+        // =====================================================
         const userId = session.metadata?.userId
         const planId = session.metadata?.planId
 
+        // Si on arrive ici sans booking_id, on attend userId + planId pour subscription
         if (!userId || !planId) {
-          console.error("[v0] Missing userId or planId in session metadata:", {
-            userId,
-            planId,
+          console.warn("[v0] checkout.session.completed received without booking_id, userId, or planId:", {
+            hasBookingId: !!bookingId,
+            hasUserId: !!userId,
+            hasPlanId: !!planId,
             metadata: session.metadata,
           })
-          break
+          break // ✅ Pas de traitement si metadata invalides
         }
+
+        console.log("[v0] Processing subscription payment checkout:", { userId, planId })
 
         // Get subscription details
         const subscriptionId = session.subscription as string
@@ -260,12 +298,12 @@ export async function POST(req: Request) {
           break
         }
 
-        // Update booking status to confirmed and mark payment as succeeded
+        // Update booking status to confirmed and mark payment as paid
         const { error: updateError } = await supabase
           .from("bookings")
           .update({
             status: "confirmed",
-            payment_status: "succeeded",
+            payment_status: "paid", // ✅ Utiliser "paid" (contrainte SQL)
             paid_at: new Date().toISOString(),
             payment_intent_id: paymentIntent.id,
             updated_at: new Date().toISOString(),

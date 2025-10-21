@@ -56,6 +56,9 @@ export const createBookingSchema = z
     subscriptionId: z.string().uuid().optional(),
     serviceType: z.string().optional(),
     
+    // Prix total calculé (incluant kg supplémentaires)
+    totalAmount: z.number().positive("Le montant doit être positif").optional(),
+    
     // Guest fields
     guestPickupAddress: guestAddressSchema.optional(),
     guestDeliveryAddress: guestAddressSchema.optional(),

@@ -2,7 +2,7 @@
 
 import { CollectionDeliveryStep } from "@/components/booking/collection-delivery-step"
 import type { LogisticSlot } from "@/lib/types/logistic-slots"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 interface DateTimeStepProps {
   pickupDate: Date | null
@@ -27,10 +27,12 @@ export function DateTimeStep({
   const [pickupSlot, setPickupSlot] = useState<LogisticSlot | null>(null)
   const [deliverySlot, setDeliverySlot] = useState<LogisticSlot | null>(null)
 
-  const handleComplete = () => {
-    updateDateTime(pickupDate, pickupTimeSlot, pickupSlot, deliverySlot)
-    onNext()
-  }
+  // Mettre à jour les données parent à chaque changement de slot
+  useEffect(() => {
+    if (pickupSlot && deliverySlot) {
+      updateDateTime(pickupDate, pickupTimeSlot, pickupSlot, deliverySlot)
+    }
+  }, [pickupSlot, deliverySlot])
 
   return (
     <div className="space-y-6">
@@ -39,7 +41,6 @@ export function DateTimeStep({
         selectedDelivery={deliverySlot}
         onPickupSelect={setPickupSlot}
         onDeliverySelect={setDeliverySlot}
-        onNext={handleComplete}
       />
     </div>
   )

@@ -175,29 +175,57 @@ export async function POST(request: NextRequest) {
       return `BK-${date}-${random}`
     }
 
-    // Calculate total amount
+    // =====================================================
+    // Calcul et validation du montant total
+    // =====================================================
     let totalAmount = 0
-    const serviceIds = validatedData.items.map((item) => item.serviceId)
 
-    const { data: services, error: servicesError } = await supabase
-      .from("services")
-      .select("id, base_price")
-      .in("id", serviceIds)
-
-    if (servicesError) {
-      console.error("[v0] Services fetch error:", servicesError)
-      return NextResponse.json({ error: "Erreur lors de la récupération des services" }, { status: 500 })
-    }
-
-    // Calculate standard total (before credit discount)
-    for (const item of validatedData.items) {
-      const service = services.find((s) => s.id === item.serviceId)
-      if (service) {
-        totalAmount += service.base_price * item.quantity
+    if (validatedData.totalAmount) {
+      // ✅ Flux authentifié avec totalAmount : validation contre whitelist
+      if (!validateTotalAmount(validatedData.totalAmount)) {
+        console.error('❌ Prix invalide détecté:', {
+          submittedAmount: validatedData.totalAmount,
+          items: validatedData.items
+        })
+        return NextResponse.json(
+          { 
+            error: 'Prix invalide détecté. Veuillez réessayer.' 
+          },
+          { status: 400 }
+        )
       }
+      
+      totalAmount = validatedData.totalAmount
+      console.log('✅ Prix validé via whitelist:', { totalAmount })
+    } else {
+      // ✅ Flux sans totalAmount (invité ou ancien flux) : calculer depuis services
+      const serviceIds = validatedData.items.map((item) => item.serviceId)
+
+      const { data: services, error: servicesError } = await supabase
+        .from("services")
+        .select("id, base_price")
+        .in("id", serviceIds)
+
+      if (servicesError) {
+        console.error("[v0] Services fetch error:", servicesError)
+        return NextResponse.json({ error: "Erreur lors de la récupération des services" }, { status: 500 })
+      }
+
+      // ⚠️ Calcul basique : base_price * quantity (ne gère PAS les kg supplémentaires)
+      // Note: Le flux auth devrait toujours envoyer totalAmount pour gérer les options correctement
+      for (const item of validatedData.items) {
+        const service = services.find((s) => s.id === item.serviceId)
+        if (service) {
+          totalAmount += service.base_price * item.quantity
+        }
+      }
+      
+      console.log('⚠️ Prix calculé (méthode legacy, sans options kg):', { totalAmount })
     }
 
-    // Check for active subscription and available credits
+    // =====================================================
+    // Gestion des crédits d'abonnement
+    // =====================================================
     let subscriptionId: string | null = null
     let usedCredit = false
     let creditDiscountAmount = 0
@@ -318,9 +346,21 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create booking items
+    // Create booking items - récupération des services pour unit_price
+    const serviceIds = validatedData.items.map((item) => item.serviceId)
+    
+    const { data: servicesForItems, error: servicesItemsError } = await supabase
+      .from("services")
+      .select("id, base_price")
+      .in("id", serviceIds)
+
+    if (servicesItemsError) {
+      console.error("[v0] Services fetch error for items:", servicesItemsError)
+      // Continue sans unit_price plutôt que de rollback
+    }
+
     const bookingItems = validatedData.items.map((item) => {
-      const service = services.find((s) => s.id === item.serviceId)
+      const service = servicesForItems?.find((s) => s.id === item.serviceId)
       return {
         booking_id: booking.id,
         quantity: item.quantity,
@@ -429,6 +469,34 @@ export async function POST(request: NextRequest) {
 // =====================================================
 // Helper Functions
 // =====================================================
+
+/**
+ * Valide que le montant total fait partie des prix autorisés
+ * Empêche la manipulation des prix par des utilisateurs malveillants
+ * 
+ * @param amount - Montant total en euros
+ * @returns true si le prix est valide, false sinon
+ */
+function validateTotalAmount(amount: number): boolean {
+  // Prix de base des 4 services
+  const basePrices = [24.99, 29.99, 34.99, 39.99]
+  
+  // Grille tarifaire des kg supplémentaires
+  const extraKgPrices = [0, 10, 19, 27, 34, 40]
+  
+  // Générer tous les prix valides possibles
+  const validPrices: number[] = []
+  for (const base of basePrices) {
+    for (const extra of extraKgPrices) {
+      validPrices.push(Number((base + extra).toFixed(2)))
+    }
+  }
+  
+  // Vérifier que le montant fait partie des prix valides
+  // Utiliser toFixed(2) pour éviter les problèmes de précision float
+  const roundedAmount = Number(amount.toFixed(2))
+  return validPrices.includes(roundedAmount)
+}
 
 function generateSecurePassword(): string {
   const length = 32

@@ -26,8 +26,6 @@ interface CollectionDeliveryStepProps {
   selectedPickup: LogisticSlot | null
   selectedDelivery: LogisticSlot | null
   serviceType?: ServiceType
-  onNext?: () => void
-  onBack?: () => void
 }
 
 export function CollectionDeliveryStep({
@@ -36,8 +34,6 @@ export function CollectionDeliveryStep({
   selectedPickup,
   selectedDelivery,
   serviceType = "classic",
-  onNext,
-  onBack,
 }: CollectionDeliveryStepProps) {
   console.log("[v0] CollectionDeliveryStep selectedPickup:", selectedPickup)
   const [activeSection, setActiveSection] = useState<"pickup" | "delivery">(
@@ -358,33 +354,6 @@ export function CollectionDeliveryStep({
                 {formatSlotDisplay(selectedDelivery).time}
               </span>
             </div>
-          )}
-        </div>
-      )}
-
-      {/* Navigation buttons */}
-      {(onNext || onBack) && (
-        <div className="flex justify-between gap-4">
-          {onBack && (
-            <Button variant="outline" onClick={onBack}>
-              Retour
-            </Button>
-          )}
-          {onNext && (
-            <Button
-              onClick={onNext}
-              disabled={!canProceed}
-              className="ml-auto"
-            >
-              {pickupLoading || deliveryLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Chargement...
-                </>
-              ) : (
-                "Continuer"
-              )}
-            </Button>
           )}
         </div>
       )}

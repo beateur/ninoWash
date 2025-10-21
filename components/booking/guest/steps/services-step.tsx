@@ -124,6 +124,32 @@ export function ServicesStep({ initialItems, onComplete }: ServicesStepProps) {
     return baseWeight + extraKg
   }
 
+  // Valider et mettre à jour le parent quand l'utilisateur termine
+  const handleValidation = () => {
+    if (selectedServiceId) {
+      const items: GuestBookingItem[] = [{
+        serviceId: selectedServiceId,
+        quantity: 1,
+        specialInstructions,
+      }]
+      const total = calculateTotal()
+      onComplete(items, total)
+    }
+  }
+
+  // Exposer la validation au parent
+  const canProceed = () => {
+    return !!selectedServiceId
+  }
+
+  // Synchroniser l'état initial
+  useEffect(() => {
+    if (canProceed()) {
+      handleValidation()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const handleSubmit = () => {
     if (!selectedServiceId) {
       toast.error("Veuillez sélectionner un service")
@@ -317,26 +343,33 @@ export function ServicesStep({ initialItems, onComplete }: ServicesStepProps) {
 
       {/* Summary Bar */}
       <Card className="p-4 bg-muted/50">
-        <div className="flex items-center justify-between">
-          <div>
-            {selectedServiceId ? (
-              <>
-                <p className="text-sm text-muted-foreground">
-                  {totalWeight}kg sélectionné{extraKg > 0 ? ` (7kg + ${extraKg}kg)` : ""}
-                </p>
-                <p className="text-2xl font-bold">{totalAmount.toFixed(2)} €</p>
-              </>
-            ) : (
+        <div>
+          {selectedServiceId ? (
+            <>
               <p className="text-sm text-muted-foreground">
-                Sélectionnez un service pour continuer
+                {totalWeight}kg sélectionné{extraKg > 0 ? ` (7kg + ${extraKg}kg)` : ""}
               </p>
-            )}
-          </div>
-          <Button onClick={handleSubmit} size="lg" disabled={!selectedServiceId}>
-            Continuer →
-          </Button>
+              <p className="text-2xl font-bold">{totalAmount.toFixed(2)} €</p>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Sélectionnez un service pour continuer
+            </p>
+          )}
         </div>
       </Card>
+
+      {/* Bouton de validation visible */}
+      <div className="flex justify-end mt-6">
+        <Button
+          onClick={handleValidation}
+          disabled={!canProceed()}
+          size="lg"
+          className="min-w-[200px]"
+        >
+          Valider le service
+        </Button>
+      </div>
     </div>
   )
 }

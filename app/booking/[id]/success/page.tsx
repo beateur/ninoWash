@@ -43,7 +43,7 @@ async function BookingSuccessContent({
   }
 
   // If payment hasn't been confirmed yet, show a message
-  const isPaymentConfirmed = booking.payment_status === "succeeded" || booking.status === "confirmed"
+  const isPaymentConfirmed = booking.payment_status === "paid" || booking.status === "confirmed"
   const isPending = booking.status === "pending"
 
   return (

@@ -19,6 +19,7 @@ interface BookingData {
   pickupAddress?: any
   deliveryAddress?: any
   items: Array<{ serviceId: string; quantity: number; specialInstructions?: string }>
+  totalAmount?: number  // ← AJOUTÉ: Prix total calculé dans ServicesStep
   pickupDate: string
   pickupTimeSlot: string
   pickupSlot?: LogisticSlot | null
@@ -81,10 +82,9 @@ export function SummaryStep({
   }
 
   const getTotalPrice = () => {
-    return bookingData.items.reduce((total, item) => {
-      const service = getServiceDetails(item.serviceId)
-      return total + (service?.base_price || 0) * item.quantity
-    }, 0)
+    // ✅ Toujours utiliser totalAmount (calculé dans ServicesStep avec kg supplémentaires)
+    // Le flow authenticated utilise la même logique que le flow guest
+    return bookingData.totalAmount || 0
   }
 
   const getTotalItems = () => {
@@ -199,6 +199,7 @@ export function SummaryStep({
         pickupAddressId: bookingData.pickupAddressId,
         deliveryAddressId: bookingData.deliveryAddressId,
         items: bookingData.items,
+        totalAmount: bookingData.totalAmount, // ✅ Envoyer le prix calculé (incluant kg supplémentaires)
         specialInstructions,
         serviceType,
       }
@@ -353,6 +354,20 @@ export function SummaryStep({
               const service = getServiceDetails(item.serviceId)
               if (!service) return null
 
+              // ✅ Extraire les kg supplémentaires depuis specialInstructions
+              let extraKg = 0
+              try {
+                if (item.specialInstructions) {
+                  const parsed = JSON.parse(item.specialInstructions)
+                  extraKg = parsed.extraKg || 0
+                }
+              } catch (e) {
+                // Si ce n'est pas du JSON, ignorer
+              }
+
+              const baseWeight = service.metadata?.weight_kg || 7
+              const totalWeight = baseWeight + extraKg
+
               return (
                 <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
                   <div className="flex-1">
@@ -361,15 +376,27 @@ export function SummaryStep({
                       <Badge variant="outline" className="text-xs">
                         x{item.quantity}
                       </Badge>
+                      {extraKg > 0 && (
+                        <Badge variant="secondary" className="text-xs">
+                          {totalWeight}kg ({baseWeight}kg + {extraKg}kg)
+                        </Badge>
+                      )}
+                      {extraKg === 0 && (
+                        <Badge variant="secondary" className="text-xs">
+                          {baseWeight}kg
+                        </Badge>
+                      )}
                     </div>
                     <p className="text-sm text-muted-foreground">{service.description}</p>
                   </div>
                   <div className="text-right">
                     <div className="font-semibold">
-                      {serviceType === "classic" ? `${(service.base_price * item.quantity).toFixed(2)}€` : "Inclus"}
+                      {serviceType === "classic" ? `${(bookingData.totalAmount || 0).toFixed(2)}€` : "Inclus"}
                     </div>
-                    {serviceType === "classic" && (
-                      <div className="text-xs text-muted-foreground">{service.base_price}€ / pièce</div>
+                    {serviceType === "classic" && extraKg > 0 && (
+                        <div className="text-xs text-muted-foreground">
+                        Base: {service.base_price}€ + Extra: {((bookingData.totalAmount || 0) - service.base_price).toFixed(2)}€
+                        </div>
                     )}
                   </div>
                 </div>
@@ -380,12 +407,12 @@ export function SummaryStep({
           <Separator className="my-4" />
 
           <div className="flex items-center justify-between text-lg font-semibold">
-            <span>Total</span>
+            <span>Total estimé</span>
             <div className="flex items-center">
               {serviceType === "classic" ? (
                 <>
                   <Euro className="h-5 w-5 mr-1" />
-                  {getTotalPrice().toFixed(2)}
+                  {getTotalPrice().toFixed(2)} €
                 </>
               ) : (
                 <span className="text-green-600">Inclus dans l'abonnement</span>
@@ -394,7 +421,9 @@ export function SummaryStep({
           </div>
 
           {serviceType === "classic" && (
-            <p className="text-xs text-muted-foreground mt-2">Prix pour 7kg de linge par service sélectionné</p>
+            <p className="text-xs text-muted-foreground mt-2">
+              Prix estimé incluant les options sélectionnées. Le prix final sera ajusté selon le poids réel.
+            </p>
           )}
         </CardContent>
       </Card>

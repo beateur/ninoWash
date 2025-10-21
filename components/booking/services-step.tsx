@@ -32,7 +32,7 @@ interface BookingItem {
 
 interface ServicesStepProps {
   items: BookingItem[]
-  onUpdate: (data: { items: BookingItem[] }) => void
+  onUpdate: (data: { items: BookingItem[]; totalAmount: number }) => void
   serviceType?: string
   readOnly?: boolean
 }
@@ -92,11 +92,21 @@ export function ServicesStep({ items, onUpdate, serviceType = "classic", readOnl
 
   const syncOnUpdate = (serviceId: string | null, nextExtraKg: number) => {
     if (!serviceId) {
-      onUpdate({ items: [] })
+      onUpdate({ items: [], totalAmount: 0 })
       return
     }
+    
+    // Calculer le prix total (base + extra kg)
+    const service = services.find((s) => s.id === serviceId)
+    const basePrice = service?.base_price || 0
+    const extraPrice = nextExtraKg > 0 ? getExtraKgPrice(nextExtraKg) : 0
+    const totalAmount = basePrice + extraPrice
+    
     const specialInstructions = JSON.stringify({ extraKg: nextExtraKg })
-    onUpdate({ items: [{ serviceId, quantity: 1, specialInstructions }] })
+    onUpdate({ 
+      items: [{ serviceId, quantity: 1, specialInstructions }],
+      totalAmount 
+    })
   }
 
   const handleServiceSelect = (serviceId: string) => {

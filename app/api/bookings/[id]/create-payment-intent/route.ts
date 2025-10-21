@@ -60,27 +60,25 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       customerEmail = booking.metadata.guest_contact.email
       console.log("[v0] Found email from metadata.guest_contact:", customerEmail)
     } 
-    // PRIORITY 2: If no metadata email and user_id exists, fetch from auth.users via SQL
+    // PRIORITY 2: If no metadata email and user_id exists, fetch from auth.admin API
     else if (booking.user_id) {
-      console.log("[v0] No metadata email, fetching from auth.users for user_id:", booking.user_id)
+      console.log("[v0] No metadata email, fetching from auth.admin for user_id:", booking.user_id)
       
-      // Query auth.users directly via SQL (bypasses auth.admin API)
+      // Use auth.admin.getUserById() API (official method)
       const adminClient = createAdminClient()
-      const { data: authUsers, error: authError } = await adminClient
-        .from('auth.users')
-        .select('email')
-        .eq('id', booking.user_id)
-        .single()
+      const { data: authUser, error: authError } = await adminClient.auth.admin.getUserById(
+        booking.user_id
+      )
       
       if (authError) {
-        console.error("[v0] Error fetching from auth.users:", authError)
+        console.error("[v0] Error fetching user by ID:", authError)
       }
       
-      if (authUsers?.email) {
-        customerEmail = authUsers.email
-        console.log("[v0] Found email from auth.users:", customerEmail)
+      if (authUser?.user?.email) {
+        customerEmail = authUser.user.email
+        console.log("[v0] Found email from auth.admin.getUserById:", customerEmail)
       } else {
-        console.error("[v0] User exists but no email found in auth.users")
+        console.error("[v0] User exists but no email found")
       }
     } else {
       // No user_id and no guest_contact email
@@ -112,18 +110,38 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     
     console.log("[v0] ✅ Customer email found:", customerEmail)
 
-    // 5. Build line items for Stripe
-    const lineItems = booking.booking_items.map((item: any) => ({
+    // 5. Calculer le montant total correct (depuis booking.total_amount_cents)
+    // ⚠️ NE PAS utiliser booking_items.unit_price car il ne contient que le prix de base
+    // sans les options de kg supplémentaires
+    const totalAmountCents = booking.total_amount_cents || Math.round((booking.total_amount || 0) * 100)
+    
+    if (totalAmountCents <= 0) {
+      console.error("[v0] ❌ Invalid total amount:", totalAmountCents)
+      return NextResponse.json({ 
+        error: "Montant de réservation invalide" 
+      }, { status: 400 })
+    }
+    
+    console.log("[v0] Total amount for Stripe:", {
+      totalAmountCents,
+      totalAmountEuros: totalAmountCents / 100,
+      bookingNumber: booking.booking_number
+    })
+
+    // Build line items for Stripe - utiliser le montant total validé
+    const lineItems = [{
       price_data: {
         currency: "eur",
         product_data: {
-          name: item.service?.name || "Service Nino Wash",
-          description: `Quantité: ${item.quantity}`,
+          name: `Réservation Nino Wash - ${booking.booking_number}`,
+          description: booking.booking_items
+            .map((item: any) => `${item.service?.name || 'Service'} (x${item.quantity})`)
+            .join(', '),
         },
-        unit_amount: Math.round(item.unit_price * 100), // cents
+        unit_amount: totalAmountCents, // ✅ Utiliser le total validé incluant options
       },
-      quantity: item.quantity,
-    }))
+      quantity: 1,
+    }]
 
     // 6. Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({

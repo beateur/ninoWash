@@ -40,6 +40,7 @@ export default function ReservationClient({
     pickupAddress: existingBooking?.pickup_address || null,
     deliveryAddress: existingBooking?.delivery_address || null,
     items: existingBooking?.booking_items || [],
+    totalAmount: existingBooking?.total_amount || 0,  // ← AJOUTÉ: Stocker le totalAmount
     pickupDate: existingBooking?.pickup_date || "",
     pickupTimeSlot: existingBooking?.pickup_time_slot || "",
     pickupSlot: null as LogisticSlot | null,
@@ -97,7 +98,7 @@ export default function ReservationClient({
       case 2:
         return bookingData.items.length > 0
       case 3:
-        return bookingData.pickupDate && bookingData.pickupTimeSlot
+        return bookingData.pickupSlot !== null && bookingData.deliverySlot !== null
       default:
         return true
     }

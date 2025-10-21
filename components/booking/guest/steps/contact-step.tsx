@@ -6,7 +6,7 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { guestContactSchema, type GuestContact } from "@/lib/validations/guest-contact"
@@ -37,6 +37,7 @@ export function ContactStep({ initialData, onComplete }: ContactStepProps) {
 
   const form = useForm<GuestContact>({
     resolver: zodResolver(guestContactSchema),
+    mode: "onBlur", // ← Validation seulement quand on quitte le champ (pas de saccades)
     defaultValues: initialData || {
       email: "",
       firstName: "",
@@ -72,6 +73,64 @@ export function ContactStep({ initialData, onComplete }: ContactStepProps) {
       setIsChecking(false)
     }
   }
+
+  // Debounce optimisé pour email check (équivalent onCommit SwiftUI)
+  const debouncedCheckEmail = useMemo(() => {
+    let timeoutId: NodeJS.Timeout
+    return (email: string) => {
+      clearTimeout(timeoutId)
+      if (email && email.includes("@")) {
+        timeoutId = setTimeout(() => {
+          checkEmail(email)
+        }, 800) // 800ms après la dernière frappe
+      }
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Surveiller UNIQUEMENT le champ email (pas tous les champs)
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      // Ne surveiller que le champ email, pas firstName, lastName, etc.
+      if (name === "email" && value.email) {
+        debouncedCheckEmail(value.email)
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [form, debouncedCheckEmail])
+
+  // Valider et mettre à jour le parent quand l'utilisateur termine
+  const handleValidation = () => {
+    const data = form.getValues()
+    if (
+      form.formState.isValid &&
+      data.email &&
+      data.firstName &&
+      data.lastName &&
+      data.rgpdConsent
+    ) {
+      onComplete(data)
+    }
+  }
+
+  // Exposer la validation au parent
+  const canProceed = () => {
+    const data = form.getValues()
+    return (
+      form.formState.isValid &&
+      !!data.email &&
+      !!data.firstName &&
+      !!data.lastName &&
+      !!data.rgpdConsent
+    )
+  }
+
+  // Synchroniser l'état initial
+  useEffect(() => {
+    if (canProceed()) {
+      handleValidation()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const onSubmit = (data: GuestContact) => {
     if (emailExists) {
@@ -243,13 +302,20 @@ export function ContactStep({ initialData, onComplete }: ContactStepProps) {
               pour définir votre mot de passe.
             </AlertDescription>
           </Alert>
-
-          {/* Submit */}
-          <Button type="submit" className="w-full" size="lg">
-            Continuer →
-          </Button>
         </form>
       </Form>
+
+      {/* Bouton de validation visible */}
+      <div className="flex justify-end mt-6">
+        <Button
+          onClick={handleValidation}
+          disabled={!canProceed()}
+          size="lg"
+          className="min-w-[200px]"
+        >
+          Valider les informations
+        </Button>
+      </div>
     </div>
   )
 }
