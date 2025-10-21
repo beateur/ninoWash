@@ -14,6 +14,8 @@ const PROTECTED_ROUTES = {
   guest: ["/auth/signin", "/auth/signup"],
   // Guest booking flow (no auth required)
   guestBooking: ["/reservation/guest"],
+  // Booking success page (requires authentication to view booking details)
+  bookingSuccess: ["/booking/"],
 }
 
 export async function middleware(request: NextRequest) {
@@ -72,6 +74,19 @@ export async function middleware(request: NextRequest) {
     // If user is logged in and tries to access guest flow, allow it
     // (they might want to create a booking for someone else)
     console.log("[v0] Guest booking route accessed:", pathname, "User:", user ? "logged in" : "anonymous")
+  }
+
+  // Check booking success pages - REQUIRE AUTHENTICATION
+  // User must be logged in to view booking details and payment confirmation
+  if (PROTECTED_ROUTES.bookingSuccess.some((route) => pathname.startsWith(route))) {
+    if (!user) {
+      // Preserve the full URL (including session_id) for redirect after login
+      const redirectUrl = new URL("/auth/signin", request.url)
+      redirectUrl.searchParams.set("redirect", pathname + request.nextUrl.search)
+      console.log("[v0] Booking success page requires auth, redirecting to login:", pathname)
+      return NextResponse.redirect(redirectUrl)
+    }
+    console.log("[v0] Booking success page accessed by authenticated user:", pathname)
   }
 
   // FEATURE FLAG GUARD: Block subscription access if flag OFF
