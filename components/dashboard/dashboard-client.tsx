@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { BookingButton } from "@/components/ui/booking-button"
@@ -10,6 +10,7 @@ import Link from "next/link"
 import { BookingCard, BookingDetailPanel } from "@/components/booking/booking-card"
 import { CreditsDisplay } from "@/components/subscription/credits-display"
 import { DevCreditReset } from "@/components/subscription/dev-credit-reset"
+import { useToast } from "@/hooks/use-toast"
 import type { User } from "@supabase/supabase-js"
 
 interface BookingWithAddresses {
@@ -46,6 +47,25 @@ export function DashboardClient({
 }: DashboardClientProps) {
   const [selectedBooking, setSelectedBooking] = useState<BookingWithAddresses | null>(null)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const { toast } = useToast()
+
+  // Détecter le retour de paiement réussi
+  useEffect(() => {
+    const paymentStatus = searchParams.get("payment")
+    const bookingId = searchParams.get("booking_id")
+    
+    if (paymentStatus === "success" && bookingId) {
+      toast({
+        title: "✅ Paiement confirmé !",
+        description: "Votre réservation a été confirmée avec succès. Vous recevrez un email de confirmation.",
+        duration: 8000,
+      })
+      
+      // Nettoyer les paramètres de l'URL
+      router.replace("/dashboard")
+    }
+  }, [searchParams, router, toast])
 
   const activeBookings = bookings.filter(
     (b) => ["confirmed", "picked_up", "in_progress", "ready", "pending"].includes(b.status)

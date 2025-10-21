@@ -148,7 +148,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       mode: "payment",
       customer_email: customerEmail,
       line_items: lineItems,
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/booking/${bookingId}/success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=success&booking_id=${bookingId}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/booking/${bookingId}/pay`,
       metadata: {
         booking_id: bookingId,
