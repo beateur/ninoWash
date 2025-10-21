@@ -93,7 +93,7 @@ export async function handler(req: Request): Promise<Response> {
     }
 
     // Build payment link
-    const appUrl = Deno.env.get("NEXT_PUBLIC_APP_URL") || "https://ninowash.com"
+    const appUrl = Deno.env.get("NEXT_PUBLIC_APP_URL") || "https://www.ninowash.org"
     const paymentLink = `${appUrl}/booking/${bookingId}/pay`
 
     // Prepare email content
