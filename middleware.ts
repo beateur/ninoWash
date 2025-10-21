@@ -79,14 +79,22 @@ export async function middleware(request: NextRequest) {
   // Check booking success pages - REQUIRE AUTHENTICATION
   // User must be logged in to view booking details and payment confirmation
   if (PROTECTED_ROUTES.bookingSuccess.some((route) => pathname.startsWith(route))) {
-    if (!user) {
-      // Preserve the full URL (including session_id) for redirect after login
+    const sessionId = request.nextUrl.searchParams.get("session_id")
+    
+    // EXCEPTION: Si session_id présent (retour de Stripe), permettre l'accès temporaire
+    // La page elle-même gérera l'authentification/création de compte
+    if (sessionId) {
+      console.log("[v0] Stripe redirect detected (session_id present), allowing access:", pathname)
+      // Continue - allow access even without auth
+    } else if (!user) {
+      // Pas de session Stripe ET pas d'utilisateur authentifié → forcer login
       const redirectUrl = new URL("/auth/signin", request.url)
       redirectUrl.searchParams.set("redirect", pathname + request.nextUrl.search)
       console.log("[v0] Booking success page requires auth, redirecting to login:", pathname)
       return NextResponse.redirect(redirectUrl)
+    } else {
+      console.log("[v0] Booking success page accessed by authenticated user:", pathname)
     }
-    console.log("[v0] Booking success page accessed by authenticated user:", pathname)
   }
 
   // FEATURE FLAG GUARD: Block subscription access if flag OFF
