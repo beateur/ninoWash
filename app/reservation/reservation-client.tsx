@@ -14,6 +14,7 @@ import { DateTimeStep } from "@/components/booking/datetime-step"
 import { SummaryStep } from "@/components/booking/summary-step"
 import { ChevronLeft, ChevronRight, Info, Edit } from "lucide-react"
 import type { LogisticSlot } from "@/lib/types/logistic-slots"
+import { trackInitiateCheckout } from "@/lib/analytics/facebook-pixel"
 
 const STEPS = [
   { id: 1, title: "Adresses", description: "Collecte et livraison" },
@@ -51,6 +52,13 @@ export default function ReservationClient({
 
   const { user, loading } = useAuth()
   const router = useRouter()
+
+  // Track InitiateCheckout event when booking process starts
+  useEffect(() => {
+    if (!isModification) {
+      trackInitiateCheckout(serviceType)
+    }
+  }, [isModification, serviceType])
 
   useEffect(() => {
     const requiresAuth = serviceType !== "classic" || isModification

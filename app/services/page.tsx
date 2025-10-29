@@ -3,11 +3,13 @@ import { Footer } from "@/components/layout/footer"
 import { ServicesSection } from "@/components/sections/services-section"
 import { Button } from "@/components/ui/button"
 import { BookingButton } from "@/components/ui/booking-button"
+import { TrackViewContent } from "@/components/analytics/track-view-content"
 import Link from "next/link"
 
 export default function ServicesPage() {
   return (
     <main className="min-h-screen">
+      <TrackViewContent contentName="Services Page" contentCategory="services" />
       <Header />
       {/* Hero Section */}
       <section className="py-16 bg-gradient-to-b from-primary/5 to-transparent">

@@ -6,6 +6,8 @@ import { Suspense } from "react"
 import { AuthProvider } from "@/lib/hooks/use-auth"
 import { Toaster } from "@/components/ui/toaster"
 import { CookieBanner } from "@/components/gdpr/cookie-banner"
+import { FacebookPixelScript } from "@/components/analytics/facebook-pixel-script"
+import { FacebookPixel } from "@/components/analytics/facebook-pixel"
 import "./globals.css"
 
 const inter = Inter({
@@ -45,7 +47,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" className={`${inter.variable} ${playfair.variable}`}>
+      <head>
+        <FacebookPixelScript />
+      </head>
       <body className="font-sans antialiased">
+        <FacebookPixel />
         <AuthProvider>
           <Suspense fallback={null}>{children}</Suspense>
           <Toaster />
