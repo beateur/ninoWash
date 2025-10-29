@@ -12,6 +12,7 @@ import { Loader2, CreditCard, Lock } from "lucide-react"
 import { toast } from "sonner"
 import { createClient } from "@/lib/supabase/client"
 import { stripePromise } from "@/lib/stripe/client"
+import { trackPurchase, trackLead } from "@/lib/analytics/facebook-pixel"
 
 interface StripePaymentProps {
   bookingData: {
@@ -101,6 +102,12 @@ function PaymentForm({
         console.log("[v0] Payment succeeded:", paymentIntent.id)
         toast.success("Paiement réussi !")
         
+        // Track successful purchase with Facebook Pixel
+        trackPurchase({
+          value: bookingData.totalAmount / 100, // Convert cents to euros
+          currency: 'EUR',
+        })
+        
         // Call orchestration API to create account + booking + session
         console.log("[v0] Calling guest booking orchestration API...")
         try {
@@ -119,6 +126,13 @@ function PaymentForm({
           }
 
           console.log("[v0] Booking orchestration completed:", orchestrationData)
+          
+          // Track lead conversion (booking completed)
+          trackLead({
+            email: bookingData.contact.email,
+            phone: bookingData.contact.phone,
+            name: bookingData.contact.fullName,
+          })
           
           // If session tokens are provided, set them for auto-login
           if (orchestrationData.session?.access_token && orchestrationData.session?.refresh_token) {
