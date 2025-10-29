@@ -1,3 +1,5 @@
+import { Header } from "@/components/layout/header"
+import { Footer } from "@/components/layout/footer"
 import { ServicesSection } from "@/components/sections/services-section"
 import { Button } from "@/components/ui/button"
 import { BookingButton } from "@/components/ui/booking-button"
@@ -5,7 +7,8 @@ import Link from "next/link"
 
 export default function ServicesPage() {
   return (
-    <div className="min-h-screen">
+    <main className="min-h-screen">
+      <Header />
       {/* Hero Section */}
       <section className="py-16 bg-gradient-to-b from-primary/5 to-transparent">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -65,6 +68,8 @@ export default function ServicesPage() {
           </div>
         </div>
       </section>
-    </div>
+
+      <Footer />
+    </main>
   )
 }
