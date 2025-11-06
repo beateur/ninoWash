@@ -194,9 +194,12 @@ export class ClientAuthService {
       const supabase = createBrowserClient()
 
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        // ✅ Utiliser callback au lieu de reset-password directement
-        // Cela permet d'échanger le code contre une session avant d'afficher le formulaire
-        redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
+        // ✅ Redirection directe vers reset-password (pas de callback intermédiaire)
+        // Supabase va créer la session automatiquement via PKCE
+        // Utiliser www pour correspondre à la config Supabase
+        redirectTo: process.env.NODE_ENV === 'production' 
+          ? 'https://www.ninowash.fr/auth/reset-password'
+          : `${window.location.origin}/auth/reset-password`,
       })
 
       if (error) {

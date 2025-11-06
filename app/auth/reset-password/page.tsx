@@ -36,6 +36,8 @@ function ResetPasswordForm() {
   useEffect(() => {
     async function checkSession() {
       try {
+        const supabase = createClient()
+        
         // Vérifier d'abord les erreurs dans l'URL
         const urlError = searchParams.get("error")
         const errorDescription = searchParams.get("error_description")
@@ -53,13 +55,22 @@ function ResetPasswordForm() {
           return
         }
 
-        // Vérifier la session (doit exister après PKCE callback)
-        const supabase = createClient()
+        // ✅ Attendre que Supabase détecte et échange le code PKCE depuis l'URL
+        // Avec flowType: 'pkce' et detectSessionInUrl: true, Supabase fait ça automatiquement
+        await new Promise(resolve => setTimeout(resolve, 1000)) // Petit délai pour laisser Supabase s'initialiser
+        
+        // Vérifier la session (doit exister après PKCE automatique)
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
         
         if (sessionError || !session) {
-          setTokenError(true)
-          setError("Votre session a expiré. Veuillez demander un nouveau lien de réinitialisation.")
+          // Réessayer une fois après 2 secondes (au cas où le PKCE prend du temps)
+          await new Promise(resolve => setTimeout(resolve, 2000))
+          const { data: { session: retrySession }, error: retryError } = await supabase.auth.getSession()
+          
+          if (retryError || !retrySession) {
+            setTokenError(true)
+            setError("Votre session a expiré. Veuillez demander un nouveau lien de réinitialisation.")
+          }
         }
       } catch (err) {
         setTokenError(true)
