@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Lock, CheckCircle2, AlertCircle } from "lucide-react"
 import { newPasswordSchema, type NewPasswordInput } from "@/lib/validations/auth"
 import { clientAuth } from "@/lib/services/auth.service.client"
+import { createClient } from "@/lib/supabase/client"
 import Link from "next/link"
 
 export default function ResetPasswordPage() {
@@ -19,6 +20,7 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [tokenError, setTokenError] = useState(false)
+  const [isCheckingSession, setIsCheckingSession] = useState(true)
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -30,22 +32,59 @@ export default function ResetPasswordPage() {
     },
   })
 
-  // Check if we have a valid token in the URL
+  // ✅ Vérifier si on a une session valide (PKCE flow)
   useEffect(() => {
-    const error = searchParams.get("error")
-    const errorDescription = searchParams.get("error_description")
+    async function checkSession() {
+      try {
+        // Vérifier d'abord les erreurs dans l'URL
+        const urlError = searchParams.get("error")
+        const errorDescription = searchParams.get("error_description")
 
-    if (error) {
-      setTokenError(true)
-      if (errorDescription) {
-        setError(decodeURIComponent(errorDescription))
-      } else if (error === "access_denied") {
-        setError("Le lien de réinitialisation a expiré ou est invalide")
-      } else {
-        setError("Erreur lors de la vérification du lien")
+        if (urlError) {
+          setTokenError(true)
+          if (errorDescription) {
+            setError(decodeURIComponent(errorDescription))
+          } else if (urlError === "access_denied") {
+            setError("Le lien de réinitialisation a expiré ou est invalide")
+          } else {
+            setError("Erreur lors de la vérification du lien")
+          }
+          setIsCheckingSession(false)
+          return
+        }
+
+        // Vérifier la session (doit exister après PKCE callback)
+        const supabase = createClient()
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        
+        if (sessionError || !session) {
+          setTokenError(true)
+          setError("Votre session a expiré. Veuillez demander un nouveau lien de réinitialisation.")
+        }
+      } catch (err) {
+        setTokenError(true)
+        setError("Erreur lors de la vérification de votre session.")
+      } finally {
+        setIsCheckingSession(false)
       }
     }
+
+    checkSession()
   }, [searchParams])
+
+  // ✅ Afficher loading pendant vérification de session
+  if (isCheckingSession) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted">
+        <Card className="w-full max-w-md mx-auto">
+          <CardContent className="pt-6 flex flex-col items-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">Vérification de votre session...</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   const onSubmit = async (data: NewPasswordInput) => {
     setIsLoading(true)
