@@ -1,5 +1,5 @@
 import type React from "react"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Inter, Playfair_Display } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
@@ -28,8 +28,6 @@ export const metadata: Metadata = {
     "Service de collecte, nettoyage, repassage et livraison de vos vêtements. Le pressing qui vient à vous.",
   generator: "Nino Wash",
   manifest: "/manifest.json",
-  themeColor: "#000000",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -38,6 +36,14 @@ export const metadata: Metadata = {
   icons: {
     apple: "/apple-touch-icon.jpg",
   },
+}
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: "#000000",
 }
 
 export default function RootLayout({
