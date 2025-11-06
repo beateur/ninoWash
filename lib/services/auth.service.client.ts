@@ -196,7 +196,10 @@ export class ClientAuthService {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         // ✅ Redirection directe vers reset-password (pas de callback intermédiaire)
         // Supabase va créer la session automatiquement via PKCE
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+        // Utiliser www pour correspondre à la config Supabase
+        redirectTo: process.env.NODE_ENV === 'production' 
+          ? 'https://www.ninowash.fr/auth/reset-password'
+          : `${window.location.origin}/auth/reset-password`,
       })
 
       if (error) {
