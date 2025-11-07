@@ -57,6 +57,15 @@ export async function middleware(request: NextRequest) {
           })
         },
       },
+      cookieOptions: {
+        name: 'sb-auth-token',
+        domain: process.env.NODE_ENV === 'production' 
+          ? process.env.NEXT_PUBLIC_DOMAIN 
+          : undefined,
+        path: '/',
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+      },
     },
   )
 
@@ -141,7 +150,9 @@ export async function middleware(request: NextRequest) {
 
   // Check if route requires guest (redirect authenticated users)
   if (PROTECTED_ROUTES.guest.some((route) => pathname.startsWith(route))) {
+    console.log("[v0] Middleware - Guest route detected:", pathname, "User:", user ? "authenticated" : "anonymous")
     if (user) {
+      console.log("[v0] Middleware - Redirecting authenticated user to dashboard")
       return NextResponse.redirect(new URL("/dashboard", request.url))
     }
   }

@@ -56,21 +56,30 @@ function ResetPasswordForm() {
         }
 
         // ✅ Attendre que Supabase détecte et échange le code PKCE depuis l'URL
-        // Avec flowType: 'pkce' et detectSessionInUrl: true, Supabase fait ça automatiquement
-        await new Promise(resolve => setTimeout(resolve, 1000)) // Petit délai pour laisser Supabase s'initialiser
-        
-        // Vérifier la session (doit exister après PKCE automatique)
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-        
-        if (sessionError || !session) {
-          // Réessayer une fois après 2 secondes (au cas où le PKCE prend du temps)
-          await new Promise(resolve => setTimeout(resolve, 2000))
-          const { data: { session: retrySession }, error: retryError } = await supabase.auth.getSession()
+        // Retry avec exponential backoff pour supporter connexions lentes
+        const MAX_RETRIES = 6
+        const BASE_DELAY = 500
+
+        let session = null
+        for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+          const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
           
-          if (retryError || !retrySession) {
-            setTokenError(true)
-            setError("Votre session a expiré. Veuillez demander un nouveau lien de réinitialisation.")
+          if (sessionData?.session) {
+            session = sessionData.session
+            console.log(`[Reset Password] Session détectée (tentative ${attempt + 1})`)
+            break
           }
+          
+          if (attempt < MAX_RETRIES - 1) {
+            const delay = BASE_DELAY * Math.pow(2, attempt)
+            console.log(`[Reset Password] Tentative ${attempt + 1}/${MAX_RETRIES}, attente ${delay}ms`)
+            await new Promise(resolve => setTimeout(resolve, delay))
+          }
+        }
+
+        if (!session) {
+          setTokenError(true)
+          setError("Votre session a expiré. Veuillez demander un nouveau lien de réinitialisation.")
         }
       } catch (err) {
         setTokenError(true)
@@ -112,11 +121,10 @@ function ResetPasswordForm() {
       // Success: show confirmation and redirect
       setSuccess(true)
       
-      // Redirect to dashboard after 2 seconds
+      // Redirect to dashboard after 1.5 seconds
       setTimeout(() => {
-        router.push("/dashboard")
-        router.refresh()
-      }, 2000)
+        window.location.href = "/dashboard"
+      }, 1500)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Une erreur est survenue")
     } finally {

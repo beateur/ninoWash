@@ -121,6 +121,41 @@ export class ClientAuthService {
         }
       }
 
+      // ✅ FIX: Nettoyer manuellement TOUT le localStorage/cookies Supabase
+      // Car supabase.auth.signOut() ne supprime pas toujours tout en PKCE
+      if (typeof window !== "undefined") {
+        // 1. Supprimer tous les items localStorage liés à Supabase
+        Object.keys(localStorage).forEach((key) => {
+          if (key.includes("supabase") || key.includes("auth") || key.includes("sb-")) {
+            localStorage.removeItem(key)
+          }
+        })
+
+        // 2. Supprimer tous les cookies Supabase
+        document.cookie.split(";").forEach((cookie) => {
+          const name = cookie.split("=")[0].trim()
+          if (name.includes("supabase") || name.includes("auth") || name.includes("sb-")) {
+            // Supprimer pour le domaine actuel
+            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
+            // Supprimer pour localhost
+            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=localhost`
+            // Supprimer pour le domaine parent
+            const domain = window.location.hostname
+            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${domain}`
+          }
+        })
+
+        // 3. Nettoyer sessionStorage aussi
+        Object.keys(sessionStorage).forEach((key) => {
+          if (key.includes("supabase") || key.includes("auth") || key.includes("sb-")) {
+            sessionStorage.removeItem(key)
+          }
+        })
+      }
+
+      // ✅ FIX: Forcer reload complet pour clear toutes les sessions
+      window.location.href = "/"
+
       return {
         success: true,
         message: "Déconnexion réussie",
@@ -196,10 +231,7 @@ export class ClientAuthService {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         // ✅ Redirection directe vers reset-password (pas de callback intermédiaire)
         // Supabase va créer la session automatiquement via PKCE
-        // Utiliser www pour correspondre à la config Supabase
-        redirectTo: process.env.NODE_ENV === 'production' 
-          ? 'https://www.ninowash.fr/auth/reset-password'
-          : `${window.location.origin}/auth/reset-password`,
+        redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/auth/reset-password`,
       })
 
       if (error) {
