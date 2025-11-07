@@ -67,9 +67,16 @@ export function AuthForm({ mode, onSuccess, defaultEmail, infoMessage }: AuthFor
       if (isSignUp) {
         form.reset()
       } else {
-        onSuccess?.()
-        router.push("/dashboard")
-        router.refresh()
+        // ✅ FIX: Attendre que la session soit bien établie
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
+        // ✅ Callback custom si fourni (ex: post-booking)
+        if (onSuccess) {
+          onSuccess()
+        } else {
+          // ✅ Utiliser window.location pour forcer full reload
+          window.location.href = "/dashboard"
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Une erreur est survenue")

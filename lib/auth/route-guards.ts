@@ -27,6 +27,15 @@ async function getServerClient() {
         cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
       },
     },
+    cookieOptions: {
+      name: 'sb-auth-token',
+      domain: process.env.NODE_ENV === 'production' 
+        ? process.env.NEXT_PUBLIC_DOMAIN 
+        : undefined,
+      path: '/',
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+    },
   })
 }
 

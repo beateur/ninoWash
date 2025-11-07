@@ -4,6 +4,16 @@
 
 Nino Wash est une plateforme moderne de pressing à domicile qui permet aux utilisateurs de réserver facilement des services de nettoyage et repassage avec collecte et livraison à domicile.
 
+## ⚠️ Corrections Auth Récentes (Nov 2025)
+
+� **Correctifs appliqués le 7 Nov 2025:**
+- ✅ Redirections dashboard après login/signup/reset password
+- ✅ Déconnexion correcte (plus de reconnexion auto)
+- ✅ Amélioration retry mechanism reset password (PKCE)
+- ✅ Configuration domain via env var
+
+📄 **Documentation:** Voir [`FIX_AUTH_REDIRECTS.md`](./FIX_AUTH_REDIRECTS.md) pour détails complets.
+
 ## ✨ Fonctionnalités Principales
 
 ### Pour les Clients

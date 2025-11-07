@@ -1,17 +1,8 @@
 import { requireAuth } from "@/lib/auth/route-guards"
-import { redirect } from "next/navigation"
 import { DashboardClient } from "@/components/dashboard/dashboard-client"
 
 export default async function DashboardPage() {
   const { user, supabase } = await requireAuth()
-
-  const {
-    data: { user: fetchedUser },
-  } = await supabase.auth.getUser()
-
-  if (!fetchedUser) {
-    redirect("/auth/signin")
-  }
 
   // Fetch bookings with addresses
   const { data: bookings } = await supabase
