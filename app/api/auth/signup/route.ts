@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       email: validatedData.email,
       password: validatedData.password,
       options: {
-        emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${request.nextUrl.origin}/auth/callback`,
+        emailRedirectTo: `${request.nextUrl.origin}/api/auth/callback?type=signup`,
         data: {
           first_name: validatedData.firstName,
           last_name: validatedData.lastName,
