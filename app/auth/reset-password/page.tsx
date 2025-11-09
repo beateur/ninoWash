@@ -32,13 +32,13 @@ function ResetPasswordForm() {
     },
   })
 
-  // ✅ Vérifier si on a une session valide (PKCE flow)
+  // ✅ Vérifier session et erreurs (session créée par /api/auth/callback)
   useEffect(() => {
     async function checkSession() {
       try {
         const supabase = createClient()
         
-        // Vérifier d'abord les erreurs dans l'URL
+        // Vérifier erreurs dans l'URL
         const urlError = searchParams.get("error")
         const errorDescription = searchParams.get("error_description")
 
@@ -55,29 +55,10 @@ function ResetPasswordForm() {
           return
         }
 
-        // ✅ Attendre que Supabase détecte et échange le code PKCE depuis l'URL
-        // Retry avec exponential backoff pour supporter connexions lentes
-        const MAX_RETRIES = 6
-        const BASE_DELAY = 500
+        // ✅ Vérifier session (doit être créée par Route Handler /api/auth/callback)
+        const { data: sessionData } = await supabase.auth.getSession()
 
-        let session = null
-        for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-          const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
-          
-          if (sessionData?.session) {
-            session = sessionData.session
-            console.log(`[Reset Password] Session détectée (tentative ${attempt + 1})`)
-            break
-          }
-          
-          if (attempt < MAX_RETRIES - 1) {
-            const delay = BASE_DELAY * Math.pow(2, attempt)
-            console.log(`[Reset Password] Tentative ${attempt + 1}/${MAX_RETRIES}, attente ${delay}ms`)
-            await new Promise(resolve => setTimeout(resolve, delay))
-          }
-        }
-
-        if (!session) {
+        if (!sessionData?.session) {
           setTokenError(true)
           setError("Votre session a expiré. Veuillez demander un nouveau lien de réinitialisation.")
         }
