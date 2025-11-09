@@ -40,8 +40,9 @@ export class ClientAuthService {
         email: validatedData.email,
         password: validatedData.password,
         options: {
-          emailRedirectTo:
-            process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/auth/callback`,
+          // ✅ PKCE officiel : Route Handler au lieu de page callback
+          // Template email garde {{ .ConfirmationURL }} (pas de modification)
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/api/auth/callback?type=signup`,
           data: {
             first_name: validatedData.firstName,
             last_name: validatedData.lastName,
@@ -229,9 +230,9 @@ export class ClientAuthService {
       const supabase = createBrowserClient()
 
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        // ✅ Redirection directe vers reset-password (pas de callback intermédiaire)
-        // Supabase va créer la session automatiquement via PKCE
-        redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/auth/reset-password`,
+        // ✅ PKCE officiel : Redirection vers Route Handler qui fera exchangeCodeForSession
+        // puis redirect vers /auth/reset-password avec session établie
+        redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/api/auth/callback?type=recovery`,
       })
 
       if (error) {

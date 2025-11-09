@@ -26,6 +26,15 @@ export default async function AuthCallbackPage({
           }
         },
       },
+      cookieOptions: {
+        name: 'sb-auth-token',
+        domain: process.env.NODE_ENV === 'production' 
+          ? process.env.NEXT_PUBLIC_DOMAIN 
+          : undefined,
+        path: '/',
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+      },
     },
   )
 
