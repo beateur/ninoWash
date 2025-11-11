@@ -31,6 +31,15 @@ export async function apiRequireAuth(request: NextRequest): Promise<ApiGuardResu
           // Not needed for API routes
         },
       },
+      cookieOptions: {
+        name: 'sb-auth-token',
+        domain: process.env.NODE_ENV === 'production' 
+          ? process.env.NEXT_PUBLIC_DOMAIN 
+          : undefined,
+        path: '/',
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+      },
     },
   )
 
@@ -76,6 +85,15 @@ export async function apiRequireApiKey(request: NextRequest): Promise<{ apiKey: 
           }))
         },
         setAll() {},
+      },
+      cookieOptions: {
+        name: 'sb-auth-token',
+        domain: process.env.NODE_ENV === 'production' 
+          ? process.env.NEXT_PUBLIC_DOMAIN 
+          : undefined,
+        path: '/',
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
       },
     },
   )
