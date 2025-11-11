@@ -1,152 +1,59 @@
-# 🔐 Auth PKCE - Problèmes & Solutions
+# 🔐 Auth PKCE - Migration Officielle Complète
 
-**Date:** 7 Novembre 2025  
-**Status:** 🔴 Bugs Critiques Identifiés + Nouveaux Problèmes Redirection
+**Date:** 9 Novembre 2025  
+**Status:** ✅ Migration PKCE Officielle Terminée
 
 ---
 
 ## 🎯 Résumé Exécutif
 
-### ✅ Objectif Atteint
-- Safari iOS reset password fonctionne (migration PKCE)
+### ✅ Migration Complétée
+- **Route Handler officiel** `/api/auth/callback` implémenté selon docs Supabase 2025
+- **Safari iOS reset password** fonctionne (fix mobile PKCE timeout)
+- **Tous les flows auth** migrés vers méthode officielle
+- **Code legacy** supprimé (`/app/auth/callback/page.tsx`)
 
-### 🔴 Problèmes Actuels
+### 🏗️ Architecture Finale
 
-#### 1. Redirections Dashboard Broken (NOUVEAU - 7 Nov)
-**Symptômes:**
-- ✅ Connexion réussie (message affiché)
-- ❌ Pas de redirection automatique vers /dashboard
-- ❌ Déconnexion ne fonctionne pas (reconnexion automatique)
-- ❌ Signup ne redirige pas vers /dashboard
-
-**Impact:** UX catastrophique - users bloqués après login
-
-#### 2. Double Échange PKCE (SignUp)
-**Impact:** ~20% échecs signup potentiels  
-**Cause:** Auto-détection + échange manuel  
-**Symptôme:** "Code already used"
-
-#### 3. Reset Password Timeout
-**Impact:** ~15% échecs connexions lentes  
-**Cause:** Retry 3s trop court  
-**Symptôme:** "Session expirée"
-
----
-
-## 🚀 Solutions (Par Priorité)
-
-### PRIORITÉ 1: Fixes Redirection Dashboard 🔴
-
-#### Fix 1.1: AuthForm - Attendre Session + Window Location
-
-**Fichier:** `components/forms/auth-form.tsx`
-
-**Ligne ~68 (dans onSubmit):**
-
-Remplacer:
-```typescript
-} else {
-  onSuccess?.()
-  router.push("/dashboard")
-  router.refresh()
-}
 ```
-
-Par:
-```typescript
-} else {
-  // ✅ FIX: Attendre que la session soit bien établie
-  await new Promise(resolve => setTimeout(resolve, 500))
-  
-  // ✅ Callback custom si fourni (ex: post-booking)
-  if (onSuccess) {
-    onSuccess()
-  } else {
-    // ✅ Utiliser window.location pour forcer full reload
-    window.location.href = "/dashboard"
-  }
-}
+┌─────────────────────────────────────────────────────┐
+│ CLIENT-SIDE                                         │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│ resetPasswordForEmail() / signUp()                  │
+│     ↓                                               │
+│ emailRedirectTo: /api/auth/callback?type=recovery  │
+│                                                     │
+└──────────────────────┬──────────────────────────────┘
+                       │
+                       │ Email link click
+                       ↓
+┌─────────────────────────────────────────────────────┐
+│ SERVER-SIDE                                         │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│ GET /api/auth/callback?code=xxx&type=recovery      │
+│     ↓                                               │
+│ exchangeCodeForSession(code)                        │
+│     ↓                                               │
+│ redirect(/auth/reset-password) with session         │
+│                                                     │
+└─────────────────────────────────────────────────────┘
 ```
 
 ---
 
-#### Fix 1.2: Callback Page - Check Session Existante
+## 🔧 Changements Implémentés
 
-**Fichier:** `app/auth/callback/page.tsx`
+### 1. Route Handler Officiel (Nouveau)
 
-Remplacer TOUT le contenu par:
-```typescript
-import { createServerClient } from "@supabase/ssr"
-import { redirect } from "next/navigation"
-import { cookies } from "next/headers"
+**Fichier:** `/app/api/auth/callback/route.ts`
 
-export default async function AuthCallbackPage({
-  searchParams,
-}: {
-  searchParams: { code?: string; error?: string; type?: string; redirect?: string }
-}) {
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options)
-            })
-          } catch (error) {
-            console.log('Cookies will be set after redirect')
-          }
-        },
-      },
-    },
-  )
-
-  // Gérer les erreurs
-  if (searchParams.error) {
-    if (searchParams.type === "recovery") {
-      redirect("/auth/reset-password?error=" + encodeURIComponent(searchParams.error))
-    }
-    redirect("/auth/signin?error=" + encodeURIComponent(searchParams.error))
-  }
-
-  if (searchParams.code) {
-    // ✅ FIX: Vérifier si session existe déjà (auto-détection PKCE)
-    const { data: existingSessionData } = await supabase.auth.getSession()
-    
-    let sessionUser = existingSessionData?.session?.user
-
-    if (!sessionUser) {
-      // Pas de session auto-détectée, faire échange manuel
-      const { data, error } = await supabase.auth.exchangeCodeForSession(searchParams.code)
-
-      if (error) {
-        if (searchParams.type === "recovery") {
-          redirect("/auth/reset-password?error=" + encodeURIComponent(error.message))
-        }
-        redirect("/auth/signin?error=" + encodeURIComponent(error.message))
-      }
-
-      sessionUser = data?.user
-    }
-
-    // Détecter type de recovery
-    const isPasswordRecovery = sessionUser?.user_metadata?.iss?.includes('recovery') || 
-                               searchParams.type === "recovery"
-
-    if (isPasswordRecovery) {
-      redirect("/auth/reset-password")
-    }
-
-    // ✅ FIX: Gérer redirect custom (post-booking)
-    const redirectTo = searchParams.redirect || "/dashboard"
-    redirect(redirectTo)
-  }
+- Gère PKCE code exchange server-side
+- Support `type=recovery` et `type=signup`
+- Support `redirect` query param pour post-booking
+- Vérifie session existante avant exchange (évite double-exchange)
+- Logs détaillés pour debugging mobile
 
   redirect("/dashboard")
 }
@@ -272,32 +179,206 @@ if (sessionError || !session) {
 
 Par:
 ```typescript
-// ✅ Attendre que Supabase détecte et échange le code PKCE depuis l'URL
-// Retry avec exponential backoff pour supporter connexions lentes
+
+
+### 2. Reset Password - Simplification Retry
+
+**Fichier:** `/app/auth/reset-password/page.tsx`
+
+**AVANT:** 6 retries avec exponential backoff (500ms → 16s)
+```typescript
 const MAX_RETRIES = 6
-const BASE_DELAY = 500
-
-let session = null
 for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-  const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
-  
-  if (sessionData?.session) {
-    session = sessionData.session
-    console.log(`[Reset Password] Session détectée (tentative ${attempt + 1})`)
-    break
-  }
-  
-  if (attempt < MAX_RETRIES - 1) {
-    const delay = BASE_DELAY * Math.pow(2, attempt)
-    console.log(`[Reset Password] Tentative ${attempt + 1}/${MAX_RETRIES}, attente ${delay}ms`)
-    await new Promise(resolve => setTimeout(resolve, delay))
-  }
+  const { data } = await supabase.auth.getSession()
+  if (data?.session) break
+  await sleep(BASE_DELAY * Math.pow(2, attempt))
 }
+```
 
-if (!session) {
-  setTokenError(true)
-  setError("Votre session a expiré. Veuillez demander un nouveau lien de réinitialisation.")
+**APRÈS:** Single check (Route Handler crée session avant redirect)
+```typescript
+const { data } = await supabase.auth.getSession()
+if (!data?.session) {
+  setError("Session expirée")
 }
+```
+
+**Raison:** Route Handler échange le code PKCE server-side, session déjà créée quand user arrive sur page.
+
+---
+
+### 3. SignUp - Migration emailRedirectTo
+
+**Fichier:** `/lib/services/auth.service.client.ts`
+
+**AVANT:** `emailRedirectTo: /auth/callback`  
+**APRÈS:** `emailRedirectTo: /api/auth/callback?type=signup`
+
+**Impact:** Signup confirmation emails pointent vers Route Handler.
+
+---
+
+### 4. API Route Legacy - Mise à jour
+
+**Fichier:** `/app/api/auth/signup/route.ts`
+
+Mis à jour `emailRedirectTo` pour cohérence (utilisé par tests).
+
+---
+
+### 5. Suppression Code Legacy
+
+**Supprimé:** `/app/auth/callback/page.tsx` (135 lignes)
+
+Page Server Component remplacée par Route Handler API.
+
+---
+
+## 🧪 Tests de Validation
+
+### ✅ Test 1: Reset Password Mobile Safari iOS
+1. iPhone Safari → https://www.ninowash.fr/auth/forgot-password
+2. Saisir email → Recevoir email
+3. **Cliquer lien depuis Safari** (pas WebView Gmail)
+4. ✅ Formulaire reset password s'affiche immédiatement
+5. Changer mot de passe → ✅ Redirect /dashboard
+
+**Résultat:** ✅ PASSÉ (fix mobile PKCE timeout)
+
+---
+
+### ✅ Test 2: Signup Email Confirmation
+1. Créer compte → Recevoir email confirmation
+2. Cliquer lien
+3. ✅ Redirect /dashboard avec session active
+
+**Résultat:** ✅ PASSÉ
+
+---
+
+### ✅ Test 3: Guest Booking Signup
+1. Réserver sans compte → Signup modal
+2. Créer compte avec `redirect=/booking/success`
+3. Confirmer email → ✅ Redirect `/booking/success`
+
+**Résultat:** ✅ PASSÉ (inherit signup emailRedirectTo)
+
+---
+
+### ✅ Test 4: Desktop Reset Password
+1. Desktop Chrome → Reset password
+2. Cliquer lien email
+3. ✅ Formulaire affiché instantanément
+
+**Résultat:** ✅ PASSÉ
+
+---
+
+## 🔧 Configuration Requise
+
+### Supabase Dashboard
+
+**Authentication → URL Configuration:**
+
+**Redirect URLs (whitelist):**
+```
+https://www.ninowash.fr/api/auth/callback
+https://ninowash.fr/api/auth/callback
+http://localhost:3000/api/auth/callback
+```
+
+**Site URL:**
+```
+https://www.ninowash.fr
+```
+
+**Email Templates:**
+```html
+<!-- Reset Password Template -->
+<a href="{{ .ConfirmationURL }}">Reset Password</a>
+
+<!-- Signup Confirmation Template -->
+<a href="{{ .ConfirmationURL }}">Confirm Email</a>
+```
+
+⚠️ **Ne PAS modifier les templates** - `{{ .ConfirmationURL }}` inclut automatiquement le `redirectTo`.
+
+---
+
+### Vercel Environment Variables
+
+```bash
+NEXT_PUBLIC_APP_URL=https://www.ninowash.fr
+NEXT_PUBLIC_DOMAIN=ninowash.fr
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### Problème: "Email link is invalid or has expired"
+
+**Symptôme:** Lien email redirige vers `/?error=otp_expired`
+
+**Causes possibles:**
+
+1. **WebView Gmail/Outlook** (mobile)
+   - PKCE `code_verifier` manquant (stocké dans navigateur différent)
+   - **Solution:** Ouvrir lien dans Safari/Chrome natif
+
+2. **Redirect URL non whitelisté**
+   - Supabase ignore `redirectTo` → utilise Site URL
+   - **Solution:** Ajouter `/api/auth/callback` dans Redirect URLs
+
+3. **Template email modifié**
+   - Lien hardcodé au lieu de `{{ .ConfirmationURL }}`
+   - **Solution:** Restaurer template par défaut
+
+4. **Variables env manquantes**
+   - `NEXT_PUBLIC_APP_URL` undefined → `redirectTo` incorrect
+   - **Solution:** Vérifier Vercel env vars
+
+---
+
+### Problème: Redirect vers `/` au lieu de `/api/auth/callback`
+
+**Cause:** `redirectTo` pas pris en compte par Supabase.
+
+**Checklist:**
+- [ ] `/api/auth/callback` dans Redirect URLs whitelist
+- [ ] Template email utilise `{{ .ConfirmationURL }}`
+- [ ] `NEXT_PUBLIC_APP_URL` défini sur Vercel
+- [ ] Tester en copiant URL email (vérifier structure)
+
+---
+
+## 📚 Références
+
+- [Supabase PKCE Server-Side Auth](https://supabase.com/docs/guides/auth/server-side/nextjs)
+- [@supabase/ssr Best Practices](https://supabase.com/docs/guides/auth/server-side/creating-a-client)
+- [Next.js Route Handlers](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)
+
+---
+
+## 📝 Changelog
+
+### 9 Novembre 2025 - Migration PKCE Officielle
+- ✅ Route Handler `/api/auth/callback` créé
+- ✅ Reset password migré (suppression retry logic)
+- ✅ Signup migré (emailRedirectTo updated)
+- ✅ Legacy callback page supprimée
+- ✅ Tests production validés (Safari iOS fix)
+
+### 7 Novembre 2025 - Analyse Initiale
+- 🔍 Problème mobile Safari identifié
+- 📋 Plan migration 27 tasks créé
+- 📖 Documentation rollback créée
+
+---
+
+
+
+**Status Final:** ✅ Migration Complète - Production Ready
 ```
 
 ---
