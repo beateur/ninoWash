@@ -24,12 +24,6 @@ interface SummaryStepProps {
   onComplete: () => void
 }
 
-const TIME_SLOTS = [
-  { value: "09:00-12:00", label: "9h00 - 12h00" },
-  { value: "14:00-17:00", label: "14h00 - 17h00" },
-  { value: "18:00-21:00", label: "18h00 - 21h00" },
-]
-
 export function SummaryStep({ bookingData, onComplete }: SummaryStepProps) {
   const router = useRouter()
   const [services, setServices] = useState<Array<{ id: string; name: string; base_price: number }>>([])
@@ -80,27 +74,6 @@ export function SummaryStep({ bookingData, onComplete }: SummaryStepProps) {
     } catch (error) {
       return "Date invalide"
     }
-  }
-
-  const calculateDeliveryDate = (pickupDate: string): string => {
-    if (!pickupDate) return "Date non disponible"
-    try {
-      const delivery = new Date(pickupDate)
-      if (isNaN(delivery.getTime())) return "Date invalide"
-      delivery.setDate(delivery.getDate() + 3) // 72h = 3 days
-      return delivery.toLocaleDateString("fr-FR", {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-      })
-    } catch (error) {
-      return "Date invalide"
-    }
-  }
-
-  const getTimeSlotLabel = (value: string | null): string => {
-    if (!value) return "Créneau non sélectionné"
-    return TIME_SLOTS.find((slot) => slot.value === value)?.label || value
   }
 
   return (
@@ -240,7 +213,7 @@ export function SummaryStep({ bookingData, onComplete }: SummaryStepProps) {
       )}
 
       {/* Date & Time */}
-      {bookingData.pickupDate && bookingData.pickupTimeSlot && (
+      {bookingData.pickupSlot && bookingData.deliverySlot && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
@@ -254,10 +227,10 @@ export function SummaryStep({ bookingData, onComplete }: SummaryStepProps) {
               <div>
                 <p className="font-medium">Collecte prévue</p>
                 <p className="text-sm text-muted-foreground">
-                  {formatDate(bookingData.pickupDate)}
+                  {format(new Date(bookingData.pickupSlot.slot_date), "EEEE d MMMM yyyy", { locale: fr })}
                 </p>
                 <p className="text-sm font-medium text-primary">
-                  {getTimeSlotLabel(bookingData.pickupTimeSlot)}
+                  {bookingData.pickupSlot.label} ({bookingData.pickupSlot.start_time.substring(0,5)}-{bookingData.pickupSlot.end_time.substring(0,5)})
                 </p>
               </div>
             </div>
@@ -267,19 +240,12 @@ export function SummaryStep({ bookingData, onComplete }: SummaryStepProps) {
             <div className="flex items-start gap-3">
               <Clock className="h-5 w-5 text-primary mt-0.5" />
               <div>
-                <p className="font-medium">Livraison estimée</p>
+                <p className="font-medium">Livraison prévue</p>
                 <p className="text-sm text-muted-foreground">
-                                  <div className="text-sm text-muted-foreground">
-                  {bookingData.deliverySlot ? (
-                    <>
-                      {format(new Date(bookingData.deliverySlot.slot_date), "EEEE d MMMM yyyy", { locale: fr })}
-                      {" - "}
-                      {bookingData.deliverySlot.label} ({bookingData.deliverySlot.start_time.substring(0,5)}-{bookingData.deliverySlot.end_time.substring(0,5)})
-                    </>
-                  ) : (
-                    <>{calculateDeliveryDate(bookingData.pickupDate)} (72h après collecte)</>
-                  )}
-                </div>
+                  {format(new Date(bookingData.deliverySlot.slot_date), "EEEE d MMMM yyyy", { locale: fr })}
+                </p>
+                <p className="text-sm font-medium text-primary">
+                  {bookingData.deliverySlot.label} ({bookingData.deliverySlot.start_time.substring(0,5)}-{bookingData.deliverySlot.end_time.substring(0,5)})
                 </p>
               </div>
             </div>
@@ -416,15 +382,9 @@ async function handleConfirmBooking(
         quantity: item.quantity,
         specialInstructions: item.specialInstructions,
       })),
-      // Prioritize slot-based scheduling (new system)
-      ...(bookingData.pickupSlot && bookingData.deliverySlot ? {
-        pickupSlotId: bookingData.pickupSlot.id,
-        deliverySlotId: bookingData.deliverySlot.id,
-      } : {
-        // Fallback to legacy date/time system
-        pickupDate: bookingData.pickupDate,
-        pickupTimeSlot: bookingData.pickupTimeSlot,
-      }),
+      // Slot-based scheduling with API slots (required)
+      pickupSlotId: bookingData.pickupSlot!.id,
+      deliverySlotId: bookingData.deliverySlot!.id,
       serviceType: "classic", // Default service type for guest bookings
     }
 

@@ -202,17 +202,9 @@ export function SummaryStep({
         totalAmount: bookingData.totalAmount, // ✅ Envoyer le prix calculé (incluant kg supplémentaires)
         specialInstructions,
         serviceType,
-      }
-
-      // Slot-based scheduling (prioritaire)
-      if (bookingData.pickupSlot?.id && bookingData.deliverySlot?.id) {
-        bookingPayload.pickupSlotId = bookingData.pickupSlot.id
-        bookingPayload.deliverySlotId = bookingData.deliverySlot.id
-        // Ne PAS inclure pickupDate/pickupTimeSlot si on utilise les slots
-      } else if (bookingData.pickupDate?.trim() && bookingData.pickupTimeSlot?.trim()) {
-        // Fallback: Legacy date/time fields (seulement si non-vides)
-        bookingPayload.pickupDate = bookingData.pickupDate
-        bookingPayload.pickupTimeSlot = bookingData.pickupTimeSlot
+        // Slot-based scheduling with API slots (required)
+        pickupSlotId: bookingData.pickupSlot!.id,
+        deliverySlotId: bookingData.deliverySlot!.id,
       }
 
       console.log("[v0] Booking payload:", bookingPayload)

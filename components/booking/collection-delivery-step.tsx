@@ -11,7 +11,7 @@
 import { useState, useMemo } from "react"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { Calendar, Clock, AlertCircle, Loader2 } from "lucide-react"
+import { Calendar, Clock, AlertCircle } from "lucide-react"
 import { useLogisticSlots } from "@/hooks/use-logistic-slots"
 import type { LogisticSlot, ServiceType } from "@/lib/types/logistic-slots"
 import { Card } from "@/components/ui/card"
@@ -101,7 +101,27 @@ export function CollectionDeliveryStep({
     enabled: !!selectedPickup, // Ne charge que si pickup sélectionné
   })
 
-  // Format slot pour affichage
+  // Format jour pour en-tête de section
+  const formatDayHeader = (dateStr: string) => {
+    try {
+      const date = new Date(dateStr)
+      const dayStr = format(date, "EEEE d MMMM", { locale: fr })
+      return dayStr.charAt(0).toUpperCase() + dayStr.slice(1)
+    } catch {
+      return dateStr
+    }
+  }
+
+  // Format slot pour affichage (uniquement heure + label)
+  const formatSlotTime = (slot: LogisticSlot) => {
+    const timeStr = `${slot.start_time.substring(0, 5)} - ${slot.end_time.substring(0, 5)}`
+    return {
+      time: timeStr,
+      label: slot.label,
+    }
+  }
+
+  // Format complet pour le résumé (avec jour)
   const formatSlotDisplay = (slot: LogisticSlot) => {
     try {
       const date = new Date(slot.slot_date)
@@ -114,7 +134,6 @@ export function CollectionDeliveryStep({
         label: slot.label,
       }
     } catch {
-      // Fallback: extraire HH:MM même en cas d'erreur de formatage de date
       return {
         day: slot.slot_date,
         time: `${slot.start_time.substring(0, 5)} - ${slot.end_time.substring(0, 5)}`,
@@ -133,7 +152,7 @@ export function CollectionDeliveryStep({
     isSelected: boolean
     onClick: () => void
   }) => {
-    const display = formatSlotDisplay(slot)
+    const display = formatSlotTime(slot)
 
     return (
       <Card
@@ -154,11 +173,7 @@ export function CollectionDeliveryStep({
       >
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-sm font-medium">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span>{display.day}</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Clock className="h-4 w-4" />
+            <Clock className="h-4 w-4 text-muted-foreground" />
             <span>{display.time}</span>
           </div>
           {display.label && (
@@ -174,13 +189,41 @@ export function CollectionDeliveryStep({
     )
   }
 
+  // Grouper et trier les slots par date
+  const groupSlotsByDate = (slots: LogisticSlot[]) => {
+    if (!slots || slots.length === 0) {
+      return new Map<string, LogisticSlot[]>()
+    }
+
+    const grouped = new Map<string, LogisticSlot[]>()
+    
+    slots.forEach(slot => {
+      if (!grouped.has(slot.slot_date)) {
+        grouped.set(slot.slot_date, [])
+      }
+      grouped.get(slot.slot_date)!.push(slot)
+    })
+
+    // Trier les slots par heure dans chaque groupe
+    grouped.forEach((slotsArray, date) => {
+      slotsArray.sort((a, b) => a.start_time.localeCompare(b.start_time))
+    })
+
+    // Trier les entrées par date
+    return new Map(
+      Array.from(grouped.entries()).sort(([dateA], [dateB]) => 
+        dateA.localeCompare(dateB)
+      )
+    )
+  }
+
   // Section pickup
   const renderPickupSection = () => {
     if (pickupLoading) {
       return (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-3">
           {[...Array(4)].map((_, i) => (
-            <Skeleton key={i} className="h-24 w-full" />
+            <Skeleton key={i} className="h-16 w-full" />
           ))}
         </div>
       )
@@ -207,19 +250,30 @@ export function CollectionDeliveryStep({
       )
     }
 
+    const groupedSlots = groupSlotsByDate(pickupSlots)
+
     return (
-      <div className="grid gap-4 md:grid-cols-2">
-        {pickupSlots.map((slot) => (
-          <SlotCard
-            key={slot.id}
-            slot={slot}
-            isSelected={selectedPickup?.id === slot.id}
-            onClick={() => {
-              onPickupSelect(slot)
-              // Auto-switch à delivery après sélection pickup
-              setTimeout(() => setActiveSection("delivery"), 300)
-            }}
-          />
+      <div className="space-y-6">
+        {Array.from(groupedSlots.entries()).map(([date, slots]) => (
+          <div key={date}>
+            <h3 className="text-sm font-semibold mb-2">
+              {formatDayHeader(date)}
+            </h3>
+            <div className="space-y-3">
+              {slots.map((slot) => (
+                <SlotCard
+                  key={slot.id}
+                  slot={slot}
+                  isSelected={selectedPickup?.id === slot.id}
+                  onClick={() => {
+                    onPickupSelect(slot)
+                    // Auto-switch à delivery après sélection pickup
+                    setTimeout(() => setActiveSection("delivery"), 300)
+                  }}
+                />
+              ))}
+            </div>
+          </div>
         ))}
       </div>
     )
@@ -240,9 +294,9 @@ export function CollectionDeliveryStep({
 
     if (deliveryLoading) {
       return (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-3">
           {[...Array(4)].map((_, i) => (
-            <Skeleton key={i} className="h-24 w-full" />
+            <Skeleton key={i} className="h-16 w-full" />
           ))}
         </div>
       )
@@ -270,15 +324,26 @@ export function CollectionDeliveryStep({
       )
     }
 
+    const groupedSlots = groupSlotsByDate(deliverySlots)
+
     return (
-      <div className="grid gap-4 md:grid-cols-2">
-        {deliverySlots.map((slot) => (
-          <SlotCard
-            key={slot.id}
-            slot={slot}
-            isSelected={selectedDelivery?.id === slot.id}
-            onClick={() => onDeliverySelect(slot)}
-          />
+      <div className="space-y-6">
+        {Array.from(groupedSlots.entries()).map(([date, slots]) => (
+          <div key={date}>
+            <h3 className="text-sm font-semibold mb-2">
+              {formatDayHeader(date)}
+            </h3>
+            <div className="space-y-3">
+              {slots.map((slot) => (
+                <SlotCard
+                  key={slot.id}
+                  slot={slot}
+                  isSelected={selectedDelivery?.id === slot.id}
+                  onClick={() => onDeliverySelect(slot)}
+                />
+              ))}
+            </div>
+          </div>
         ))}
       </div>
     )
