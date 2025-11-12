@@ -164,7 +164,7 @@ export async function handler(req: Request): Promise<Response> {
       </p>
 
       <p style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 14px; color: #666;">
-        Si vous avez des questions, <a href="mailto:support@ninowash.com">contactez notre support</a>.
+        Si vous avez des questions, <a href="mailto:support@ninowash.fr">contactez notre support</a>.
       </p>
     </div>
 
@@ -172,7 +172,7 @@ export async function handler(req: Request): Promise<Response> {
       <p style="margin: 0;">Nino Wash - Service de nettoyage à domicile</p>
       <p style="margin: 5px 0 0 0; font-size: 11px;">
         <a href="https://ninowash.com">ninowash.com</a> • 
-        <a href="mailto:support@ninowash.com">support@ninowash.com</a>
+        <a href="mailto:support@ninowash.fr">support@ninowash.fr</a>
       </p>
     </div>
   </div>
@@ -196,7 +196,7 @@ ${paymentLink}
 
 Paiement sécurisé par Stripe ✓
 
-Si vous avez des questions, contactez notre support: support@ninowash.com
+Si vous avez des questions, contactez notre support: support@ninowash.fr
 
 Nino Wash - Service de nettoyage à domicile
 https://ninowash.com
@@ -220,12 +220,12 @@ https://ninowash.com
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "Nino Wash <paiement@ninowash.com>",
+        from: "Nino Wash <paiement@ninowash.fr>",
         to: contactEmail,
         subject: emailSubject,
         html: emailHtml,
         text: emailPlainText,
-        reply_to: "support@ninowash.com",
+        reply_to: "support@ninowash.fr",
       }),
     })
 

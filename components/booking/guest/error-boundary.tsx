@@ -84,8 +84,8 @@ export class GuestBookingErrorBoundary extends Component<Props, State> {
 
               <p className="text-center text-xs text-muted-foreground">
                 Si le problème persiste, contactez-nous à{" "}
-                <a href="mailto:contact@ninowash.com" className="underline">
-                  contact@ninowash.com
+                <a href="mailto:contact@ninowash.fr" className="underline">
+                  contact@ninowash.fr
                 </a>
               </p>
             </CardContent>
