@@ -52,7 +52,7 @@ export async function handler(req: Request): Promise<Response> {
       },
       body: JSON.stringify({
         from: "Nino Wash <confirmation@ninowash.fr>",
-        to: contactEmail,
+        to: email,
         subject: emailSubject,
         html: emailHtml,
         text: emailPlainText,
