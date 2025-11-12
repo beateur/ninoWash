@@ -45,7 +45,7 @@ Cette erreur se produit quand l'API ne trouve pas l'email du client pour créer 
 vercel logs <url-preview>
 
 # Pour Production
-vercel logs https://ninowash.org
+vercel logs https://ninowash.fr
 
 # Chercher les logs [v0]
 # Ils montrent maintenant:
@@ -338,7 +338,7 @@ npm run dev
 
 Seuls les logs Vercel sont disponibles:
 ```bash
-vercel logs https://ninowash.org --follow
+vercel logs https://ninowash.fr --follow
 ```
 
 ---

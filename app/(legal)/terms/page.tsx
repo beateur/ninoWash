@@ -100,8 +100,8 @@ export default function TermsPage() {
             <div className="mt-4 space-y-1">
               <p>
                 Email :{" "}
-                <a href="mailto:contact@ninowash.org" className="text-primary underline">
-                  contact@ninowash.org
+                <a href="mailto:contact@ninowash.fr" className="text-primary underline">
+                  contact@ninowash.fr
                 </a>
               </p>
               <p>Téléphone : +33 1 23 45 67 89</p>

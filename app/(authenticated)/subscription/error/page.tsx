@@ -49,7 +49,7 @@ export default function SubscriptionErrorPage() {
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg">
-                <a href="mailto:contact@ninowash.org">Contacter le support</a>
+                <a href="mailto:contact@ninowash.fr">Contacter le support</a>
               </Button>
             </div>
           </CardContent>

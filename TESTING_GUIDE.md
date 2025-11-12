@@ -7,9 +7,9 @@
 
 ## 📋 Environnements Configurés
 
-### ✅ Production (ninowash.org)
+### ✅ Production (ninowash.fr)
 - **Clés Stripe:** LIVE (`pk_live_...`, `sk_live_...`)
-- **Webhook:** https://ninowash.org/api/webhooks/stripe
+- **Webhook:** https://ninowash.fr/api/webhooks/stripe
 - **Cartes:** Cartes bancaires RÉELLES uniquement
 - **Usage:** Clients finaux
 
@@ -288,7 +288,7 @@ SELECT * FROM pg_trigger WHERE tgname = 'on_auth_user_created';
 
 | Aspect | Local | Preview | Production |
 |--------|-------|---------|------------|
-| **URL** | localhost:3000 | *.vercel.app | ninowash.org |
+| **URL** | localhost:3000 | *.vercel.app | ninowash.fr |
 | **Clés Stripe** | TEST (pk_test) | TEST (pk_test) | LIVE (pk_live) |
 | **Webhook** | stripe listen | Auto Vercel | Stripe prod |
 | **Cartes** | 4242... | 4242... | Vraies cartes |
@@ -322,7 +322,7 @@ SELECT * FROM pg_trigger WHERE tgname = 'on_auth_user_created';
 ```bash
 1. Merge vers main
 2. Vercel déploie automatiquement
-3. Tester sur ninowash.org avec vraie carte
+3. Tester sur ninowash.fr avec vraie carte
 4. Monitorer Stripe Dashboard (LIVE)
 ```
 

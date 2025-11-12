@@ -25,7 +25,7 @@ feature/* (features individuelles)
 
 | Branche | Environnement | Déploiement | Protection |
 |---------|---------------|-------------|------------|
-| `main` | **Production** | ninowash.org (auto) | ✅ Protégée |
+| `main` | **Production** | ninowash.fr (auto) | ✅ Protégée |
 | `dev` | **Preview** | URL Preview Vercel (auto) | ⚠️ Semi-protégée |
 | `feature/*` | **Preview** | URL Preview Vercel (auto) | ❌ Libre |
 
@@ -134,7 +134,7 @@ git push origin main
 ```
 
 **Résultat:**
-- ✅ **Production déployée** : https://ninowash.org
+- ✅ **Production déployée** : https://ninowash.fr
 - ✅ CI/CD Vercel automatique
 - ✅ Utilise les variables **Production** (clés LIVE)
 
@@ -223,7 +223,7 @@ git merge main --no-edit
 git push origin dev
 
 # 3. Monitorer production
-vercel logs https://ninowash.org --follow
+vercel logs https://ninowash.fr --follow
 ```
 
 ---
@@ -424,7 +424,7 @@ git push origin dev
 echo ""
 echo "✅ Déploiement terminé!"
 echo "📊 Vérifier: https://vercel.com/beateur/ninowash/deployments"
-echo "🌐 Production: https://ninowash.org"
+echo "🌐 Production: https://ninowash.fr"
 ```
 
 ---

@@ -224,7 +224,7 @@ echo -ne "${CYAN}Appuyez sur ENTRÉE pour continuer...${NC}"
 read dummy
 
 # Variables OBLIGATOIRES à demander
-PROD_APP_URL=$(ask_value "NEXT_PUBLIC_APP_URL" "URL de production de l'application" false "https://ninowash.org")
+PROD_APP_URL=$(ask_value "NEXT_PUBLIC_APP_URL" "URL de production de l'application" false "https://ninowash.fr")
 
 echo ""
 print_info "Les clés Supabase sont les mêmes en dev et prod (OK)"
@@ -242,7 +242,7 @@ echo ""
 echo -e "${CYAN}1.${NC} Créez d'abord le webhook sur Stripe:"
 echo -e "   ${BLUE}→ https://dashboard.stripe.com/webhooks${NC} (mode LIVE)"
 echo ""
-echo -e "${CYAN}2.${NC} Endpoint: ${GREEN}https://ninowash.org/api/webhooks/stripe${NC}"
+echo -e "${CYAN}2.${NC} Endpoint: ${GREEN}https://ninowash.fr/api/webhooks/stripe${NC}"
 echo ""
 echo -e "${CYAN}3.${NC} Événements à sélectionner:"
 echo -e "   • checkout.session.completed"
@@ -278,7 +278,7 @@ print_success "Cette clé sera utilisée en production (même clé dev/prod)"
 PROD_RESEND_API_KEY=$DEV_RESEND_API_KEY
 
 # Email FROM
-PROD_FROM_EMAIL=$(ask_value "FROM_EMAIL" "Adresse email d'expédition" false "noreply@ninowash.org")
+PROD_FROM_EMAIL=$(ask_value "FROM_EMAIL" "Adresse email d'expédition" false "noreply@ninowash.fr")
 
 # Feature Flags (valeurs par défaut raisonnables pour prod)
 echo ""

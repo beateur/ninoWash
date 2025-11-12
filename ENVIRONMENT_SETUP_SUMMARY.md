@@ -11,7 +11,7 @@
 
 | Environnement | Clés Stripe | Webhook | Usage |
 |---------------|-------------|---------|-------|
-| **Production** | LIVE (pk_live/sk_live) | ninowash.org/api/webhooks/stripe | Clients réels |
+| **Production** | LIVE (pk_live/sk_live) | ninowash.fr/api/webhooks/stripe | Clients réels |
 | **Preview** | TEST (pk_test/sk_test) | Auto Vercel | Tests pre-merge |
 | **Development** | TEST (pk_test/sk_test) | stripe listen | Dev local |
 
@@ -29,12 +29,12 @@
 ```
 
 **Webhook Stripe:**
-- URL: `https://ninowash.org/api/webhooks/stripe`
+- URL: `https://ninowash.fr/api/webhooks/stripe`
 - Mode: LIVE
 - Événements: 8 configurés (checkout, payment_intent, subscription)
 
 **Déploiement:**
-- URL: https://ninowash.org
+- URL: https://ninowash.fr
 - Statut: ✅ Déployé avec clés LIVE
 - Dernière mise à jour: 20 oct 2025 ~22h30
 
@@ -134,7 +134,7 @@ git push origin main
 **2. Vercel déploie automatiquement:**
 - Utilise les clés LIVE
 - Webhook production actif
-- URL: https://ninowash.org
+- URL: https://ninowash.fr
 
 **3. Test avec vraie carte:**
 - ⚠️ Utiliser une vraie carte bancaire
@@ -173,7 +173,7 @@ vercel env add STRIPE_WEBHOOK_SECRET production
 vercel --prod
 
 # Logs production
-vercel logs https://ninowash.org
+vercel logs https://ninowash.fr
 
 # Tester les webhooks localement
 stripe listen --forward-to localhost:3000/api/webhooks/stripe
@@ -242,7 +242,7 @@ stripe trigger checkout.session.completed
 
 ### Test Production
 - [ ] Merge vers main déclenche deploy
-- [ ] https://ninowash.org accessible
+- [ ] https://ninowash.fr accessible
 - [ ] Clés LIVE actives
 - [ ] Test avec vraie carte
 - [ ] Webhooks reçus sur Stripe Dashboard (LIVE)
@@ -337,7 +337,7 @@ SELECT COUNT(*) FROM user_profiles;
 
 ## ✅ État Final
 
-### Production (ninowash.org)
+### Production (ninowash.fr)
 - ✅ Déployé avec clés Stripe LIVE
 - ✅ Webhook production configuré
 - ✅ Base de données réconciliée

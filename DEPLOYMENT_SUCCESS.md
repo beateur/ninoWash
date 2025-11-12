@@ -51,9 +51,9 @@ Contraintes FK:
 ## 🔗 URLs et Accès
 
 ### Production
-- **Application:** https://ninowash.org
-- **API:** https://ninowash.org/api
-- **Auth Callback:** https://ninowash.org/auth/callback
+- **Application:** https://ninowash.fr
+- **API:** https://ninowash.fr/api
+- **Auth Callback:** https://ninowash.fr/auth/callback
 
 ### Dashboards
 - **Vercel:** https://vercel.com/beateur/ninowash
@@ -69,7 +69,7 @@ Contraintes FK:
 
 #### Application
 ```bash
-NEXT_PUBLIC_APP_URL=https://ninowash.org
+NEXT_PUBLIC_APP_URL=https://ninowash.fr
 NODE_ENV=production
 ```
 
@@ -78,7 +78,7 @@ NODE_ENV=production
 NEXT_PUBLIC_SUPABASE_URL=https://slmhuhfunssmwhzajccm.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsbWh1aGZ1bnNzbXdoemFqY2NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkwNzY0MjAsImV4cCI6MjA3NDY1MjQyMH0.ZOIZtN_D7AAmI3EBBPVK7cjppqdZtHCwdvtCkzECKkM
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsbWh1aGZ1bnNzbXdoemFqY2NtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTA3NjQyMCwiZXhwIjoyMDc0NjUyNDIwfQ.0QctkSaCskTNr23Ml_WT-ekpuv0CO8-hxyhl_5pCSEU
-NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL=https://ninowash.org/auth/callback
+NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL=https://ninowash.fr/auth/callback
 ```
 
 #### Stripe (⚠️ À PASSER EN LIVE)
@@ -92,7 +92,7 @@ STRIPE_WEBHOOK_SECRET=whsec_xxx  # À configurer après création webhook
 #### Email
 ```bash
 RESEND_API_KEY=re_cRWJSgNr_BqmiobCspRaSh3WDTjuhSDgs
-FROM_EMAIL=noreply@ninowash.org
+FROM_EMAIL=noreply@ninowash.fr
 ```
 
 #### Feature Flags
@@ -107,7 +107,7 @@ MAINTENANCE_MODE=false
 **Étapes :**
 1. Aller sur https://dashboard.stripe.com/webhooks (mode LIVE)
 2. Cliquer "Add endpoint"
-3. URL : `https://ninowash.org/api/webhooks/stripe`
+3. URL : `https://ninowash.fr/api/webhooks/stripe`
 4. Événements :
    - `checkout.session.completed`
    - `payment_intent.succeeded`
@@ -123,10 +123,10 @@ MAINTENANCE_MODE=false
 **URL :** https://supabase.com/dashboard/project/slmhuhfunssmwhzajccm/auth/url-configuration
 
 **Configuration :**
-- Site URL : `https://ninowash.org`
+- Site URL : `https://ninowash.fr`
 - Redirect URLs : 
-  - `https://ninowash.org/auth/callback`
-  - `https://ninowash.org/**`
+  - `https://ninowash.fr/auth/callback`
+  - `https://ninowash.fr/**`
 
 ---
 
@@ -241,7 +241,7 @@ MAINTENANCE_MODE=false
 
 ### Vercel
 - ⚠️ Variables d'environnement à vérifier
-- ⚠️ Domain ninowash.org configuré
+- ⚠️ Domain ninowash.fr configuré
 - ✅ CI/CD automatique actif
 
 ---
@@ -281,7 +281,7 @@ npm run dev
 - [ ] Webhook Stripe production créé
 - [ ] Supabase Auth redirect URLs configurées
 - [ ] Tests post-déploiement effectués
-- [ ] Application accessible sur ninowash.org
+- [ ] Application accessible sur ninowash.fr
 
 ---
 

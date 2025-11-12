@@ -1231,7 +1231,7 @@ if (paymentError) {
   - ✅ Après 3 échecs → **Log en database** (`failed_account_creations` table)
   - ✅ **Toast discret** (non bloquant): 
     \`\`\`
-    "Une erreur est survenue. Veuillez contacter contact@ninowash.org 
+    "Une erreur est survenue. Veuillez contacter contact@ninowash.fr 
     avec votre numéro de paiement: [payment_intent_id]"
     \`\`\`
   - ✅ Webhook Stripe détecte l'échec → email automatique au support
@@ -1287,7 +1287,7 @@ if (!userId) {
   
   return NextResponse.json({
     error: "account_creation_failed",
-    message: `Une erreur technique est survenue. Contactez contact@ninowash.org avec votre référence: ${paymentIntentId}`,
+    message: `Une erreur technique est survenue. Contactez contact@ninowash.fr avec votre référence: ${paymentIntentId}`,
     payment_intent_id: paymentIntentId
   }, { status: 500 })
 }
@@ -1304,7 +1304,7 @@ if (!userId) {
   - ✅ **Toast visible** (bloquant):
     \`\`\`
     "Erreur lors de l'enregistrement de votre réservation. 
-    Veuillez contacter contact@ninowash.org avec votre référence: [payment_intent_id]"
+    Veuillez contacter contact@ninowash.fr avec votre référence: [payment_intent_id]"
     \`\`\`
   - ✅ Support contacte le client sous 24h pour créer la réservation manuellement
   - ❌ **PAS de refund automatique**
@@ -1367,7 +1367,7 @@ if (!bookingId) {
   
   return NextResponse.json({
     error: "booking_creation_failed",
-    message: `Erreur lors de l'enregistrement de votre réservation. Contactez contact@ninowash.org avec votre référence: ${paymentIntentId}`,
+    message: `Erreur lors de l'enregistrement de votre réservation. Contactez contact@ninowash.fr avec votre référence: ${paymentIntentId}`,
     payment_intent_id: paymentIntentId,
     user_id: userId // User account created successfully
   }, { status: 500 })
@@ -1400,7 +1400,7 @@ if (!bookingId) {
 - **Mitigation:**
   - ✅ **Fallback UI**: Message d'erreur après 10s de chargement
   - ✅ **Option alternative**: Bouton "Payer avec Stripe Checkout" (hosted page)
-  - ✅ Toast: "Contactez contact@ninowash.org si le problème persiste"
+  - ✅ Toast: "Contactez contact@ninowash.fr si le problème persiste"
 
 ---
 

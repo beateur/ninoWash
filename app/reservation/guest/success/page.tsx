@@ -184,7 +184,7 @@ export default function GuestBookingSuccessPage() {
             <p className="text-xs text-muted-foreground">
               Vous avez une question ?{" "}
               <a
-                href="mailto:contact@ninowash.org"
+                href="mailto:contact@ninowash.fr"
                 className="text-primary hover:underline"
               >
                 Contactez-nous

@@ -28,10 +28,10 @@ export default function GuestBookingLayout({
           <p>
             Besoin d&apos;aide ?{" "}
             <a
-              href="mailto:contact@ninowash.org"
+              href="mailto:contact@ninowash.fr"
               className="underline hover:text-foreground"
             >
-              contact@ninowash.org
+              contact@ninowash.fr
             </a>
           </p>
         </div>
