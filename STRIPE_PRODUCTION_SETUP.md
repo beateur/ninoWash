@@ -22,7 +22,7 @@ Les 3 clés Stripe de production ont été configurées sur Vercel :
 
 ### 2. Webhook Stripe Production
 
-**URL:** `https://ninowash.org/api/webhooks/stripe`  
+**URL:** `https://ninowash.fr/api/webhooks/stripe`  
 **Mode:** LIVE  
 **Statut:** ✅ Créé et configuré
 
@@ -47,7 +47,7 @@ Les 3 clés Stripe de production ont été configurées sur Vercel :
 ## 🧪 Tests à Effectuer
 
 ### Test 1: Paiement Simple
-1. Aller sur https://ninowash.org
+1. Aller sur https://ninowash.fr
 2. Créer une réservation
 3. Utiliser une carte de test Stripe LIVE:
    - **Succès:** 4242 4242 4242 4242
@@ -79,7 +79,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 
 ### Autres Variables Importantes (Déjà Configurées)
 ```bash
-NEXT_PUBLIC_APP_URL=https://ninowash.org
+NEXT_PUBLIC_APP_URL=https://ninowash.fr
 NODE_ENV=production
 
 NEXT_PUBLIC_SUPABASE_URL=https://slmhuhfunssmwhzajccm.supabase.co
@@ -87,7 +87,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 RESEND_API_KEY=re_cRWJSgNr_BqmiobCspRaSh3WDTjuhSDgs
-FROM_EMAIL=noreply@ninowash.org
+FROM_EMAIL=noreply@ninowash.fr
 
 NEXT_PUBLIC_SUBSCRIPTIONS_ENABLED=false
 NEXT_PUBLIC_BOOKINGS_ENABLED=true
@@ -153,7 +153,7 @@ vercel ls
 
 1. Vérifier l'URL du webhook sur Stripe:
    ```
-   https://ninowash.org/api/webhooks/stripe
+   https://ninowash.fr/api/webhooks/stripe
    ```
 
 2. Vérifier que le mode LIVE est activé
@@ -162,7 +162,7 @@ vercel ls
 
 4. Vérifier les logs Vercel:
    ```bash
-   vercel logs https://ninowash.org
+   vercel logs https://ninowash.fr
    ```
 
 ### Paiement refusé en production
@@ -172,7 +172,7 @@ vercel ls
 3. Vérifier les logs Stripe Dashboard
 4. Vérifier la clé publique dans le code source:
    ```bash
-   curl https://ninowash.org | grep pk_live
+   curl https://ninowash.fr | grep pk_live
    ```
 
 ### Variables non appliquées
@@ -205,7 +205,7 @@ vercel ls
 ## 🎯 Prochaines Actions
 
 ### Immédiat
-1. **Tester un paiement** sur https://ninowash.org
+1. **Tester un paiement** sur https://ninowash.fr
 2. **Vérifier le webhook** sur Stripe Dashboard
 3. **Confirmer la réception** des événements
 

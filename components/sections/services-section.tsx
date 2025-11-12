@@ -174,7 +174,7 @@ export function ServicesSection() {
         <div className="text-center mt-12">
           <p className="text-sm text-muted-foreground mb-4">Besoin d'une solution sur mesure ?</p>
           <Button variant="outline" asChild>
-            <a href="mailto:contact@ninowash.org">Contactez-nous</a>
+            <a href="mailto:contact@ninowash.fr">Contactez-nous</a>
           </Button>
         </div>
       </div>

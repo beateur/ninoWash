@@ -8,7 +8,7 @@
 
 La page `/contact` n'existait pas dans le projet, mais plusieurs composants contenaient des liens vers cette route inexistante. Pour éviter les erreurs 404 et améliorer l'expérience utilisateur, toutes les références ont été supprimées.
 
-**Décision** : Remplacer les liens vers `/contact` par des liens `mailto:` vers l'email `contact@ninowash.org`.
+**Décision** : Remplacer les liens vers `/contact` par des liens `mailto:` vers l'email `contact@ninowash.fr`.
 
 ---
 
@@ -66,7 +66,7 @@ const publicNavigation = [
 **Après** :
 \`\`\`tsx
 <Button variant="outline" asChild>
-  <a href="mailto:contact@ninowash.org">Contactez-nous par email</a>
+  <a href="mailto:contact@ninowash.fr">Contactez-nous par email</a>
 </Button>
 \`\`\`
 
@@ -86,7 +86,7 @@ const publicNavigation = [
 **Après** :
 \`\`\`tsx
 <Button size="lg" variant="outline" asChild>
-  <a href="mailto:contact@ninowash.org">Nous contacter par email</a>
+  <a href="mailto:contact@ninowash.fr">Nous contacter par email</a>
 </Button>
 \`\`\`
 
@@ -106,7 +106,7 @@ const publicNavigation = [
 **Après** :
 \`\`\`tsx
 <Button asChild size="lg">
-  <a href="mailto:contact@ninowash.org">Nous contacter par email</a>
+  <a href="mailto:contact@ninowash.fr">Nous contacter par email</a>
 </Button>
 \`\`\`
 
@@ -126,7 +126,7 @@ const publicNavigation = [
 **Après** :
 \`\`\`tsx
 <Button asChild variant="outline" size="lg">
-  <a href="mailto:contact@ninowash.org">Contacter le support</a>
+  <a href="mailto:contact@ninowash.fr">Contacter le support</a>
 </Button>
 \`\`\`
 
@@ -180,7 +180,7 @@ Les utilisateurs peuvent toujours contacter l'entreprise via :
 </div>
 <div className="flex items-center gap-2">
   <Mail className="h-4 w-4" />
-  <span>contact@ninowash.org</span>
+  <span>contact@ninowash.fr</span>
 </div>
 <div className="flex items-start gap-2">
   <MapPin className="h-4 w-4 mt-0.5" />
@@ -190,7 +190,7 @@ Les utilisateurs peuvent toujours contacter l'entreprise via :
 
 ### Boutons "Nous contacter par email"
 - Ouvrent directement l'application mail par défaut
-- Email pré-rempli : `contact@ninowash.org`
+- Email pré-rempli : `contact@ninowash.fr`
 - Disponibles dans :
   - Section Services
   - Section CTA
@@ -259,7 +259,7 @@ Pour l'instant, la solution `mailto:` est **simple, efficace et sans maintenance
 
 ## 📝 Notes
 
-- **Email de contact** : `contact@ninowash.org` (utilisé partout)
+- **Email de contact** : `contact@ninowash.fr` (utilisé partout)
 - **Téléphone** : `01 23 45 67 89` (visible dans le footer)
 - **Zone de service** : Paris et petite couronne
 - **Réseaux sociaux** : Icônes présentes dans le footer (Facebook, Instagram, Twitter)

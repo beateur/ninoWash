@@ -45,7 +45,7 @@
 
 ### 🔄 Modified
 - Updated delivery time from 48h → 72h (6 files)
-- Changed email domain to `contact@ninowash.org` (5 files)
+- Changed email domain to `contact@ninowash.fr` (5 files)
 - Removed broken `/contact` page links (7 occurrences)
 - Redesigned footer social links (Instagram only)
 

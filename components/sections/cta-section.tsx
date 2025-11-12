@@ -25,7 +25,7 @@ export function CTASection() {
               asChild
               className="text-base px-8 bg-transparent border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10"
             >
-              <a href="mailto:contact@ninowash.org">Nous contacter par email</a>
+              <a href="mailto:contact@ninowash.fr">Nous contacter par email</a>
             </Button>
           </div>
         </div>

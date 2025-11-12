@@ -62,7 +62,7 @@ export default function ServicesPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild size="lg">
-              <a href="mailto:contact@ninowash.org">Nous contacter</a>
+              <a href="mailto:contact@ninowash.fr">Nous contacter</a>
             </Button>
             <Button asChild variant="outline" size="lg">
               <Link href="/comment-ca-marche">Comment ça marche</Link>

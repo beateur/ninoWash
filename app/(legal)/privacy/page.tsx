@@ -75,7 +75,7 @@ export default function PrivacyPage() {
             <p className="mt-4">
               Pour exercer ces droits, contactez-nous à{" "}
               <a href="mailto:privacy@ninowash.fr" className="text-primary underline">
-                privacy@ninowash.org
+                privacy@ninowash.fr
               </a>
             </p>
           </CardContent>
