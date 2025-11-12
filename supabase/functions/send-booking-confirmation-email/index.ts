@@ -51,8 +51,8 @@ export async function handler(req: Request): Promise<Response> {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "Nino Wash <confirmation@ninowash.com>",
-        to: email,
+        from: "Nino Wash <confirmation@ninowash.fr>",
+        to: contactEmail,
         subject: emailSubject,
         html: emailHtml,
         text: emailPlainText,

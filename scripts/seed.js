@@ -100,13 +100,13 @@ async function seedDatabase() {
     if (process.env.NODE_ENV === "development") {
       console.log("👤 Creating admin user...")
 
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: "admin@ninowash.com",
-        password: "admin123",
+      const { data: adminUser, error: adminUserError } = await supabase.auth.admin.createUser({
+        email: "admin@ninowash.fr",
+        password: "Admin123!Secure",
         email_confirm: true,
         user_metadata: {
-          full_name: "Admin User",
           role: "admin",
+          full_name: "Admin Nino Wash",
         },
       })
 
@@ -119,7 +119,7 @@ async function seedDatabase() {
         const { error: profileError } = await supabase.from("users").upsert(
           {
             id: authData.user.id,
-            email: "admin@ninowash.com",
+            email: "admin@ninowash.fr",
             full_name: "Admin User",
             role: "admin",
             created_at: new Date().toISOString(),
