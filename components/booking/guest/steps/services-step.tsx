@@ -127,12 +127,19 @@ export function ServicesStep({ initialItems, onComplete }: ServicesStepProps) {
   // Valider et mettre à jour le parent quand l'utilisateur termine
   const handleValidation = () => {
     if (selectedServiceId) {
+      // Stocker extraKg dans specialInstructions en JSON (compatible avec parcours auth)
+      const instructionsData = {
+        extraKg: extraKg,
+        userNotes: specialInstructions || undefined // Notes utilisateur séparées
+      }
+      
       const items: GuestBookingItem[] = [{
         serviceId: selectedServiceId,
         quantity: 1,
-        specialInstructions,
+        specialInstructions: JSON.stringify(instructionsData),
       }]
       const total = calculateTotal()
+      console.log('[ServicesStep] Validation avec extraKg:', { extraKg, total, instructionsData })
       onComplete(items, total)
     }
   }
@@ -156,10 +163,16 @@ export function ServicesStep({ initialItems, onComplete }: ServicesStepProps) {
       return
     }
 
+    // Stocker extraKg dans specialInstructions en JSON (compatible avec parcours auth)
+    const instructionsData = {
+      extraKg: extraKg,
+      userNotes: specialInstructions || undefined
+    }
+
     const items: GuestBookingItem[] = [{
       serviceId: selectedServiceId,
       quantity: 1,
-      specialInstructions,
+      specialInstructions: JSON.stringify(instructionsData),
     }]
 
     const total = calculateTotal()

@@ -192,21 +192,65 @@ export function SummaryStep({ bookingData, onComplete }: SummaryStepProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {bookingData.items.map((item, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <p className="font-medium">Service {index + 1}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Quantité: {item.quantity}
-                    </p>
-                    {item.specialInstructions && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        "{item.specialInstructions}"
+              {bookingData.items.map((item, index) => {
+                // Extraire les extras KG depuis specialInstructions
+                let extraKg = 0
+                let userNotes = ""
+                try {
+                  if (item.specialInstructions) {
+                    const parsed = JSON.parse(item.specialInstructions)
+                    extraKg = parsed.extraKg || 0
+                    userNotes = parsed.userNotes || ""
+                  }
+                } catch {
+                  // Si ce n'est pas du JSON, c'est probablement une ancienne note texte
+                  userNotes = item.specialInstructions || ""
+                }
+
+                const service = services.find(s => s.id === item.serviceId)
+                const baseWeight = 7 // Poids de base par défaut
+                const totalWeight = baseWeight + extraKg
+
+                return (
+                  <div key={index} className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="font-medium">
+                        {service?.name || `Service ${index + 1}`}
                       </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <p className="text-sm text-muted-foreground">
+                          Quantité: {item.quantity}
+                        </p>
+                        {extraKg > 0 && (
+                          <Badge variant="secondary" className="text-xs">
+                            {totalWeight}kg ({baseWeight}kg + {extraKg}kg)
+                          </Badge>
+                        )}
+                        {extraKg === 0 && (
+                          <Badge variant="secondary" className="text-xs">
+                            {baseWeight}kg
+                          </Badge>
+                        )}
+                      </div>
+                      {userNotes && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Note: "{userNotes}"
+                        </p>
+                      )}
+                    </div>
+                    {service && (
+                      <div className="text-right">
+                        <p className="font-semibold">{service.base_price.toFixed(2)} €</p>
+                        {extraKg > 0 && (
+                          <p className="text-xs text-muted-foreground">
+                            Base: {service.base_price}€
+                          </p>
+                        )}
+                      </div>
                     )}
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </CardContent>
         </Card>
