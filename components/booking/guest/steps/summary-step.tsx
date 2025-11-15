@@ -430,6 +430,7 @@ async function handleConfirmBooking(
       pickupSlotId: bookingData.pickupSlot!.id,
       deliverySlotId: bookingData.deliverySlot!.id,
       serviceType: "classic", // Default service type for guest bookings
+      totalAmount: bookingData.totalAmount, // ✅ Inclut le prix de base + extras KG
     }
 
     // Validate with Zod schema
