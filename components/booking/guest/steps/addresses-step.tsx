@@ -78,19 +78,16 @@ export function AddressesStep({
 
   // Valider et mettre à jour le parent quand l'utilisateur termine
   const handleValidation = async () => {
-    const pickupValid = await pickupForm.trigger()
-    const deliveryValid = sameAddress ? true : await deliveryForm.trigger()
-
-    if (pickupValid && deliveryValid) {
+    // Vérifier si les données sont déjà valides
+    if (canProceed()) {
       const pickupData = pickupForm.getValues()
       const deliveryData = sameAddress ? pickupData : deliveryForm.getValues()
-
-      // Final postal code validation
-      if (
-        validatePostalCode(pickupData.postal_code) &&
-        (sameAddress || validatePostalCode(deliveryData.postal_code))
-      ) {
-        onComplete(pickupData, deliveryData)
+      onComplete(pickupData, deliveryData)
+    } else {
+      // Forcer la validation pour afficher les erreurs en rouge
+      await pickupForm.trigger()
+      if (!sameAddress) {
+        await deliveryForm.trigger()
       }
     }
   }
@@ -343,7 +340,6 @@ export function AddressesStep({
       <div className="flex justify-end mt-6">
         <Button
           onClick={handleValidation}
-          disabled={!canProceed()}
           size="lg"
           className="min-w-[200px]"
         >

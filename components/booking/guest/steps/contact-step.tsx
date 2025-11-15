@@ -99,16 +99,14 @@ export function ContactStep({ initialData, onComplete }: ContactStepProps) {
   }, [form, debouncedCheckEmail])
 
   // Valider et mettre à jour le parent quand l'utilisateur termine
-  const handleValidation = () => {
-    const data = form.getValues()
-    if (
-      form.formState.isValid &&
-      data.email &&
-      data.firstName &&
-      data.lastName &&
-      data.rgpdConsent
-    ) {
+  const handleValidation = async () => {
+    // Vérifier si les données sont déjà valides
+    if (canProceed()) {
+      const data = form.getValues()
       onComplete(data)
+    } else {
+      // Forcer la validation pour afficher les erreurs en rouge
+      await form.trigger()
     }
   }
 
@@ -309,7 +307,6 @@ export function ContactStep({ initialData, onComplete }: ContactStepProps) {
       <div className="flex justify-end mt-6">
         <Button
           onClick={handleValidation}
-          disabled={!canProceed()}
           size="lg"
           className="min-w-[200px]"
         >
