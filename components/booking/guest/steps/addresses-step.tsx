@@ -71,20 +71,25 @@ export function AddressesStep({
   })
 
   const validatePostalCode = (postalCode: string): boolean => {
-    // Paris postal codes: 75001 - 75020
-    const parisRegex = /^75[0-9]{3}$/
-    return parisRegex.test(postalCode)
+    // Accepte tous les codes postaux français (5 chiffres)
+    const postalCodeRegex = /^[0-9]{5}$/
+    return postalCodeRegex.test(postalCode)
   }
 
   // Valider et mettre à jour le parent quand l'utilisateur termine
   const handleValidation = async () => {
     // Vérifier si les données sont déjà valides
-    if (canProceed()) {
+    const proceed = canProceed()
+    console.log('[AddressesStep] handleValidation - canProceed:', proceed)
+    
+    if (proceed) {
       const pickupData = pickupForm.getValues()
       const deliveryData = sameAddress ? pickupData : deliveryForm.getValues()
+      console.log('[AddressesStep] Validation réussie, appel onComplete avec:', { pickupData, deliveryData })
       onComplete(pickupData, deliveryData)
     } else {
       // Forcer la validation pour afficher les erreurs en rouge
+      console.log('[AddressesStep] Validation échouée, trigger de la validation')
       await pickupForm.trigger()
       if (!sameAddress) {
         await deliveryForm.trigger()
@@ -110,7 +115,18 @@ export function AddressesStep({
         deliveryData.city &&
         validatePostalCode(deliveryData.postal_code)
 
-    return pickupValid && deliveryValid
+    const result = pickupValid && deliveryValid
+    console.log('[AddressesStep] canProceed:', {
+      result,
+      sameAddress,
+      pickupValid,
+      deliveryValid,
+      pickupFormValid: pickupForm.formState.isValid,
+      deliveryFormValid: deliveryForm.formState.isValid,
+      pickupData,
+      deliveryData
+    })
+    return result
   }
 
   // Appeler handleValidation au montage pour synchroniser l'état initial

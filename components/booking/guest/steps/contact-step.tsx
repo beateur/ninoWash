@@ -101,11 +101,16 @@ export function ContactStep({ initialData, onComplete }: ContactStepProps) {
   // Valider et mettre à jour le parent quand l'utilisateur termine
   const handleValidation = async () => {
     // Vérifier si les données sont déjà valides
-    if (canProceed()) {
+    const proceed = canProceed()
+    console.log('[ContactStep] handleValidation - canProceed:', proceed)
+    
+    if (proceed) {
       const data = form.getValues()
+      console.log('[ContactStep] Validation réussie, appel onComplete avec:', data)
       onComplete(data)
     } else {
       // Forcer la validation pour afficher les erreurs en rouge
+      console.log('[ContactStep] Validation échouée, trigger de la validation')
       await form.trigger()
     }
   }
@@ -113,13 +118,23 @@ export function ContactStep({ initialData, onComplete }: ContactStepProps) {
   // Exposer la validation au parent
   const canProceed = () => {
     const data = form.getValues()
-    return (
+    const result = (
       form.formState.isValid &&
       !!data.email &&
       !!data.firstName &&
       !!data.lastName &&
       !!data.rgpdConsent
     )
+    console.log('[ContactStep] canProceed:', {
+      result,
+      isValid: form.formState.isValid,
+      hasEmail: !!data.email,
+      hasFirstName: !!data.firstName,
+      hasLastName: !!data.lastName,
+      hasConsent: !!data.rgpdConsent,
+      formValues: data
+    })
+    return result
   }
 
   // Synchroniser l'état initial
