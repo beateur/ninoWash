@@ -51,6 +51,33 @@ export async function handler(req: Request): Promise<Response> {
     const booking = payload.record
     const bookingId = booking.id
     const bookingNumber = booking.booking_number
+    const bookingStatus = booking.status
+
+    // ✅ FILTER: Only process bookings with status 'pending_payment'
+    if (bookingStatus !== 'pending_payment') {
+      console.log(
+        `[send-booking-payment-email] ⏭️  Ignored - Status is '${bookingStatus}' (expected 'pending_payment')`,
+        { bookingId, bookingNumber, status: bookingStatus }
+      )
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          ignored: true,
+          reason: `Status is '${bookingStatus}', expected 'pending_payment'`,
+          bookingId 
+        }),
+        { 
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200 
+        }
+      )
+    }
+
+    console.log(
+      `[send-booking-payment-email] ✅ Processing booking with status 'pending_payment'`,
+      { bookingId, bookingNumber }
+    )
+
     const totalAmountEuros = (booking.total_amount_cents || 0) / 100
 
     // Extract contact email
@@ -171,7 +198,7 @@ export async function handler(req: Request): Promise<Response> {
     <div class="footer">
       <p style="margin: 0;">Nino Wash - Service de nettoyage à domicile</p>
       <p style="margin: 5px 0 0 0; font-size: 11px;">
-        <a href="https://ninowash.com">ninowash.com</a> • 
+        <a href="https://ninowash.fr">ninowash.fr</a> • 
         <a href="mailto:support@ninowash.fr">support@ninowash.fr</a>
       </p>
     </div>
@@ -199,19 +226,38 @@ Paiement sécurisé par Stripe ✓
 Si vous avez des questions, contactez notre support: support@ninowash.fr
 
 Nino Wash - Service de nettoyage à domicile
-https://ninowash.com
+https://ninowash.fr
     `
 
     // Send email via Resend
     const resendApiKey = Deno.env.get("RESEND_API_KEY")
 
     if (!resendApiKey) {
-      console.error("[send-booking-payment-email] RESEND_API_KEY not configured")
+      console.error("[send-booking-payment-email] ❌ RESEND_API_KEY not configured")
       return new Response(
         JSON.stringify({ error: "Email service not configured" }),
         { status: 500 }
       )
     }
+
+    const emailPayload = {
+      from: "Nino Wash <paiement@ninowash.fr>",
+      to: contactEmail,
+      subject: emailSubject,
+      html: emailHtml,
+      text: emailPlainText,
+      reply_to: "support@ninowash.fr",
+    }
+
+    console.log("[send-booking-payment-email] 📧 Sending email to:", contactEmail)
+    console.log("[send-booking-payment-email] 📋 Email payload:", {
+      from: emailPayload.from,
+      to: emailPayload.to,
+      subject: emailPayload.subject,
+      reply_to: emailPayload.reply_to,
+      hasHtml: !!emailPayload.html,
+      hasText: !!emailPayload.text,
+    })
 
     const emailResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -219,30 +265,40 @@ https://ninowash.com
         Authorization: `Bearer ${resendApiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        from: "Nino Wash <paiement@ninowash.fr>",
-        to: contactEmail,
-        subject: emailSubject,
-        html: emailHtml,
-        text: emailPlainText,
-        reply_to: "support@ninowash.fr",
-      }),
+      body: JSON.stringify(emailPayload),
     })
+
+    console.log("[send-booking-payment-email] 📬 Resend API response status:", emailResponse.status)
 
     if (!emailResponse.ok) {
       const errorData = await emailResponse.text()
-      console.error("[send-booking-payment-email] Resend API error:", errorData)
+      console.error("[send-booking-payment-email] ❌ Resend API error - Status:", emailResponse.status)
+      console.error("[send-booking-payment-email] ❌ Resend API error - Response:", errorData)
+      console.error("[send-booking-payment-email] ❌ Request details:", {
+        bookingId,
+        bookingNumber,
+        contactEmail,
+        paymentLink,
+        emailPayloadSize: JSON.stringify(emailPayload).length,
+      })
       return new Response(
-        JSON.stringify({ error: "Failed to send email", details: errorData }),
+        JSON.stringify({ 
+          error: "Failed to send email", 
+          details: errorData,
+          status: emailResponse.status,
+          bookingId,
+        }),
         { status: 500 }
       )
     }
 
     const emailResult = await emailResponse.json()
-    console.log("[send-booking-payment-email] Email sent successfully:", {
+    console.log("[send-booking-payment-email] ✅ Email sent successfully!")
+    console.log("[send-booking-payment-email] 📬 Email details:", {
       messageId: emailResult.id,
       to: contactEmail,
       bookingId: bookingId,
+      bookingNumber: bookingNumber,
     })
 
     return new Response(
@@ -258,15 +314,24 @@ https://ninowash.com
     )
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
-    console.error("[send-booking-payment-email] Error:", errorMessage)
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    const errorStack = error instanceof Error ? error.stack : undefined
+    console.error("[send-booking-payment-email] ❌ Unexpected error:", errorMessage)
+    if (errorStack) {
+      console.error("[send-booking-payment-email] ❌ Stack trace:", errorStack)
+    }
+    console.error("[send-booking-payment-email] ❌ Error details:", {
+      type: error?.constructor?.name,
+      error: error,
+    })
+    return new Response(JSON.stringify({ 
+      error: errorMessage,
+      type: error?.constructor?.name,
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     })
   }
 }
 
-// Lance le serveur uniquement si ce fichier est exécuté directement
-if (import.meta.main) {
-  serve(handler)
-}
+// Lance le serveur
+serve(handler)
